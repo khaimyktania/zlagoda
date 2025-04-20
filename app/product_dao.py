@@ -4,7 +4,7 @@ def get_all_products(connection):
 
     cursor = connection.cursor()
 
-    query = "SELECT * FROM zlagoda.products;"
+    query = "SELECT * FROM products;"
 
     cursor.execute(query)
 
