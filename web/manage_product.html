@@ -1,29 +1,65 @@
-
 <!DOCTYPE html>
 <html>
 <head>
-    <title> GSMS </title>
+    <title>GSMS</title>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <meta name="apple-mobile-web-app-capable" content="yes"/>
-    <meta name="csrf-token" content="kmapods5wQ5L1hn7rcR9OPst7EsN0gC7SrHh3m9K"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Fonts & Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,300,600,700">
-    <link media="all" type="text/css" rel="stylesheet" href="web/static/bootstrap.min.css">
-    <link media="all" type="text/css" rel="stylesheet" href="web/static/style.css">
-    <link media="all" type="text/css" rel="stylesheet" href="web/static/sidebar-menu.css">
-    <link media="all" type="text/css" rel="stylesheet" href="web/static/custom.css">
+
+    <!-- Bootstrap + Custom Styles -->
+    <link rel="stylesheet" href="web/static/bootstrap.min.css">
+    <link rel="stylesheet" href="web/static/style.css">
+    <link rel="stylesheet" href="web/static/sidebar-menu.css">
+    <link rel="stylesheet" href="web/static/custom.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+
+    <style>
+        /* Always visible sidebar on desktop */
+        @media (min-width: 992px) {
+            #mySidebar {
+                display: block !important;
+                width: 150;
+                position: fixed;
+                height: 100%;
+                z-index: 1000;
+            }
+            #main {
+                margin-left: 250px;
+            }
+            #openNav {
+                display: none !important;
+            }
+        }
+
+        /* Content margin reset on small screens */
+        @media (max-width: 991px) {
+            #main {
+                margin-left: 0;
+            }
+        }
+    </style>
 </head>
 <body class="tooltips">
-<div class="container">
 
+<!-- Sidebar -->
+<div class="w3-sidebar w3-bar-block w3-card w3-animate-left w3-light-grey" style="display:none;" id="mySidebar">
+    <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">✕ Close</button>
+    <a href="web/manage-employee.html" class="w3-bar-item w3-button"> Workers</a>
+    <a href="manage-product.html" class="w3-bar-item w3-button"> Manage Products</a>
+    <a href="#" class="w3-bar-item w3-button"> Reports</a>
+</div>
+
+<!-- Main -->
+<div id="main">
+
+    <!-- Header -->
     <div class="header content rows-content-header">
-        <button class="button-menu-mobile show-sidebar">
-            <i class="fa fa-bars"></i>
-        </button>
+        <button id="openNav" class="w3-button w3-teal w3-xlarge">&#9776;</button>
         <div class="navbar navbar-default" role="navigation">
             <div class="container">
-
                 <div class="navbar-collapse collapse">
                     <ul class="nav navbar-nav visible-lg visible-md limit-chars">
                         <ul class="breadcrumb">
@@ -40,70 +76,94 @@
         </div>
     </div>
 
-    <div class="right content-page">
-        <div class="body content rows scroll-y">
-            <div class="box-info full" id="taskFormContainer">
-                <h2>Manage Products</h2>
-                <div class="panel-body pt-0">
-                    <div class="row mb-4">
-                        <div class="col-sm-12">
-                            <button type="button" class="btn btn-sm btn-primary pull-right" data-toggle="modal" data-target="#productModal">
-                                Add New Product
-                            </button>
+    <!-- Main Content -->
+    <div class="container">
+        <div class="right content-page">
+            <div class="body content rows scroll-y">
+                <div class="box-info full" id="taskFormContainer">
+                    <h2>Manage Products</h2>
+                    <div class="panel-body pt-0">
+                        <div class="row mb-4">
+                            <div class="col-sm-12">
+                                <button type="button" class="btn btn-sm btn-primary pull-right" data-toggle="modal" data-target="#productModal">
+                                    Add New Product
+                                </button>
+                            </div>
                         </div>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Category</th>
+                                    <th>Characteristics</th>
+                                    <th style="width: 150px">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Product rows go here -->
+                            </tbody>
+                        </table>
                     </div>
-                    <table class="table table-bordered">
-                        <thead>
-                        <th>Name</th>
-                        <th>Category</th>
-                        <th>Characteristics</th>
-                        <th style="width: 150px">Action</th>
-                        </thead>
-                        <tbody>
-
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </div>
     </div>
 
-  <div class="modal fade-scale" id="productModal" role="dialog" data-backdrop="static">
-    <div class="modal-dialog ">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Add New Product</h4>
-            </div>
-            <div class="modal-body">
-                <form id="productForm">
-                    <input type="hidden" name="id_product" id="id_product" value="">
-
-                    <div class="form-group">
-                        <label>Product Name</label>
-                        <input class="form-control" placeholder="Product Name" name="product_name" id="product_name" type="text" value="">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Category Number</label>
-                        <input class="form-control" placeholder="Category Number" name="category_number" id="category_number" type="text" value="">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Characteristics</label>
-                        <input class="form-control" placeholder="Characteristics" name="characteristics" id="characteristics" type="text" value="">
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="saveProduct">Save</button>
+    <!-- Modal -->
+    <div class="modal fade-scale" id="productModal" role="dialog" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Add New Product</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="productForm">
+                        <input type="hidden" name="id_product" id="id_product">
+                        <div class="form-group">
+                            <label>Product Name</label>
+                            <input class="form-control" name="product_name" id="product_name" type="text" placeholder="Product Name">
+                        </div>
+                        <div class="form-group">
+                            <label>Category Number</label>
+                            <select class="form-control" name="category_number" id="category_number">
+                                <option value="">Select category</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Characteristics</label>
+                            <input class="form-control" name="characteristics" id="characteristics" type="text" placeholder="Characteristics">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveProduct">Save</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+
+</div> <!-- #main -->
+
+<!-- Scripts -->
 <script src="web/js/package/jquery.min.js"></script>
 <script src="web/js/common.js"></script>
 <script src="web/js/manage-product.js"></script>
 <script src="web/js/package/bootstrap.min.js"></script>
+
+<script>
+    function w3_open() {
+        document.getElementById("mySidebar").style.display = "block";
+        document.getElementById("main").style.marginLeft = "250px";
+        document.getElementById("openNav").style.display = "none";
+    }
+
+    function w3_close() {
+        document.getElementById("mySidebar").style.display = "none";
+        document.getElementById("main").style.marginLeft = "0";
+        document.getElementById("openNav").style.display = "inline-block";
+    }
+</script>
+
 </body>
 </html>

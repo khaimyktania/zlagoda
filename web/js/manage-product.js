@@ -1,7 +1,11 @@
 var productModal = $("#productModal");
 
 $(function () {
-    // Завантаження продуктів
+    loadProducts();
+});
+
+// Завантаження продуктів
+function loadProducts() {
     $.get(productListApiUrl, function (response) {
         if(response) {
             var table = '';
@@ -15,23 +19,25 @@ $(function () {
             $("table").find('tbody').empty().html(table);
         }
     });
+}
+
+$('#productModal').on('show.bs.modal', function () {
+    loadCategories();
 });
 
 // Збереження продукту
 $("#saveProduct").on("click", function () {
     var data = $("#productForm").serializeArray();
     var requestPayload = {
-        id_product: null,
         product_name: null,
         category_number: null,
         characteristics: null
     };
-    for (var i=0;i<data.length;++i) {
+
+    // Формуємо об'єкт з полів форми
+    for (var i = 0; i < data.length; ++i) {
         var element = data[i];
         switch(element.name) {
-            case 'id_product':
-                requestPayload.id_product = element.value;
-                break;
             case 'product_name':
                 requestPayload.product_name = element.value;
                 break;
@@ -44,26 +50,60 @@ $("#saveProduct").on("click", function () {
         }
     }
 
-    callApi("POST", productSaveApiUrl, {
-        'data': JSON.stringify(requestPayload)
+    // Відправка POST-запиту
+    $.ajax({
+        type: "POST",
+        url: productSaveApiUrl,
+        data: {
+            data: JSON.stringify(requestPayload)
+        },
+        success: function(response) {
+            alert("Product saved successfully!");
+            productModal.modal('hide');
+            loadProducts(); // оновити таблицю
+        },
+        error: function() {
+            alert("Error while saving product.");
+        }
     });
 });
 
 // Видалення продукту
-$(document).on("click", ".delete-product", function (){
+$(document).on("click", ".delete-product", function () {
     var tr = $(this).closest('tr');
     var data = {
-        id_product : tr.data('id')
+        product_id : tr.data('id')
     };
-    var isDelete = confirm("Are you sure to delete "+ tr.data('name') +"?");
+    var isDelete = confirm("Are you sure to delete " + tr.data('name') + "?");
     if (isDelete) {
-        callApi("POST", productDeleteApiUrl, data);
+        $.post(productDeleteApiUrl, data, function(response){
+            alert("Product deleted.");
+            loadProducts(); // оновити таблицю
+        }).fail(function(){
+            alert("Error while deleting product.");
+        });
     }
 });
 
+function loadCategories() {
+    $.get('/getCategories', function(categories) {
+        const $dropdown = $('#category_number');
+        $dropdown.empty();
+        $dropdown.append('<option value="">Select category</option>');
+
+        categories.forEach(function(category) {
+            $dropdown.append(
+                $('<option></option>')
+                    .attr('value', category.category_number)
+                    .text(category.name)
+            );
+        });
+    });
+}
+
+
 // Скидання форми при закритті модалки
 productModal.on('hide.bs.modal', function(){
-    $("#id_product").val('');
-    $("#product_name, #category_number, #characteristics").val('');
+    $("#productForm")[0].reset(); // скинути всю форму
     productModal.find('.modal-title').text('Add New Product');
 });

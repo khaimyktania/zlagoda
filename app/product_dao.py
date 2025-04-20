@@ -22,13 +22,13 @@ def get_all_products(connection):
 
     return response
 
-def insert_new_product (connection, product):
+def insert_new_product(connection, product):
     cursor = connection.cursor()
     query = ("INSERT INTO products "
-             "(id_product, product_name, category_number, characteristics) "
-             "values (%s, %s, %s, %s);")
+             "(product_name, category_number, characteristics) "
+             "VALUES (%s, %s, %s);")
 
-    data = (product["id_product"], product["product_name"], product["category_number"], product["characteristics"] )
+    data = (product["product_name"], product["category_number"], product["characteristics"])
     cursor.execute(query, data)
     connection.commit()
 
@@ -36,7 +36,7 @@ def insert_new_product (connection, product):
 
 def delete_products(connection, id_product):
     cursor = connection.cursor()
-    query = ("DELETE FROM products where id_product=" + str(id_product))
+    query = ("DELETE FROM products where id_product=" + id_product)
     cursor.execute(query)
     connection.commit()
 
