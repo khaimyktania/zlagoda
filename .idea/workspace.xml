@@ -4,12 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f9f0029f-da69-424e-98ae-755ef497d758" name="Changes" comment="zirochka palay, dani yeeee">
+    <list default="true" id="f9f0029f-da69-424e-98ae-755ef497d758" name="Changes" comment="add/delete/trhoshki">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/product_dao.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/product_dao.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/server.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/js/manage-product.js" beforeDir="false" afterPath="$PROJECT_DIR$/web/js/manage-product.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/manage_product.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/manage_product.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/static/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/web/static/style.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,12 +31,12 @@
     &quot;assignee&quot;: &quot;airrinaaa&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/khaimyktania/zlagoda.git",
-    "accountId": "5ef950eb-4137-4aba-992a-3880bb16cbd5"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/khaimyktania/zlagoda.git&quot;,
+    &quot;accountId&quot;: &quot;5ef950eb-4137-4aba-992a-3880bb16cbd5&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
 }</component>
@@ -50,20 +48,20 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "Python.app (1).executor": "Run",
-    "Python.app.executor": "Run",
-    "Python.product_dao.executor": "Run",
-    "Python.server.executor": "Run",
-    "Python.sql.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "D:/python_projects_grocery_webapp-main"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;Python.app (1).executor&quot;: &quot;Run&quot;,
+    &quot;Python.app.executor&quot;: &quot;Run&quot;,
+    &quot;Python.product_dao.executor&quot;: &quot;Run&quot;,
+    &quot;Python.server.executor&quot;: &quot;Run&quot;,
+    &quot;Python.sql.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/python_projects_grocery_webapp-main&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\zlagoda\web" />
@@ -187,10 +185,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.server" />
+        <item itemvalue="Python.product_dao" />
         <item itemvalue="Python.app (1)" />
         <item itemvalue="Python.app" />
         <item itemvalue="Python.app (1)" />
-        <item itemvalue="Python.product_dao" />
       </list>
     </recent_temporary>
   </component>
@@ -234,7 +232,15 @@
       <option name="project" value="LOCAL" />
       <updated>1745109675878</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="add/delete/trhoshki">
+      <option name="closed" value="true" />
+      <created>1745183111248</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1745183111249</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -252,6 +258,7 @@
     <MESSAGE value="pu pu pu choto" />
     <MESSAGE value="nezarah" />
     <MESSAGE value="zirochka palay, dani yeeee" />
-    <option name="LAST_COMMIT_MESSAGE" value="zirochka palay, dani yeeee" />
+    <MESSAGE value="add/delete/trhoshki" />
+    <option name="LAST_COMMIT_MESSAGE" value="add/delete/trhoshki" />
   </component>
 </project>
