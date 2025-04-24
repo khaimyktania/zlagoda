@@ -191,6 +191,74 @@ def get_products_by_category():
     category_number = request.args.get('category_number')
     return jsonify(product_dao.get_products_by_category(connection, category_number))
 
+@app.route('/manage_category')
+def manage_category():
+    return app.send_static_file('manage_category.html')
+
+
+@app.route('/saveCategory', methods=['POST'])
+def save_category():
+    try:
+        request_payload = request.get_json()
+        print(f"Category request payload: {request_payload}")
+
+        # Check if this is an update or insert
+        if request_payload.get('category_number') and str(request_payload['category_number']).strip():
+            # This is an update
+            print(f"Updating category with number: {request_payload['category_number']}")
+            rows_updated = category_dao.update_category(connection, request_payload)
+            response = jsonify({
+                'success': True,
+                'operation': 'update',
+                'rows_updated': rows_updated
+            })
+        else:
+            # This is a new insert
+            print("Inserting new category")
+            category_id = category_dao.insert_new_category(connection, request_payload)
+            response = jsonify({
+                'success': True,
+                'operation': 'insert',
+                'category_number': category_id
+            })
+
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    except Exception as e:
+        print(f"Error in save_category: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/deleteCategory', methods=['POST'])
+def delete_category():
+    try:
+        category_number = request.form['category_number']
+        result = category_dao.delete_category(connection, category_number)
+
+        if result['success']:
+            response = jsonify({
+                'success': True,
+                'message': 'Category deleted successfully',
+                'rows_deleted': result['rows_deleted']
+            })
+        else:
+            response = jsonify({
+                'success': False,
+                'message': result['message']
+            })
+
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    except Exception as e:
+        print(f"Error in delete_category: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 if __name__ == "__main__":
     print("Starting Python Flask Server For Grocery Store Management System")
     app.run(port=5000, debug=True)
