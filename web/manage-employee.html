@@ -83,6 +83,18 @@
                 <div class="box-info full" id="taskFormContainer">
                     <h2>Manage Employees</h2>
                     <div class="panel-body pt-0">
+                        <div class="row mt-3 mb-3">
+    <div class="col-md-6">
+        <input type="text" id="searchSurname" class="form-control" placeholder="Enter employee surname">
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-sm btn-info" id="searchBySurname">Find Contact Info</button>
+    </div>
+</div>
+
+<!-- Блок для виводу результату -->
+<div id="contactInfoResult" class="alert alert-secondary" style="display: none;"></div>
+
                         <div class="row mb-4">
                           <div class="col-sm-12">
     <select id="sortSelect" class="form-control" style="width: auto; display: inline-block;">

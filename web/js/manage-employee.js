@@ -204,3 +204,25 @@ $("#sortSelect").on("change", function () {
         }
     });
 });
+
+$("#searchBySurname").on("click", function () {
+    var surname = $("#searchSurname").val().trim();
+
+    if (!surname) {
+        alert("Please enter a surname.");
+        return;
+    }
+
+    $.get('/getContactBySurname', { surname: surname }, function (response) {
+        if (response) {
+            $("#contactInfoResult").html(
+                "<strong>Phone:</strong> " + response.phone_number + "<br>" +
+                "<strong>Address:</strong> " + response.city + ", " + response.street + ", " + response.zip_code
+            ).show();
+        } else {
+            $("#contactInfoResult").html("No employee found with that surname.").show();
+        }
+    }).fail(function () {
+        $("#contactInfoResult").html("Error while fetching contact info.").show();
+    });
+});

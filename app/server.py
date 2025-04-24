@@ -31,13 +31,38 @@ def get_products():
 
 @app.route('/insertProduct', methods=['POST'])
 def insert_product():
-    request_payload = json.loads(request.form['data'])
-    id_product = product_dao.insert_new_product(connection, request_payload)
-    response = jsonify({
-        'product_id': id_product
-    })
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    return response
+    try:
+        request_payload = json.loads(request.form['data'])
+        print(f"Product request payload: {request_payload}")
+
+        # Check if this is an update or insert
+        if request_payload.get('id_product') and request_payload['id_product'].strip():
+            # This is an update
+            print(f"Updating product with ID: {request_payload['id_product']}")
+            rows_updated = product_dao.update_product(connection, request_payload)
+            response = jsonify({
+                'success': True,
+                'operation': 'update',
+                'rows_updated': rows_updated
+            })
+        else:
+            # This is a new insert
+            print("Inserting new product")
+            product_id = product_dao.insert_new_product(connection, request_payload)
+            response = jsonify({
+                'success': True,
+                'operation': 'insert',
+                'product_id': product_id
+            })
+
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    except Exception as e:
+        # print(f"Error in insert_product: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 
 @app.route('/deleteProduct', methods=['POST'])
@@ -147,6 +172,24 @@ def get_cashiers_sorted():
     cashiers = employee_dao.get_cashiers_ordered_by_surname(connection)
     return jsonify(cashiers)
 
+@app.route('/getContactBySurname')
+def get_contact_by_surname_api():
+    surname = request.args.get('surname')
+    connection = get_sql_connection()
+    result = employee_dao.get_contact_by_surname(connection, surname)
+    if result:
+        return jsonify(result)
+    else:
+        return jsonify(None)
+
+@app.route('/getAllProductsSorted', methods=['GET'])
+def get_all_products_sorted():
+    return jsonify(product_dao.get_all_products_sorted(connection))
+
+@app.route('/getProductsByCategory', methods=['GET'])
+def get_products_by_category():
+    category_number = request.args.get('category_number')
+    return jsonify(product_dao.get_products_by_category(connection, category_number))
 
 if __name__ == "__main__":
     print("Starting Python Flask Server For Grocery Store Management System")

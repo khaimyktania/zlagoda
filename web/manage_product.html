@@ -83,7 +83,20 @@
                 <div class="box-info full" id="taskFormContainer">
                     <h2>Manage Products</h2>
                     <div class="panel-body pt-0">
+                        <div class="form-group">
+    <label for="categoryFilter">Filter by Category:</label>
+    <select id="categoryFilter" class="form-control">
+        <option value="">All Categories</option>
+        <!-- Категорії будуть довантажуватись -->
+    </select>
+</div>
+
                         <div class="row mb-4">
+                              <div class="col-sm-12 text-right">
+    <button type="button" id="sortByNameBtn" class="btn btn-sm btn-primary">
+      Get All Products Sorted by Name
+    </button>
+  </div>
                             <div class="col-sm-12">
                                 <button type="button" class="btn btn-sm btn-primary pull-right" data-toggle="modal" data-target="#productModal">
                                     Add New Product

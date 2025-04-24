@@ -4,7 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f9f0029f-da69-424e-98ae-755ef497d758" name="Changes" comment="add/delete/trhoshki" />
+    <list default="true" id="f9f0029f-da69-424e-98ae-755ef497d758" name="Changes" comment="add/delete/trhoshki">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/product_dao.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/product_dao.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/server.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/js/manage-employee.js" beforeDir="false" afterPath="$PROJECT_DIR$/web/js/manage-employee.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/js/manage-product.js" beforeDir="false" afterPath="$PROJECT_DIR$/web/js/manage-product.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/manage-employee.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/manage-employee.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/manage_product.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/manage_product.html" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -19,11 +27,6 @@
     </option>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_BRANCH_BY_REPOSITORY">
-      <map>
-        <entry key="$PROJECT_DIR$" value="main" />
-      </map>
-    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -59,8 +62,9 @@
     "Python.sql.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "eby",
-    "last_opened_file_path": "D:/python_projects_grocery_webapp-main"
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "D:/zlagoda",
+    "settings.editor.selected.configurable": "com.intellij.pycharm.community.ide.impl.configuration.PythonContentEntriesConfigurable"
   }
 }]]></component>
   <component name="RecentsManager">
@@ -189,7 +193,7 @@
         <item itemvalue="Python.product_dao" />
         <item itemvalue="Python.app (1)" />
         <item itemvalue="Python.app" />
-        <item itemvalue="Python.server" />
+        <item itemvalue="Python.app (1)" />
       </list>
     </recent_temporary>
   </component>
@@ -241,31 +245,7 @@
       <option name="project" value="LOCAL" />
       <updated>1745183111249</updated>
     </task>
-    <task id="LOCAL-00005" summary="add/delete/trhoshki">
-      <option name="closed" value="true" />
-      <created>1745451709435</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1745451709435</updated>
-    </task>
-    <task id="LOCAL-00006" summary="add/delete/trhoshki">
-      <option name="closed" value="true" />
-      <created>1745451823112</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1745451823112</updated>
-    </task>
-    <task id="LOCAL-00007" summary="add/delete/trhoshki">
-      <option name="closed" value="true" />
-      <created>1745451955615</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1745451955615</updated>
-    </task>
-    <option name="localTasksCounter" value="8" />
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
