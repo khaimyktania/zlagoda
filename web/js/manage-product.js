@@ -5,15 +5,20 @@ $(function () {
 });
 
 // Завантаження продуктів
-function loadProducts() {
-    $.get(productListApiUrl, function (response) {
-        if(response) {
-            var table = '';
-            $.each(response, function(index, product) {
-                table += '<tr data-id="'+ product.id_product +'" data-name="'+ product.product_name +'" data-category="'+ product.category_number +'" data-char="'+ product.characteristics +'">' +
+function loadProducts(category_number = null) {
+    let url = category_number
+        ? "/getProductsByCategory?category_number=" + category_number
+        : "/getAllProductsSorted";
+
+    $.get(url, function (response) {
+        if (response) {
+            let table = '';
+            $.each(response, function (index, product) {
+                table += '<tr data-id="'+ product.id_product +'" data-name="'+ product.product_name +'" data-category="'+ product.category_number +'" data-char="'+ product.characteristics +'" data-producer="'+ (product.producer || '') +'">' +
                     '<td>'+ product.product_name +'</td>'+
                     '<td>'+ product.category_number +'</td>'+
                     '<td>'+ product.characteristics +'</td>'+
+                    '<td>'+ (product.producer || '') +'</td>'+ // Added producer column with empty fallback
                     '<td><span class="btn btn-xs btn-primary edit-product">Edit</span> <span class="btn btn-xs btn-danger delete-product">Delete</span></td></tr>';
             });
             $("table").find('tbody').empty().html(table);
@@ -26,6 +31,8 @@ $('#addProductBtn').on('click', function() {
     productModal.find('.modal-title').text('Add New Product');
     $("#productForm")[0].reset();
     $("#id_product").val(''); // Ensure ID is empty for new product
+     // Завантажити категорії перед показом модалки
+    loadCategories();
     productModal.modal('show');
 });
 
@@ -36,11 +43,13 @@ $(document).on('click', '.edit-product', function() {
     var productName = tr.data('name');
     var categoryNumber = tr.data('category');
     var characteristics = tr.data('char');
+    var producer = tr.data('producer'); // Get producer value
 
     // Fill the form with product data
     $("#id_product").val(productId);
     $("#product_name").val(productName);
     $("#characteristics").val(characteristics);
+    $("#producer").val(producer); // Set producer value
 
     // Load categories and then select the right one
     $.get('/getCategories', function(categories) {
@@ -76,7 +85,8 @@ $("#saveProduct").on("click", function () {
         id_product: null,  // Added for edit functionality
         product_name: null,
         category_number: null,
-        characteristics: null
+        characteristics: null,
+        producer: null // Added producer field
     };
 
     // Формуємо об'єкт з полів форми
@@ -94,6 +104,9 @@ $("#saveProduct").on("click", function () {
                 break;
             case 'characteristics':
                 requestPayload.characteristics = element.value;
+                break;
+            case 'producer':
+                requestPayload.producer = element.value; // Get producer value
                 break;
         }
     }
@@ -145,39 +158,16 @@ $(document).on("click", ".delete-product", function () {
 function loadCategories() {
     $.get('/getCategories', function(categories) {
         const $dropdown = $('#category_number');
-        // Only empty the dropdown if it's not already populated (for edit case)
-        if ($dropdown.find('option[value="' + $("#category_number").val() + '"]').length === 0) {
-            $dropdown.empty();
-            $dropdown.append('<option value="">Select category</option>');
+        $dropdown.empty();
+        $dropdown.append('<option value="">Select category</option>');
 
-            categories.forEach(function(category) {
-                $dropdown.append(
-                    $('<option></option>')
-                        .attr('value', category.category_number)
-                        .text(category.name)
-                );
-            });
-        }
-    });
-}
-
-function loadProducts(category_number = null) {
-    let url = category_number
-        ? "/getProductsByCategory?category_number=" + category_number
-        : "/getAllProductsSorted";
-
-    $.get(url, function (response) {
-        if (response) {
-            let table = '';
-            $.each(response, function (index, product) {
-                table += '<tr data-id="'+ product.id_product +'" data-name="'+ product.product_name +'" data-category="'+ product.category_number +'" data-char="'+ product.characteristics +'">' +
-                    '<td>'+ product.product_name +'</td>' +
-                    '<td>'+ product.category_number +'</td>' +
-                    '<td>'+ product.characteristics +'</td>' +
-                    '<td><span class="btn btn-xs btn-primary edit-product">Edit</span> <span class="btn btn-xs btn-danger delete-product">Delete</span></td></tr>';
-            });
-            $("table").find('tbody').empty().html(table);
-        }
+        categories.forEach(function(category) {
+            $dropdown.append(
+                $('<option></option>')
+                    .attr('value', category.category_number)
+                    .text(category.name)
+            );
+        });
     });
 }
 
@@ -205,8 +195,6 @@ $(function () {
     loadCategoryFilter();
     loadProducts(); // початкове завантаження
 });
-
-
 
 // Скидання форми при закритті модалки
 productModal.on('hide.bs.modal', function(){

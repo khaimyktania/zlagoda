@@ -5,6 +5,7 @@ from sql_connection import get_sql_connection
 import json
 import employee_dao
 import product_dao
+import customer_dao
 
 app = Flask(__name__, static_folder='../web', template_folder='../web')
 
@@ -63,7 +64,6 @@ def insert_product():
             'success': False,
             'error': str(e)
         }), 500
-
 
 @app.route('/deleteProduct', methods=['POST'])
 def delete_product():
@@ -254,6 +254,115 @@ def delete_category():
         return response
     except Exception as e:
         print(f"Error in delete_category: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+# Add these routes to your server.py file
+@app.route('/manage_customer')
+def manage_customer():
+    return app.send_static_file('manage_customer.html')
+
+
+@app.route('/getCustomers', methods=['GET'])
+def get_customers():
+    response = customer_dao.get_all_customers(connection)
+    response = jsonify(response)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
+
+@app.route('/getCustomersSorted', methods=['GET'])
+def get_customers_sorted():
+    response = customer_dao.get_all_customers_ordered_by_surname(connection)
+    response = jsonify(response)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
+
+@app.route('/getPremiumCustomers', methods=['GET'])
+def get_premium_customers():
+    response = customer_dao.get_premium_customers(connection)
+    response = jsonify(response)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
+
+@app.route('/getCustomerContactBySurname', methods=['GET'])
+def get_customer_contact_by_surname():
+    surname = request.args.get('surname')
+    response = customer_dao.get_contact_by_surname(connection, surname)
+    response = jsonify(response)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
+
+@app.route('/insertCustomer', methods=['POST'])
+def insert_customer():
+    try:
+        request_payload = json.loads(request.form['data'])
+        print(f"Customer request payload: {request_payload}")
+
+        # Check if this is an update or insert
+        if request_payload.get('card_number') and request_payload['card_number'].strip():
+            # Check if customer already exists (this would be an update)
+            cursor = connection.cursor()
+            cursor.execute("SELECT card_number FROM customer_card WHERE card_number = %s",
+                           (request_payload['card_number'],))
+            result = cursor.fetchone()
+
+            if result:
+                # This is an update
+                print(f"Updating customer with card number: {request_payload['card_number']}")
+                rows_updated = customer_dao.update_customer(connection, request_payload)
+                response = jsonify({
+                    'success': True,
+                    'operation': 'update',
+                    'rows_updated': rows_updated
+                })
+            else:
+                # This is a new insert with provided card number
+                print("Inserting new customer with provided card number")
+                customer_dao.insert_new_customer(connection, request_payload)
+                response = jsonify({
+                    'success': True,
+                    'operation': 'insert',
+                    'card_number': request_payload['card_number']
+                })
+        else:
+            # Card number is required, so we should return an error
+            return jsonify({
+                'success': False,
+                'error': 'Card number is required'
+            }), 400
+
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    except Exception as e:
+        print(f"Error in insert_customer: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/deleteCustomer', methods=['POST'])
+def delete_customer():
+    try:
+        card_number = request.form['card_number']
+        rows_deleted = customer_dao.delete_customer(connection, card_number)
+
+        response = jsonify({
+            'success': True,
+            'message': 'Customer deleted successfully',
+            'rows_deleted': rows_deleted
+        })
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    except Exception as e:
+        print(f"Error in delete_customer: {str(e)}")
         return jsonify({
             'success': False,
             'error': str(e)

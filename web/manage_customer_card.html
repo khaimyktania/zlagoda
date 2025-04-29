@@ -1,0 +1,231 @@
+<!--<!DOCTYPE html>-->
+<!--<html>-->
+<!--<head>-->
+<!--    <title>GSMS - Customer Card Management</title>-->
+<!--    <meta charset="utf-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1">-->
+
+<!--   &lt;!&ndash; Fonts & Icons &ndash;&gt;-->
+<!--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">-->
+<!--    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,300,600,700">-->
+
+<!--    &lt;!&ndash; Bootstrap + Custom Styles &ndash;&gt;-->
+<!--    <link rel="stylesheet" href="web/static/bootstrap.min.css">-->
+<!--    <link rel="stylesheet" href="web/static/style.css">-->
+<!--    <link rel="stylesheet" href="web/static/sidebar-menu.css">-->
+<!--    <link rel="stylesheet" href="web/static/custom.css">-->
+<!--    <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">-->
+
+<!--    <style>-->
+<!--        /* Always visible sidebar on desktop */-->
+<!--        @media (min-width: 992px) {-->
+<!--            #mySidebar {-->
+<!--                display: block !important;-->
+<!--                width: 150;-->
+<!--                position: fixed;-->
+<!--                height: 100%;-->
+<!--                z-index: 1000;-->
+<!--            }-->
+<!--            #main {-->
+<!--                margin-left: 250px;-->
+<!--            }-->
+<!--            #openNav {-->
+<!--                display: none !important;-->
+<!--            }-->
+<!--        }-->
+
+<!--        /* Content margin reset on small screens */-->
+<!--        @media (max-width: 991px) {-->
+<!--            #main {-->
+<!--                margin-left: 0;-->
+<!--            }-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body class="tooltips">-->
+
+<!--&lt;!&ndash; Sidebar &ndash;&gt;-->
+<!--<div class="w3-sidebar w3-bar-block w3-card w3-animate-left w3-light-grey" style="display:none;" id="mySidebar">-->
+<!--    <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">✕ Close</button>-->
+<!--    <a href="/manage-employee" class="w3-bar-item w3-button"> Workers</a>-->
+<!--    <a href="/manage_product" class="w3-bar-item w3-button"> Manage Products</a>-->
+<!--    <a href="/manage_category" class="w3-bar-item w3-button"> Categories</a>-->
+<!--    <a href="/manage_customer_card" class="w3-bar-item w3-button"> Customer Cards</a>-->
+<!--    <a href="#" class="w3-bar-item w3-button"> Reports</a>-->
+<!--</div>-->
+
+<!--&lt;!&ndash; Main &ndash;&gt;-->
+<!--<div id="main">-->
+
+<!--    &lt;!&ndash; Header &ndash;&gt;-->
+<!--    <div class="header content rows-content-header">-->
+<!--        <button id="openNav" class="w3-button w3-teal w3-xlarge">&#9776;</button>-->
+<!--        <div class="navbar navbar-default" role="navigation">-->
+<!--            <div class="container">-->
+<!--                <div class="navbar-collapse collapse">-->
+<!--                    <ul class="nav navbar-nav visible-lg visible-md limit-chars">-->
+<!--                        <ul class="breadcrumb">-->
+<!--                            <a href="index.html">-->
+<!--                                <i class="zmdi zmdi-view-dashboard zmdi-hc-fw" title="Orders"></i>-->
+<!--                            </a>-->
+<!--                            <a href="manage_customer_card.html">-->
+<!--                                <i class="zmdi zmdi-card zmdi-hc-fw" title="Customer Cards"></i>-->
+<!--                            </a>-->
+<!--                        </ul>-->
+<!--                    </ul>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Main Content &ndash;&gt;-->
+<!--    <div class="container">-->
+<!--        <div class="right content-page">-->
+<!--            <div class="body content rows scroll-y">-->
+<!--                <div class="box-info full" id="taskFormContainer">-->
+<!--                    <h2>Manage Customer Cards</h2>-->
+<!--                    <div class="panel-body pt-0">-->
+<!--                        <div class="row mt-3 mb-3">-->
+<!--                            <div class="col-md-6">-->
+<!--                                <input type="text" id="searchSurname" class="form-control" placeholder="Enter customer surname">-->
+<!--                            </div>-->
+<!--                            <div class="col-md-2">-->
+<!--                                <button class="btn btn-sm btn-info" id="searchBySurname">Find Contact Info</button>-->
+<!--                            </div>-->
+<!--                        </div>-->
+
+<!--                        &lt;!&ndash; Result output block &ndash;&gt;-->
+<!--                        <div id="contactInfoResult" class="alert alert-secondary" style="display: none;"></div>-->
+
+<!--                        <div class="row mb-4">-->
+<!--                            <div class="col-sm-12">-->
+<!--                                <select id="sortSelect" class="form-control" style="width: auto; display: inline-block;">-->
+<!--                                    <option value="default">Default</option>-->
+<!--                                    <option value="byName">Sort by name</option>-->
+<!--                                    <option value="byDiscount">Sort by discount</option>-->
+<!--                                </select>-->
+<!--                                <button type="button" class="btn btn-sm btn-primary pull-right" id="addCustomerBtn">-->
+<!--                                    Add New Customer Card-->
+<!--                                </button>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <table class="table table-bordered">-->
+<!--                            <thead>-->
+<!--                                <tr>-->
+<!--                                    <th>Full Name</th>-->
+<!--                                    <th>Phone</th>-->
+<!--                                    <th>Address</th>-->
+<!--                                    <th>Discount %</th>-->
+<!--                                    <th style="width: 150px">Action</th>-->
+<!--                                </tr>-->
+<!--                            </thead>-->
+<!--                            <tbody>-->
+<!--                                &lt;!&ndash; Customer rows go here &ndash;&gt;-->
+<!--                            </tbody>-->
+<!--                        </table>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Modal &ndash;&gt;-->
+<!--    <div class="modal fade-scale" id="customerModal" role="dialog" data-backdrop="static">-->
+<!--        <div class="modal-dialog">-->
+<!--            <div class="modal-content">-->
+<!--                <div class="modal-header">-->
+<!--                    <h4 class="modal-title">Add New Customer Card</h4>-->
+<!--                </div>-->
+<!--                <div class="modal-body">-->
+<!--                    <form id="customerForm">-->
+<!--                        <div class="form-group">-->
+<!--                            <label>Card Number</label>-->
+<!--                            <input class="form-control" name="card_number" id="card_number" type="text" placeholder="Card Number" maxlength="13">-->
+<!--                            <small class="form-text text-muted">Enter customer card number (max 13 characters)</small>-->
+<!--                        </div>-->
+<!--                        -->
+<!--                        <div class="row">-->
+<!--                            <div class="col-md-4">-->
+<!--                                <div class="form-group">-->
+<!--                                    <label>Surname</label>-->
+<!--                                    <input class="form-control" name="cust_surname" id="cust_surname" type="text" placeholder="Surname">-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                            <div class="col-md-4">-->
+<!--                                <div class="form-group">-->
+<!--                                    <label>Name</label>-->
+<!--                                    <input class="form-control" name="cust_name" id="cust_name" type="text" placeholder="Name">-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                            <div class="col-md-4">-->
+<!--                                <div class="form-group">-->
+<!--                                    <label>Patronymic</label>-->
+<!--                                    <input class="form-control" name="cust_patronymic" id="cust_patronymic" type="text" placeholder="Patronymic">-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+
+<!--                        <div class="form-group">-->
+<!--                            <label>Phone Number</label>-->
+<!--                            <input class="form-control" name="phone_number" id="phone_number" type="text" placeholder="Phone Number" maxlength="13">-->
+<!--                        </div>-->
+
+<!--                        <div class="row">-->
+<!--                            <div class="col-md-4">-->
+<!--                                <div class="form-group">-->
+<!--                                    <label>City</label>-->
+<!--                                    <input class="form-control" name="city" id="city" type="text" placeholder="City">-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                            <div class="col-md-4">-->
+<!--                                <div class="form-group">-->
+<!--                                    <label>Street</label>-->
+<!--                                    <input class="form-control" name="street" id="street" type="text" placeholder="Street">-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                            <div class="col-md-4">-->
+<!--                                <div class="form-group">-->
+<!--                                    <label>ZIP Code</label>-->
+<!--                                    <input class="form-control" name="zip_code" id="zip_code" type="text" placeholder="ZIP Code" maxlength="9">-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+
+<!--                        <div class="form-group">-->
+<!--                            <label>Discount Percentage</label>-->
+<!--                            <input class="form-control" name="percent" id="percent" type="number" min="0" max="100" placeholder="0" value="0">-->
+<!--                        </div>-->
+<!--                    </form>-->
+<!--                </div>-->
+<!--                <div class="modal-footer">-->
+<!--                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>-->
+<!--                    <button type="button" class="btn btn-primary" id="saveCustomer">Save</button>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--</div> &lt;!&ndash; #main &ndash;&gt;-->
+
+<!--&lt;!&ndash; Scripts &ndash;&gt;-->
+<!--<script src="web/js/package/jquery.min.js"></script>-->
+<!--<script src="web/js/common.js"></script>-->
+<!--<script src="web/js/manage-customer-card.js"></script>-->
+<!--<script src="web/js/package/bootstrap.min.js"></script>-->
+
+<!--<script>-->
+<!--    function w3_open() {-->
+<!--        document.getElementById("mySidebar").style.display = "block";-->
+<!--        document.getElementById("main").style.marginLeft = "250px";-->
+<!--        document.getElementById("openNav").style.display = "none";-->
+<!--    }-->
+
+<!--    function w3_close() {-->
+<!--        document.getElementById("mySidebar").style.display = "none";-->
+<!--        document.getElementById("main").style.marginLeft = "0";-->
+<!--        document.getElementById("openNav").style.display = "inline-block";-->
+<!--    }-->
+<!--</script>-->
+
+<!--</body>-->
+<!--</html>-->

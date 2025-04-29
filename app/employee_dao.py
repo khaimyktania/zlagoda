@@ -1,9 +1,7 @@
-from sql_connection import get_sql_connection
-import pymysql
+from sql_connection import execute_query, get_sql_connection
 
 
 def insert_new_employee(connection, employee):
-    cursor = connection.cursor()
     query = """
         INSERT INTO employee (
             id_employee, empl_surname, empl_name, empl_patronymic,
@@ -25,17 +23,19 @@ def insert_new_employee(connection, employee):
         employee['street'],
         employee['zip_code']
     )
-    cursor.execute(query, data)
-    connection.commit()
-    return cursor.lastrowid
+
+    try:
+        result = execute_query(connection, query, data)
+        return result
+    except Exception as e:
+        print(f"Помилка додавання працівника: {e}")
+        raise
 
 
 def update_employee(connection, employee):
-    cursor = connection.cursor()
-
     # Перевірка наявності id_employee
     if not employee['id_employee']:
-        raise ValueError("id_employee is required for update")
+        raise ValueError("id_employee обов'язковий для оновлення")
 
     query = """
         UPDATE employee SET
@@ -68,128 +68,82 @@ def update_employee(connection, employee):
     )
 
     try:
-        cursor.execute(query, data)
-        connection.commit()
-        return cursor.rowcount  # Повертаємо кількість оновлених рядків
-    except pymysql.MySQLError as e:
-        connection.rollback()
-        print(f"Error: {e}")
-        return None
+        result = execute_query(connection, query, data)
+        return result
+    except Exception as e:
+        print(f"Помилка оновлення працівника: {e}")
+        raise
 
 
 def delete_employee(connection, employee_id):
-    cursor = connection.cursor()
     query = "DELETE FROM employee WHERE id_employee = %s;"
-    cursor.execute(query, (employee_id,))
-    connection.commit()
-    return cursor.rowcount
+    try:
+        result = execute_query(connection, query, (employee_id,))
+        return result
+    except Exception as e:
+        print(f"Помилка видалення працівника: {e}")
+        raise
+
 
 def get_contact_by_surname(connection, surname):
-    cursor = connection.cursor()
     query = """
         SELECT phone_number, city, street, zip_code
         FROM employee
         WHERE empl_surname = %s;
     """
-    cursor.execute(query, (surname,))
-    result = cursor.fetchone()
 
-    if result:
-        return {
-            'phone_number': result[0],
-            'city': result[1],
-            'street': result[2],
-            'zip_code': result[3]
-        }
-    else:
-        return None
+    try:
+        result = execute_query(connection, query, (surname,))
+        if result and len(result) > 0:
+            return result[0]
+        else:
+            return None
+    except Exception as e:
+        print(f"Помилка отримання контакту за прізвищем: {e}")
+        raise
+
 
 def get_all_employees_ordered_by_surname(connection):
-    cursor = connection.cursor()
     query = """
-            SELECT id_employee, empl_surname, empl_name, empl_patronymic,
-                   empl_role, salary, date_of_birth, date_of_start,
-                   phone_number, city, street, zip_code
-            FROM employee
-            ORDER BY empl_surname;
-        """
-    cursor.execute(query)
+        SELECT id_employee, empl_surname, empl_name, empl_patronymic,
+               empl_role, salary, date_of_birth, date_of_start,
+               phone_number, city, street, zip_code
+        FROM employee
+        ORDER BY empl_surname;
+    """
 
-    response = []
-    for (id_employee, surname, name, patronymic,
-         role, salary, birth, start,
-         phone, city, street, zip_code) in cursor:
-        response.append({
-            'id_employee': id_employee,
-            'empl_surname': surname,
-            'empl_name': name,
-            'empl_patronymic': patronymic,
-            'empl_role': role,
-            'salary': salary,
-            'date_of_birth': birth,
-            'date_of_start': start,
-            'phone_number': phone,
-            'city': city,
-            'street': street,
-            'zip_code': zip_code
-        })
-    return response
+    try:
+        result = execute_query(connection, query)
+        return result
+    except Exception as e:
+        print(f"Помилка отримання списку працівників: {e}")
+        raise
+
 
 def get_cashiers_ordered_by_surname(connection):
-    cursor = connection.cursor()
     query = """
-            SELECT id_employee, empl_surname, empl_name, empl_patronymic,
-                   empl_role, salary, date_of_birth, date_of_start,
-                   phone_number, city, street, zip_code
-            FROM employee
-            WHERE empl_role = 'Cashier'
-            ORDER BY empl_surname;  -- Сортуємо за прізвищем
-        """
-    cursor.execute(query)
+        SELECT id_employee, empl_surname, empl_name, empl_patronymic,
+               empl_role, salary, date_of_birth, date_of_start,
+               phone_number, city, street, zip_code
+        FROM employee
+        WHERE empl_role = 'Cashier'
+        ORDER BY empl_surname;
+    """
 
-    response = []
-    for (id_employee, surname, name, patronymic,
-         role, salary, birth, start,
-         phone, city, street, zip_code) in cursor:
-        response.append({
-            'id_employee': id_employee,
-            'empl_surname': surname,
-            'empl_name': name,
-            'empl_patronymic': patronymic,
-            'empl_role': role,
-            'salary': salary,
-            'date_of_birth': birth,
-            'date_of_start': start,
-            'phone_number': phone,
-            'city': city,
-            'street': street,
-            'zip_code': zip_code
-        })
-    return response
-
+    try:
+        result = execute_query(connection, query)
+        return result
+    except Exception as e:
+        print(f"Помилка отримання списку касирів: {e}")
+        raise
 
 
 def get_all_employees(connection):
-    cursor = connection.cursor()
     query = "SELECT * FROM employee;"
-    cursor.execute(query)
 
-    response = []
-    for (id_employee,empl_surname, empl_name, empl_patronymic, empl_role, salary, date_of_birth,
-         date_of_start, phone_number, city, street, zip_code) in cursor:
-        response.append({
-            'id_employee': id_employee,
-            'empl_surname': empl_surname,
-            'empl_name': empl_name,
-            'empl_patronymic': empl_patronymic,
-            'empl_role': empl_role,
-            'salary': salary,
-            'date_of_birth': date_of_birth,
-            'date_of_start':date_of_start,
-            'phone_number': phone_number,
-            'city': city,
-            'street': street,
-            'zip_code': zip_code
-        })
-    return response
-
+    try:
+        result = execute_query(connection, query)
+        return result
+    except Exception as e:
+        print(f"Помилка отримання всіх працівників: {e}")
+        raise

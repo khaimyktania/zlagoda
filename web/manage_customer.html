@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>GSMS - Employee Management</title>
+    <title>GSMS - Customer Management</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -10,10 +10,10 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,300,600,700">
 
     <!-- Bootstrap + Custom Styles -->
-    <link rel="stylesheet" href="static/bootstrap.min.css">
-    <link rel="stylesheet" href="static/style.css">
-    <link rel="stylesheet" href="static/sidebar-menu.css">
-    <link rel="stylesheet" href="static/custom.css">
+    <link rel="stylesheet" href="web/static/bootstrap.min.css">
+    <link rel="stylesheet" href="web/static/style.css">
+    <link rel="stylesheet" href="web/static/sidebar-menu.css">
+    <link rel="stylesheet" href="web/static/custom.css">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
 
     <style>
@@ -50,8 +50,7 @@
     <a href="/manage-employee" class="w3-bar-item w3-button"> Workers</a>
     <a href="/manage_product" class="w3-bar-item w3-button"> Manage Products</a>
     <a href="/manage_category" class="w3-bar-item w3-button"> Categories</a>
-        <a href="/manage_customer" class="w3-bar-item w3-button"> Customers</a>
-
+    <a href="/manage_customer" class="w3-bar-item w3-button"> Customers</a>
     <a href="#" class="w3-bar-item w3-button"> Reports</a>
 </div>
 
@@ -69,8 +68,8 @@
                             <a href="index.html">
                                 <i class="zmdi zmdi-view-dashboard zmdi-hc-fw" title="Orders"></i>
                             </a>
-                            <a href="manage-employee.html">
-                                <i class="zmdi zmdi-accounts zmdi-hc-fw" title="Employees"></i>
+                            <a href="manage_customer.html">
+                                <i class="zmdi zmdi-accounts zmdi-hc-fw" title="Customers"></i>
                             </a>
                         </ul>
                     </ul>
@@ -84,46 +83,45 @@
         <div class="right content-page">
             <div class="body content rows scroll-y">
                 <div class="box-info full" id="taskFormContainer">
-                    <h2>Manage Employees</h2>
+                    <h2>Manage Customers</h2>
                     <div class="panel-body pt-0">
                         <div class="row mt-3 mb-3">
-    <div class="col-md-6">
-        <input type="text" id="searchSurname" class="form-control" placeholder="Enter employee surname">
-    </div>
-    <div class="col-md-2">
-        <button class="btn btn-sm btn-info" id="searchBySurname">Find Contact Info</button>
-    </div>
-</div>
+                            <div class="col-md-6">
+                                <input type="text" id="searchSurname" class="form-control" placeholder="Enter customer surname">
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-sm btn-info" id="searchBySurname">Find Contact Info</button>
+                            </div>
+                        </div>
 
-<!-- Блок для виводу результату -->
-<div id="contactInfoResult" class="alert alert-secondary" style="display: none;"></div>
+                        <!-- Result block -->
+                        <div id="contactInfoResult" class="alert alert-secondary" style="display: none;"></div>
 
                         <div class="row mb-4">
-                          <div class="col-sm-12">
-    <select id="sortSelect" class="form-control" style="width: auto; display: inline-block;">
-        <option value="default">Default</option>
-        <option value="byName">Sort by name</option>
-        <option value="cashiersByName">Cashiers sorted by name</option>
-    </select>
-</div>
-
-                                <button type="button" class="btn btn-sm btn-primary pull-right" id="addEmployeeBtn">
-                                    Add New Employee
-                                </button>
+                            <div class="col-sm-12">
+                                <select id="sortSelect" class="form-control" style="width: auto; display: inline-block;">
+                                    <option value="default">Default</option>
+                                    <option value="byName">Sort by name</option>
+                                    <option value="premium">Premium customers</option>
+                                </select>
                             </div>
+
+                            <button type="button" class="btn btn-sm btn-primary pull-right" id="addCustomerBtn">
+                                Add New Customer
+                            </button>
                         </div>
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
+                                    <th>Card Number</th>
                                     <th>Full Name</th>
-                                    <th>Role</th>
-                                    <th>Salary</th>
                                     <th>Phone</th>
+                                    <th>Discount %</th>
                                     <th style="width: 150px">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- Employee rows go here -->
+                                <!-- Customer rows go here -->
                             </tbody>
                         </table>
                     </div>
@@ -133,32 +131,36 @@
     </div>
 
     <!-- Modal -->
-    <div class="modal fade-scale" id="employeeModal" role="dialog" data-backdrop="static">
+    <div class="modal fade-scale" id="customerModal" role="dialog" data-backdrop="static">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Add New Employee</h4>
+                    <h4 class="modal-title">Add New Customer</h4>
                 </div>
                 <div class="modal-body">
-                    <form id="employeeForm">
-                        <input type="hidden" name="id_employee" id="id_employee">
+                    <form id="customerForm">
+                        <div class="form-group">
+                            <label>Card Number</label>
+                            <input class="form-control" name="card_number" id="card_number" type="text" placeholder="Card Number">
+                        </div>
+
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Surname</label>
-                                    <input class="form-control" name="empl_surname" id="empl_surname" type="text" placeholder="Surname">
+                                    <input class="form-control" name="cust_surname" id="cust_surname" type="text" placeholder="Surname">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Name</label>
-                                    <input class="form-control" name="empl_name" id="empl_name" type="text" placeholder="Name">
+                                    <input class="form-control" name="cust_name" id="cust_name" type="text" placeholder="Name">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Patronymic</label>
-                                    <input class="form-control" name="empl_patronymic" id="empl_patronymic" type="text" placeholder="Patronymic">
+                                    <input class="form-control" name="cust_patronymic" id="cust_patronymic" type="text" placeholder="Patronymic">
                                 </div>
                             </div>
                         </div>
@@ -166,36 +168,16 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Role</label>
-                                    <input class="form-control" name="empl_role" id="empl_role" type="text" placeholder="Role">
+                                    <label>Phone Number</label>
+                                    <input class="form-control" name="phone_number" id="phone_number" type="text" placeholder="Phone Number">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Salary</label>
-                                    <input class="form-control" name="salary" id="salary" type="number" step="0.01" placeholder="0.00">
+                                    <label>Discount Percent</label>
+                                    <input class="form-control" name="percent" id="percent" type="number" min="0" max="100" placeholder="Discount percentage">
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Date of Birth</label>
-                                    <input class="form-control" name="date_of_birth" id="date_of_birth" type="date">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Date of Start</label>
-                                    <input class="form-control" name="date_of_start" id="date_of_start" type="date">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Phone Number</label>
-                            <input class="form-control" name="phone_number" id="phone_number" type="text" placeholder="Phone Number">
                         </div>
 
                         <div class="row">
@@ -222,7 +204,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="saveEmployee">Save</button>
+                    <button type="button" class="btn btn-primary" id="saveCustomer">Save</button>
                 </div>
             </div>
         </div>
@@ -231,10 +213,10 @@
 </div> <!-- #main -->
 
 <!-- Scripts -->
-<script src="js/package/jquery.min.js"></script>
-<script src="js/common.js"></script>
-<script src="js/manage-employee.js"></script>
-<script src="js/package/bootstrap.min.js"></script>
+<script src="web/js/package/jquery.min.js"></script>
+<script src="web/js/common.js"></script>
+<script src="web/js/manage-customer.js"></script>
+<script src="web/js/package/bootstrap.min.js"></script>
 
 <script>
     function w3_open() {

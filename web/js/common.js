@@ -10,6 +10,10 @@ var employeeListApiUrl = 'http://127.0.0.1:5000/getEmployees';
 var employeeSaveApiUrl = 'http://127.0.0.1:5000/insertEmployee';
 var employeeDeleteApiUrl = 'http://127.0.0.1:5000/deleteEmployee';
 
+var customerListApiUrl = 'http://127.0.0.1:5000/getCustomers';
+var customerSaveApiUrl = 'http://127.0.0.1:5000/insertCustomer';
+var customerDeleteApiUrl = 'http://127.0.0.1:5000/deleteCustomer';
+
 // Optional fake store API (for UI dropdowns or demos)
 var productsApiUrl = 'https://fakestoreapi.com/products';
 

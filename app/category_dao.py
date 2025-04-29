@@ -1,44 +1,44 @@
-import pymysql
+from sql_connection import execute_query, get_sql_connection
 
 
 def get_categories(connection):
-    cursor = connection.cursor()
     query = "SELECT * FROM category;"
-    cursor.execute(query)
-
-    response = []
-    for (category_number, category_name) in cursor:
-        response.append({
-            'category_number': category_number,
-            'name': category_name
-        })
-
-    return response
+    try:
+        result = execute_query(connection, query)
+        response = []
+        for row in result:
+            response.append({
+                'category_number': row['category_number'],
+                'name': row['category_name']
+            })
+        return response
+    except Exception as e:
+        print(f"Помилка в get_categories: {e}")
+        raise
 
 
 def insert_new_category(connection, category):
-    cursor = connection.cursor()
-
-    # Check if this is an update (category_number exists and is not None)
+    # Перевірка чи це оновлення (category_number існує і не None)
     if category.get('category_number') and str(category['category_number']).strip():
-        # This is an update
+        # Це оновлення
         return update_category(connection, category)
     else:
-        # This is a new insertion
-        query = ("INSERT INTO category (category_name) VALUES (%s);")
+        # Це нова вставка
+        query = "INSERT INTO category (category_name) VALUES (%s);"
         data = (category["category_name"],)
 
-        cursor.execute(query, data)
-        connection.commit()
-        return cursor.lastrowid
+        try:
+            result = execute_query(connection, query, data)
+            return result  # Повертає ID доданого запису
+        except Exception as e:
+            print(f"Помилка під час додавання категорії: {e}")
+            raise
 
 
 def update_category(connection, category):
-    cursor = connection.cursor()
-
-    # Ensure we have a valid category number
+    # Переконуємося, що маємо дійсний номер категорії
     if not category.get('category_number') or not str(category['category_number']).strip():
-        raise ValueError("category_number is required for update")
+        raise ValueError("category_number обов'язковий для оновлення")
 
     query = """
         UPDATE category SET
@@ -51,37 +51,36 @@ def update_category(connection, category):
     )
 
     try:
-        print(f"Updating category with number: {category['category_number']}")
-        cursor.execute(query, data)
-        connection.commit()
-        return cursor.rowcount  # Return number of updated rows
-    except pymysql.MySQLError as e:
-        connection.rollback()
-        print(f"Error updating category: {e}")
+        print(f"Оновлення категорії з номером: {category['category_number']}")
+        result = execute_query(connection, query, data)
+        return result  # Повертає кількість оновлених рядків
+    except Exception as e:
+        print(f"Помилка оновлення категорії: {e}")
         raise
 
 
 def delete_category(connection, category_number):
-    cursor = connection.cursor()
+    # Спочатку перевіряємо, чи категорія використовується в таблиці продуктів
+    check_query = "SELECT COUNT(*) as count FROM products WHERE category_number = %s"
+    try:
+        result = execute_query(connection, check_query, (category_number,))
+        count = result[0]['count']
 
-    # First check if category is referenced in products table
-    check_query = "SELECT COUNT(*) FROM products WHERE category_number = %s"
-    cursor.execute(check_query, (category_number,))
-    count = cursor.fetchone()[0]
+        if count > 0:
+            # Категорія використовується, не видаляємо
+            return {
+                'success': False,
+                'message': f"Неможливо видалити категорію. Вона використовується {count} продуктом(ами)."
+            }
 
-    if count > 0:
-        # Category is in use, don't delete
+        # Безпечно видаляти
+        query = "DELETE FROM category WHERE category_number = %s"
+        rows_deleted = execute_query(connection, query, (category_number,))
+
         return {
-            'success': False,
-            'message': f"Cannot delete category. It is used by {count} product(s)."
+            'success': True,
+            'rows_deleted': rows_deleted
         }
-
-    # Safe to delete
-    query = "DELETE FROM category WHERE category_number = %s"
-    cursor.execute(query, (category_number,))
-    connection.commit()
-
-    return {
-        'success': True,
-        'rows_deleted': cursor.rowcount
-    }
+    except Exception as e:
+        print(f"Помилка видалення категорії: {e}")
+        raise

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>GSMS</title>
+    <title>GSMS - Manage Categories</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -47,10 +47,11 @@
 <!-- Sidebar -->
 <div class="w3-sidebar w3-bar-block w3-card w3-animate-left w3-light-grey" style="display:none;" id="mySidebar">
     <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">✕ Close</button>
-    <a href="web/manage-employee.html" class="w3-bar-item w3-button"> Workers</a>
+    <a href="/manage-employee" class="w3-bar-item w3-button"> Workers</a>
     <a href="/manage_product" class="w3-bar-item w3-button"> Manage Products</a>
-        <a href="/manage_category" class="w3-bar-item w3-button"> Categories</a>
+    <a href="/manage_category" class="w3-bar-item w3-button"> Categories</a>
         <a href="/manage_customer" class="w3-bar-item w3-button"> Customers</a>
+
     <a href="#" class="w3-bar-item w3-button"> Reports</a>
 </div>
 
@@ -71,6 +72,9 @@
                             <a href="manage-product.html">
                                 <i class="zmdi zmdi-assignment zmdi-hc-fw" title="Products"></i>
                             </a>
+                            <a href="manage_category">
+                                <i class="zmdi zmdi-folder zmdi-hc-fw" title="Categories"></i>
+                            </a>
                         </ul>
                     </ul>
                 </div>
@@ -83,40 +87,25 @@
         <div class="right content-page">
             <div class="body content rows scroll-y">
                 <div class="box-info full" id="taskFormContainer">
-                    <h2>Manage Products</h2>
+                    <h2>Manage Categories</h2>
                     <div class="panel-body pt-0">
-                        <div class="form-group">
-    <label for="categoryFilter">Filter by Category:</label>
-    <select id="categoryFilter" class="form-control">
-        <option value="">All Categories</option>
-        <!-- Категорії будуть довантажуватись -->
-    </select>
-</div>
-
                         <div class="row mb-4">
-                              <div class="col-sm-12 text-right">
-    <button type="button" id="sortByNameBtn" class="btn btn-sm btn-primary">
-      Get All Products Sorted by Name
-    </button>
-  </div>
                             <div class="col-sm-12">
-                                <button type="button" class="btn btn-sm btn-primary pull-right" data-toggle="modal" data-target="#productModal">
-                                    Add New Product
+                                <button type="button" class="btn btn-sm btn-primary pull-right" id="addCategoryBtn">
+                                    Add New Category
                                 </button>
                             </div>
                         </div>
                         <table class="table table-bordered">
-                           <thead>
-    <tr>
-        <th>Name</th>
-        <th>Category</th>
-        <th>Characteristics</th>
-        <th>Producer</th>  <!-- New column -->
-        <th style="width: 150px">Action</th>
-    </tr>
-</thead>
-                            <tbody>
-                                <!-- Product rows go here -->
+                            <thead>
+                                <tr>
+                                    <th>Category Number</th>
+                                    <th>Category Name</th>
+                                    <th style="width: 150px">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="categoryTableBody">
+                                <!-- Category rows go here -->
                             </tbody>
                         </table>
                     </div>
@@ -126,38 +115,24 @@
     </div>
 
     <!-- Modal -->
-    <div class="modal fade-scale" id="productModal" role="dialog" data-backdrop="static">
+    <div class="modal fade-scale" id="categoryModal" role="dialog" data-backdrop="static">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Add New Product</h4>
+                    <h4 class="modal-title">Add New Category</h4>
                 </div>
                 <div class="modal-body">
-                 <form id="productForm">
-    <input type="hidden" name="id_product" id="id_product">
-    <div class="form-group">
-        <label>Product Name</label>
-        <input class="form-control" name="product_name" id="product_name" type="text" placeholder="Product Name">
-    </div>
-    <div class="form-group">
-        <label>Category Number</label>
-        <select class="form-control" name="category_number" id="category_number">
-            <option value="">Select category</option>
-        </select>
-    </div>
-    <div class="form-group">
-        <label>Characteristics</label>
-        <input class="form-control" name="characteristics" id="characteristics" type="text" placeholder="Characteristics">
-    </div>
-    <div class="form-group">
-        <label>Producer</label>
-        <input class="form-control" name="producer" id="producer" type="text" placeholder="Producer">
-    </div>
-</form>
+                    <form id="categoryForm">
+                        <input type="hidden" name="category_number" id="category_number">
+                        <div class="form-group">
+                            <label>Category Name</label>
+                            <input class="form-control" name="category_name" id="category_name" type="text" placeholder="Category Name" required>
+                        </div>
+                    </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="saveProduct">Save</button>
+                    <button type="button" class="btn btn-primary" id="saveCategory">Save</button>
                 </div>
             </div>
         </div>
@@ -167,9 +142,9 @@
 
 <!-- Scripts -->
 <script src="web/js/package/jquery.min.js"></script>
-<script src="web/js/common.js"></script>
-<script src="web/js/manage-product.js"></script>
 <script src="web/js/package/bootstrap.min.js"></script>
+<script src="web/js/common.js"></script>
+<script src="web/js/manage-category.js"></script>
 
 <script>
     function w3_open() {
