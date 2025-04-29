@@ -6,6 +6,7 @@ import json
 import employee_dao
 import product_dao
 import customer_dao
+import store_product_dao
 
 app = Flask(__name__, static_folder='../web', template_folder='../web')
 
@@ -17,10 +18,14 @@ def home():
     return app.send_static_file('main.html')
 
 
+
 @app.route('/manage_product')
 def manage_product():
     return app.send_static_file('manage_product.html')
 
+@app.route('/manage_store_product')
+def manage_store_product():
+    return app.send_static_file('manage_store_product.html')
 
 @app.route('/getProducts', methods=['GET'])
 def get_products():
@@ -367,6 +372,134 @@ def delete_customer():
             'success': False,
             'error': str(e)
         }), 500
+
+    # Add these routes to your server.py file
+
+
+@app.route('/getStoreProducts', methods=['GET'])
+def get_store_products():
+        response = store_product_dao.get_all_store_products(connection)
+        response = jsonify(response)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+
+@app.route('/getStoreProductByUPC', methods=['GET'])
+def get_store_product_by_upc():
+        upc = request.args.get('upc')
+        if not upc:
+            return jsonify({"success": False, "message": "UPC is required"}), 400
+
+        response = store_product_dao.get_store_product_by_upc(connection, upc)
+        if response:
+            response = jsonify(response)
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            return response
+        else:
+            return jsonify({"success": False, "message": "Product not found"}), 404
+
+@app.route('/insertStoreProduct', methods=['POST'])
+def insert_store_product():
+    try:
+        request_payload = json.loads(request.form['data'])
+        print(f"Store product request payload: {request_payload}")
+
+        # Check if this is an update (UPC exists in database) or insert
+        existing_product = store_product_dao.get_store_product_by_upc(connection, request_payload.get('UPC'))
+
+        if existing_product:
+            # This is an update
+            print(f"Updating store product with UPC: {request_payload['UPC']}")
+            rows_updated = store_product_dao.update_store_product(connection, request_payload)
+            response = jsonify({
+                'success': True,
+                'operation': 'update',
+                'rows_updated': rows_updated
+            })
+        else:
+            # This is a new insert
+            print("Inserting new store product")
+            result = store_product_dao.insert_store_product(connection, request_payload)
+            response = jsonify({
+                'success': True,
+                'operation': 'insert',
+                'result': result
+            })
+
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    except Exception as e:
+        print(f"Error in insert_store_product: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/deleteStoreProduct', methods=['POST'])
+def delete_store_product():
+    try:
+        upc = request.form['upc']
+        rows_deleted = store_product_dao.delete_store_product(connection, upc)
+
+        response = jsonify({
+            'success': True,
+            'message': 'Store product deleted successfully',
+            'rows_deleted': rows_deleted
+        })
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    except Exception as e:
+        print(f"Error in delete_store_product: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/makePromotional', methods=['POST'])
+def make_promotional():
+    try:
+        upc = request.form['upc']
+        promotional = request.form.get('promotional', 'true').lower() == 'true'
+
+        result = store_product_dao.make_product_promotional(connection, upc, promotional)
+
+        response = jsonify(result)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    except Exception as e:
+        print(f"Error in make_promotional: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/updateProductQuantity', methods=['POST'])
+def update_product_quantity():
+    try:
+        upc = request.form['upc']
+        new_quantity = request.form['quantity']
+
+        result = store_product_dao.update_product_quantity(connection, upc, new_quantity)
+
+        response = jsonify(result)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    except Exception as e:
+        print(f"Error in update_product_quantity: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/getProductVAT', methods=['GET'])
+def get_product_vat():
+    upc = request.args.get('upc')
+    if not upc:
+        return jsonify({"success": False, "message": "UPC is required"}), 400
+
+    result = store_product_dao.recalculate_vat(connection, upc)
+    response = jsonify(result)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 if __name__ == "__main__":
     print("Starting Python Flask Server For Grocery Store Management System")

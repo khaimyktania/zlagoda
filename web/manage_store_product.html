@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GSMS - Store Products</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,300,600,700">
+
+    <!-- Bootstrap + Custom Styles -->
+    <link rel="stylesheet" href="web/static/bootstrap.min.css">
+    <link rel="stylesheet" href="web/static/style.css">
+    <link rel="stylesheet" href="web/static/sidebar-menu.css">
+    <link rel="stylesheet" href="web/static/custom.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+
+    <style>
+        /* Always visible sidebar on desktop */
+        @media (min-width: 992px) {
+            #mySidebar {
+                display: block !important;
+                width: 150;
+                position: fixed;
+                height: 100%;
+                z-index: 1000;
+            }
+            #main {
+                margin-left: 250px;
+            }
+            #openNav {
+                display: none !important;
+            }
+        }
+
+        /* Content margin reset on small screens */
+        @media (max-width: 991px) {
+            #main {
+                margin-left: 0;
+            }
+        }
+
+        .promotional-product {
+            background-color: rgba(255, 255, 0, 0.2); /* Light yellow background */
+        }
+
+        .price-with-vat {
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .price-without-vat {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body class="tooltips">
+
+<!-- Sidebar -->
+<div class="w3-sidebar w3-bar-block w3-card w3-animate-left w3-light-grey" style="display:none;" id="mySidebar">
+    <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">✕ Close</button>
+    <a href="web/manage-employee.html" class="w3-bar-item w3-button"> Workers</a>
+    <a href="/manage_product" class="w3-bar-item w3-button"> Manage Products</a>
+    <a href="/manage_store_product" class="w3-bar-item w3-button"> Store Products</a>
+    <a href="/manage_category" class="w3-bar-item w3-button"> Categories</a>
+    <a href="/manage_customer" class="w3-bar-item w3-button"> Customers</a>
+    <a href="#" class="w3-bar-item w3-button"> Reports</a>
+</div>
+
+<!-- Main -->
+<div id="main">
+
+    <!-- Header -->
+    <div class="header content rows-content-header">
+        <button id="openNav" class="w3-button w3-teal w3-xlarge">&#9776;</button>
+        <div class="navbar navbar-default" role="navigation">
+            <div class="container">
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav visible-lg visible-md limit-chars">
+                        <ul class="breadcrumb">
+                            <a href="index.html">
+                                <i class="zmdi zmdi-view-dashboard zmdi-hc-fw" title="Orders"></i>
+                            </a>
+                            <a href="/manage_store_product">
+                                <i class="zmdi zmdi-shopping-cart zmdi-hc-fw" title="Store Products"></i>
+                            </a>
+                        </ul>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="right content-page">
+            <div class="body content rows scroll-y">
+                <div class="box-info full" id="taskFormContainer">
+                    <h2>Store Products</h2>
+                    <div class="panel-body pt-0">
+                        <div class="row mb-4">
+                            <div class="col-sm-12">
+                                <button type="button" class="btn btn-sm btn-primary pull-right" data-toggle="modal" data-target="#storeProductModal">
+                                    Add New Store Product
+                                </button>
+                            </div>
+                        </div>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>UPC</th>
+                                    <th>Promotional UPC</th>
+                                    <th>Product Name</th>
+                                    <th>Selling Price</th>
+                                    <th>Quantity</th>
+                                    <th>Promotional</th>
+                                    <th style="width: 200px">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Store Product rows go here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade-scale" id="storeProductModal" role="dialog" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Add New Store Product</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="storeProductForm">
+                        <div class="form-group">
+                            <label>UPC</label>
+                            <input class="form-control" name="UPC" id="UPC" type="text" placeholder="UPC" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Promotional UPC (optional for non-promotional products)</label>
+                            <input class="form-control" name="UPC_prom" id="UPC_prom" type="text" placeholder="Promotional UPC">
+                        </div>
+                        <div class="form-group">
+                            <label>Product</label>
+                            <select class="form-control" name="id_product" id="id_product" required>
+                                <option value="">Select product</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Selling Price</label>
+                            <input class="form-control" name="selling_price" id="selling_price" type="number" step="0.0001" placeholder="Selling Price" required>
+                            <small class="text-muted">Price includes 20% VAT</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Quantity</label>
+                            <input class="form-control" name="products_number" id="products_number" type="number" placeholder="Quantity" required>
+                        </div>
+                        <div class="form-group">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="promotional_product" name="promotional_product">
+                                <label class="custom-control-label" for="promotional_product">Promotional Product (20% discount)</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveStoreProduct">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VAT Info Modal -->
+    <div class="modal fade" id="vatInfoModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">VAT Information</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Product: <span id="vatProductName"></span></p>
+                    <p>UPC: <span id="vatUPC"></span></p>
+                    <p>Selling Price (with VAT): <span id="vatSellingPrice"></span></p>
+                    <p>VAT Amount (20%): <span id="vatAmount"></span></p>
+                    <p>Price without VAT: <span id="priceWithoutVAT"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div> <!-- #main -->
+
+<!-- Scripts -->
+<script src="web/js/package/jquery.min.js"></script>
+<script src="web/js/common.js"></script>
+<script src="web/js/manage-store-product.js"></script>
+<script src="web/js/package/bootstrap.min.js"></script>
+
+<script>
+    function w3_open() {
+        document.getElementById("mySidebar").style.display = "block";
+        document.getElementById("main").style.marginLeft = "250px";
+        document.getElementById("openNav").style.display = "none";
+    }
+
+    function w3_close() {
+        document.getElementById("mySidebar").style.display = "none";
+        document.getElementById("main").style.marginLeft = "0";
+        document.getElementById("openNav").style.display = "inline-block";
+    }
+</script>
+
+</body>
+</html>

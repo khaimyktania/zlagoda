@@ -1,0 +1,188 @@
+from sql_connection import execute_query, get_sql_connection
+
+
+def get_all_store_products(connection):
+    """
+    Get all products from store_products table
+    """
+    query = "SELECT sp.*, p.product_name FROM store_products sp JOIN products p ON sp.id_product = p.id_product;"
+    try:
+        result = execute_query(connection, query)
+        return result
+    except Exception as e:
+        print(f"Error in get_all_store_products: {e}")
+        raise
+
+
+def get_store_product_by_upc(connection, upc):
+    """
+    Get a store product by its UPC
+    """
+    query = """
+    SELECT sp.*, p.product_name 
+    FROM store_products sp 
+    JOIN products p ON sp.id_product = p.id_product 
+    WHERE sp.UPC = %s;
+    """
+    try:
+        result = execute_query(connection, query, (upc,))
+        return result[0] if result else None
+    except Exception as e:
+        print(f"Error in get_store_product_by_upc: {e}")
+        raise
+
+
+def insert_store_product(connection, store_product):
+    """
+    Insert a new store product
+    """
+    query = """
+    INSERT INTO store_products 
+    (UPC, UPC_prom, id_product, selling_price, products_number, promotional_product) 
+    VALUES (%s, %s, %s, %s, %s, %s);
+    """
+    data = (
+        store_product["UPC"],
+        store_product.get("UPC_prom", None),
+        store_product["id_product"],
+        store_product["selling_price"],
+        store_product["products_number"],
+        store_product.get("promotional_product", 0)
+    )
+
+    try:
+        result = execute_query(connection, query, data)
+        return result
+    except Exception as e:
+        print(f"Error inserting store product: {e}")
+        raise
+
+
+def update_store_product(connection, store_product):
+    """
+    Update an existing store product
+    """
+    query = """
+    UPDATE store_products SET 
+    UPC_prom = %s, 
+    id_product = %s, 
+    selling_price = %s, 
+    products_number = %s, 
+    promotional_product = %s 
+    WHERE UPC = %s;
+    """
+    data = (
+        store_product.get("UPC_prom", None),
+        store_product["id_product"],
+        store_product["selling_price"],
+        store_product["products_number"],
+        store_product.get("promotional_product", 0),
+        store_product["UPC"]
+    )
+
+    try:
+        result = execute_query(connection, query, data)
+        return result
+    except Exception as e:
+        print(f"Error updating store product: {e}")
+        raise
+
+
+def delete_store_product(connection, upc):
+    """
+    Delete a store product by UPC
+    """
+    query = "DELETE FROM store_products WHERE UPC = %s"
+    try:
+        result = execute_query(connection, query, (upc,))
+        return result
+    except Exception as e:
+        print(f"Error deleting store product: {e}")
+        raise
+
+
+def make_product_promotional(connection, upc, promotional=True):
+    """
+    Mark a product as promotional/non-promotional and calculate new price if needed
+    """
+    try:
+        # First get the current product
+        product = get_store_product_by_upc(connection, upc)
+        if not product:
+            return {"success": False, "message": "Product not found"}
+
+        # If already in the requested state, do nothing
+        if (promotional and product['promotional_product'] == 1) or (
+                not promotional and product['promotional_product'] == 0):
+            return {"success": True, "message": "No change needed"}
+
+        # Determine new price
+        new_price = product['selling_price']
+        if promotional:
+            # If making promotional, apply 20% discount
+            new_price = float(product['selling_price']) * 0.8
+
+            # Generate promotional UPC if not exists
+            upc_prom = product.get('UPC_prom')
+            if not upc_prom:
+                # Simple approach: append 'P' to original UPC
+                upc_prom = f"P{upc}"
+
+            update_data = {
+                "UPC": upc,
+                "UPC_prom": upc_prom,
+                "id_product": product['id_product'],
+                "selling_price": new_price,
+                "products_number": product['products_number'],
+                "promotional_product": 1
+            }
+        else:
+            # If making non-promotional, increase price by dividing by 0.8
+            new_price = float(product['selling_price']) / 0.8
+
+            update_data = {
+                "UPC": upc,
+                "UPC_prom": None,
+                "id_product": product['id_product'],
+                "selling_price": new_price,
+                "products_number": product['products_number'],
+                "promotional_product": 0
+            }
+
+        # Update the product
+        update_store_product(connection, update_data)
+        return {"success": True, "message": "Product updated successfully", "new_price": new_price}
+
+    except Exception as e:
+        print(f"Error making product promotional: {e}")
+        return {"success": False, "message": str(e)}
+
+
+def update_product_quantity(connection, upc, new_quantity):
+    """
+    Update product quantity
+    """
+    query = "UPDATE store_products SET products_number = %s WHERE UPC = %s"
+    try:
+        result = execute_query(connection, query, (new_quantity, upc))
+        return {"success": True, "rows_updated": result}
+    except Exception as e:
+        print(f"Error updating product quantity: {e}")
+        return {"success": False, "message": str(e)}
+
+
+def recalculate_vat(connection, upc):
+    """
+    Calculate and return VAT (20% of selling price)
+    """
+    try:
+        product = get_store_product_by_upc(connection, upc)
+        if not product:
+            return {"success": False, "message": "Product not found"}
+
+        # VAT is 20% of the selling price
+        vat_amount = float(product['selling_price']) * 0.2
+        return {"success": True, "vat_amount": vat_amount, "selling_price": product['selling_price']}
+    except Exception as e:
+        print(f"Error calculating VAT: {e}")
+        return {"success": False, "message": str(e)}
