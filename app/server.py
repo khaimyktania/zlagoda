@@ -29,10 +29,19 @@ def manage_store_product():
 
 @app.route('/getProducts', methods=['GET'])
 def get_products():
-    response = product_dao.get_all_products(connection)
-    response = jsonify(response)
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    return response
+    connection = None
+    try:
+        connection = get_sql_connection()
+        response = product_dao.get_all_products(connection)
+        response = jsonify(response)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    except Exception as e:
+        print(f"Помилка в get_products: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
 
 
 @app.route('/insertProduct', methods=['POST'])
@@ -76,14 +85,6 @@ def delete_product():
     response = jsonify({
         'product_id': return_id
     })
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    return response
-
-
-@app.route('/getCategories', methods=['GET'])
-def get_categories():
-    response = category_dao.get_categories(connection)
-    response = jsonify(response)
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
@@ -191,79 +192,106 @@ def get_contact_by_surname_api():
 def get_all_products_sorted():
     return jsonify(product_dao.get_all_products_sorted(connection))
 
+
 @app.route('/getProductsByCategory', methods=['GET'])
 def get_products_by_category():
     category_number = request.args.get('category_number')
     return jsonify(product_dao.get_products_by_category(connection, category_number))
 
+
 @app.route('/manage_category')
 def manage_category():
     return app.send_static_file('manage_category.html')
 
+@app.route('/getCategories', methods=['GET'])
+def get_categories():
+    connection = None
+    try:
+        connection = get_sql_connection()
+        response_data = category_dao.get_categories(connection)
+        response = jsonify(response_data)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    except Exception as e:
+        print(f"Помилка в get_categories: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
+
 
 @app.route('/saveCategory', methods=['POST'])
 def save_category():
+    connection = None
     try:
         request_payload = request.get_json()
         print(f"Category request payload: {request_payload}")
 
-        # Check if this is an update or insert
+        connection = get_sql_connection()
+
         if request_payload.get('category_number') and str(request_payload['category_number']).strip():
-            # This is an update
+            # Update category
             print(f"Updating category with number: {request_payload['category_number']}")
             rows_updated = category_dao.update_category(connection, request_payload)
-            response = jsonify({
+            result = {
                 'success': True,
                 'operation': 'update',
                 'rows_updated': rows_updated
-            })
+            }
         else:
-            # This is a new insert
+            # Insert new category
             print("Inserting new category")
             category_id = category_dao.insert_new_category(connection, request_payload)
-            response = jsonify({
+            result = {
                 'success': True,
                 'operation': 'insert',
                 'category_number': category_id
-            })
+            }
 
+        response = jsonify(result)
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
+
     except Exception as e:
         print(f"Error in save_category: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+    finally:
+        if connection:
+            connection.close()
 
 
 @app.route('/deleteCategory', methods=['POST'])
 def delete_category():
+    connection = None
     try:
         category_number = request.form['category_number']
+        connection = get_sql_connection()
         result = category_dao.delete_category(connection, category_number)
 
         if result['success']:
-            response = jsonify({
+            response_data = {
                 'success': True,
                 'message': 'Category deleted successfully',
                 'rows_deleted': result['rows_deleted']
-            })
+            }
         else:
-            response = jsonify({
+            response_data = {
                 'success': False,
                 'message': result['message']
-            })
+            }
 
+        response = jsonify(response_data)
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
+
     except Exception as e:
         print(f"Error in delete_category: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
+    finally:
+        if connection:
+            connection.close()
 
 # Add these routes to your server.py file
 @app.route('/manage_customer')
@@ -375,201 +403,158 @@ def delete_customer():
 
     # Add these routes to your server.py file
 
-
 @app.route('/getStoreProducts', methods=['GET'])
 def get_store_products():
+    connection = get_sql_connection()
+    try:
         response = store_product_dao.get_all_store_products(connection)
-        response = jsonify(response)
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
+        return jsonify(response)
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+    finally:
+        connection.close()
 
 @app.route('/getStoreProductByUPC', methods=['GET'])
 def get_store_product_by_upc():
-        upc = request.args.get('upc')
-        if not upc:
-            return jsonify({"success": False, "message": "UPC is required"}), 400
-
+    upc = request.args.get('upc')
+    if not upc:
+        return jsonify({"success": False, "message": "UPC is required"}), 400
+    connection = get_sql_connection()
+    try:
         response = store_product_dao.get_store_product_by_upc(connection, upc)
         if response:
-            response = jsonify(response)
-            response.headers.add('Access-Control-Allow-Origin', '*')
-            return response
+            return jsonify(response)
         else:
             return jsonify({"success": False, "message": "Product not found"}), 404
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+    finally:
+        connection.close()
 
 @app.route('/insertStoreProduct', methods=['POST'])
 def insert_store_product():
+    connection = get_sql_connection()
     try:
         request_payload = json.loads(request.form['data'])
-        print(f"Store product request payload: {request_payload}")
-
-        # Check if this is an update (UPC exists in database) or insert
         existing_product = store_product_dao.get_store_product_by_upc(connection, request_payload.get('UPC'))
 
         if existing_product:
-            # This is an update
-            print(f"Updating store product with UPC: {request_payload['UPC']}")
             rows_updated = store_product_dao.update_store_product(connection, request_payload)
-            response = jsonify({
-                'success': True,
-                'operation': 'update',
-                'rows_updated': rows_updated
-            })
+            return jsonify({'success': True, 'operation': 'update', 'rows_updated': rows_updated})
         else:
-            # This is a new insert
-            print("Inserting new store product")
             result = store_product_dao.insert_store_product(connection, request_payload)
-            response = jsonify({
-                'success': True,
-                'operation': 'insert',
-                'result': result
-            })
-
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
+            return jsonify({'success': True, 'operation': 'insert', 'result': result})
     except Exception as e:
-        print(f"Error in insert_store_product: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        connection.close()
 
 @app.route('/deleteStoreProduct', methods=['POST'])
 def delete_store_product():
+    connection = get_sql_connection()
     try:
         upc = request.form['upc']
         rows_deleted = store_product_dao.delete_store_product(connection, upc)
-
-        response = jsonify({
-            'success': True,
-            'message': 'Store product deleted successfully',
-            'rows_deleted': rows_deleted
-        })
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
+        return jsonify({'success': True, 'message': 'Store product deleted successfully', 'rows_deleted': rows_deleted})
     except Exception as e:
-        print(f"Error in delete_store_product: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        connection.close()
 
 @app.route('/makePromotional', methods=['POST'])
 def make_promotional():
+    connection = get_sql_connection()
     try:
         upc = request.form['upc']
         promotional = request.form.get('promotional', 'true').lower() == 'true'
-
         result = store_product_dao.make_product_promotional(connection, upc, promotional)
-
-        response = jsonify(result)
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
+        return jsonify(result)
     except Exception as e:
-        print(f"Error in make_promotional: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        connection.close()
 
 @app.route('/updateProductQuantity', methods=['POST'])
 def update_product_quantity():
+    connection = get_sql_connection()
     try:
         upc = request.form['upc']
         new_quantity = request.form['quantity']
-
         result = store_product_dao.update_product_quantity(connection, upc, new_quantity)
-
-        response = jsonify(result)
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
+        return jsonify(result)
     except Exception as e:
-        print(f"Error in update_product_quantity: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        connection.close()
 
 @app.route('/getProductVAT', methods=['GET'])
 def get_product_vat():
     upc = request.args.get('upc')
     if not upc:
         return jsonify({"success": False, "message": "UPC is required"}), 400
-
-    result = store_product_dao.recalculate_vat(connection, upc)
-    response = jsonify(result)
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    return response
+    connection = get_sql_connection()
+    try:
+        result = store_product_dao.recalculate_vat(connection, upc)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        connection.close()
 
 @app.route('/getPromotionalProductsSortedByQuantity', methods=['GET'])
 def get_promotional_products_sorted_by_quantity():
+    connection = get_sql_connection()
     try:
         response = store_product_dao.get_promotional_products_sorted_by_quantity(connection)
-        response = jsonify(response)
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
+        return jsonify(response)
     except Exception as e:
-        print(f"Error in get_promotional_products_sorted_by_quantity: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        connection.close()
 
 @app.route('/getPromotionalProductsSortedByName', methods=['GET'])
 def get_promotional_products_sorted_by_name():
+    connection = get_sql_connection()
     try:
         response = store_product_dao.get_promotional_products_sorted_by_name(connection)
-        response = jsonify(response)
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
+        return jsonify(response)
     except Exception as e:
-        print(f"Error in get_promotional_products_sorted_by_name: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        connection.close()
 
 @app.route('/getNonPromotionalProductsSortedByQuantity', methods=['GET'])
 def get_non_promotional_products_sorted_by_quantity():
+    connection = get_sql_connection()
     try:
         response = store_product_dao.get_non_promotional_products_sorted_by_quantity(connection)
-        response = jsonify(response)
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
+        return jsonify(response)
     except Exception as e:
-        print(f"Error in get_non_promotional_products_sorted_by_quantity: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        connection.close()
 
 @app.route('/getNonPromotionalProductsSortedByName', methods=['GET'])
 def get_non_promotional_products_sorted_by_name():
+    connection = get_sql_connection()
     try:
         response = store_product_dao.get_non_promotional_products_sorted_by_name(connection)
-        response = jsonify(response)
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
+        return jsonify(response)
     except Exception as e:
-        print(f"Error in get_non_promotional_products_sorted_by_name: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        connection.close()
 
 @app.route('/getAllProductsSortedByQuantity', methods=['GET'])
 def get_all_products_sorted_by_quantity():
+    connection = get_sql_connection()
     try:
         response = store_product_dao.get_all_store_products_sorted_by_quantity(connection)
-        response = jsonify(response)
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
+        return jsonify(response)
     except Exception as e:
-        print(f"Error in get_all_products_sorted_by_quantity: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        connection.close()
 
 if __name__ == "__main__":
     print("Starting Python Flask Server For Grocery Store Management System")
