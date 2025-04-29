@@ -501,6 +501,76 @@ def get_product_vat():
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
+@app.route('/getPromotionalProductsSortedByQuantity', methods=['GET'])
+def get_promotional_products_sorted_by_quantity():
+    try:
+        response = store_product_dao.get_promotional_products_sorted_by_quantity(connection)
+        response = jsonify(response)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    except Exception as e:
+        print(f"Error in get_promotional_products_sorted_by_quantity: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/getPromotionalProductsSortedByName', methods=['GET'])
+def get_promotional_products_sorted_by_name():
+    try:
+        response = store_product_dao.get_promotional_products_sorted_by_name(connection)
+        response = jsonify(response)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    except Exception as e:
+        print(f"Error in get_promotional_products_sorted_by_name: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/getNonPromotionalProductsSortedByQuantity', methods=['GET'])
+def get_non_promotional_products_sorted_by_quantity():
+    try:
+        response = store_product_dao.get_non_promotional_products_sorted_by_quantity(connection)
+        response = jsonify(response)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    except Exception as e:
+        print(f"Error in get_non_promotional_products_sorted_by_quantity: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/getNonPromotionalProductsSortedByName', methods=['GET'])
+def get_non_promotional_products_sorted_by_name():
+    try:
+        response = store_product_dao.get_non_promotional_products_sorted_by_name(connection)
+        response = jsonify(response)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    except Exception as e:
+        print(f"Error in get_non_promotional_products_sorted_by_name: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/getAllProductsSortedByQuantity', methods=['GET'])
+def get_all_products_sorted_by_quantity():
+    try:
+        response = store_product_dao.get_all_store_products_sorted_by_quantity(connection)
+        response = jsonify(response)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    except Exception as e:
+        print(f"Error in get_all_products_sorted_by_quantity: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 if __name__ == "__main__":
     print("Starting Python Flask Server For Grocery Store Management System")
     app.run(port=5000, debug=True)

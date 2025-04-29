@@ -2,6 +2,7 @@
 var storeProductModal = $("#storeProductModal");
 var vatInfoModal = $("#vatInfoModal");
 var productSelect = $("#id_product");
+var productDetailModal = $("#productDetailModal");
 
 // API URLs
 const storeProductsApiUrl = "/getStoreProducts";
@@ -10,6 +11,12 @@ const storeProductDeleteApiUrl = "/deleteStoreProduct";
 const makePromotionalApiUrl = "/makePromotional";
 const updateQuantityApiUrl = "/updateProductQuantity";
 const getVatInfoApiUrl = "/getProductVAT";
+const getProductDetailByUpcApiUrl = "/getStoreProductByUPC";
+const getPromotionalProductsSortedByQuantityApiUrl = "/getPromotionalProductsSortedByQuantity";
+const getPromotionalProductsSortedByNameApiUrl = "/getPromotionalProductsSortedByName";
+const getNonPromotionalProductsSortedByQuantityApiUrl = "/getNonPromotionalProductsSortedByQuantity";
+const getNonPromotionalProductsSortedByNameApiUrl = "/getNonPromotionalProductsSortedByName";
+const getAllProductsSortedByQuantityApiUrl = "/getAllProductsSortedByQuantity";
 
 $(function () {
     // Initial load of store products
@@ -25,48 +32,54 @@ $(function () {
 // Load all store products
 function loadStoreProducts() {
     $.get(storeProductsApiUrl, function (response) {
-        if (response) {
-            let table = '';
-            $.each(response, function (index, product) {
-                // Determine if this is a promotional product for row styling
-                const promotionalClass = product.promotional_product == 1 ? 'promotional-product' : '';
-
-                // Format price with VAT
-                const priceWithVAT = parseFloat(product.selling_price).toFixed(2);
-
-                // UPC_prom might be null for non-promotional products
-                const promotionalUPC = product.UPC_prom || '-';
-
-                // Create table row
-                table += '<tr class="' + promotionalClass + '" data-upc="' + product.UPC +
-                    '" data-product-id="' + product.id_product +
-                    '" data-product-name="' + product.product_name +
-                    '" data-selling-price="' + product.selling_price +
-                    '" data-quantity="' + product.products_number +
-                    '" data-promotional="' + product.promotional_product +
-                    '" data-upc-prom="' + (product.UPC_prom || '') + '">' +
-                    '<td>' + product.UPC + '</td>' +
-                    '<td>' + promotionalUPC + '</td>' +
-                    '<td>' + product.product_name + '</td>' +
-                    '<td><span class="price-with-vat">' + priceWithVAT + '</span> <br>' +
-                    '<a href="#" class="show-vat-info" data-upc="' + product.UPC + '">VAT info</a></td>' +
-                    '<td>' + product.products_number + '</td>' +
-                    '<td>' + (product.promotional_product == 1 ? 'Yes' : 'No') + '</td>' +
-                    '<td>' +
-                        '<div class="btn-group">' +
-                            '<button class="btn btn-xs btn-primary edit-store-product">Edit</button> ' +
-                            '<button class="btn btn-xs btn-danger delete-store-product">Delete</button> ' +
-                            (product.promotional_product == 1 ?
-                                '<button class="btn btn-xs btn-warning make-non-promotional">Make Non-Promotional</button>' :
-                                '<button class="btn btn-xs btn-success make-promotional">Make Promotional</button>'
-                            ) +
-                        '</div>' +
-                    '</td></tr>';
-            });
-
-            $("table").find('tbody').empty().html(table);
-        }
+        renderProductsTable(response);
     });
+}
+
+// Render products table with the given data
+function renderProductsTable(products) {
+    if (products) {
+        let table = '';
+        $.each(products, function (index, product) {
+            // Determine if this is a promotional product for row styling
+            const promotionalClass = product.promotional_product == 1 ? 'promotional-product' : '';
+
+            // Format price with VAT
+            const priceWithVAT = parseFloat(product.selling_price).toFixed(2);
+
+            // UPC_prom might be null for non-promotional products
+            const promotionalUPC = product.UPC_prom || '-';
+
+            // Create table row
+            table += '<tr class="' + promotionalClass + '" data-upc="' + product.UPC +
+                '" data-product-id="' + product.id_product +
+                '" data-product-name="' + product.product_name +
+                '" data-selling-price="' + product.selling_price +
+                '" data-quantity="' + product.products_number +
+                '" data-promotional="' + product.promotional_product +
+                '" data-upc-prom="' + (product.UPC_prom || '') + '">' +
+                '<td>' + product.UPC + '</td>' +
+                '<td>' + promotionalUPC + '</td>' +
+                '<td>' + product.product_name + '</td>' +
+                '<td><span class="price-with-vat">' + priceWithVAT + '</span> <br>' +
+                '<a href="#" class="show-vat-info" data-upc="' + product.UPC + '">VAT info</a></td>' +
+                '<td>' + product.products_number + '</td>' +
+                '<td>' + (product.promotional_product == 1 ? 'Yes' : 'No') + '</td>' +
+                '<td>' +
+                    '<div class="btn-group">' +
+                        '<button class="btn btn-xs btn-primary edit-store-product">Edit</button> ' +
+                        '<button class="btn btn-xs btn-info view-product-details">Details</button> ' +
+                        '<button class="btn btn-xs btn-danger delete-store-product">Delete</button> ' +
+                        (product.promotional_product == 1 ?
+                            '<button class="btn btn-xs btn-warning make-non-promotional">Make Non-Promotional</button>' :
+                            '<button class="btn btn-xs btn-success make-promotional">Make Promotional</button>'
+                        ) +
+                    '</div>' +
+                '</td></tr>';
+        });
+
+        $("table").find('tbody').empty().html(table);
+    }
 }
 
 // Load products dropdown for store product form
@@ -98,6 +111,13 @@ function initEventHandlers() {
         openEditStoreProductModal(tr);
     });
 
+    // View product details
+    $(document).on('click', '.view-product-details', function() {
+        var tr = $(this).closest('tr');
+        var upc = tr.data('upc');
+        viewProductDetails(upc);
+    });
+
     // Delete store product
     $(document).on('click', '.delete-store-product', function() {
         var tr = $(this).closest('tr');
@@ -121,6 +141,62 @@ function initEventHandlers() {
         e.preventDefault();
         var upc = $(this).data('upc');
         showVatInfo(upc);
+    });
+
+    // Filter promotional products by quantity
+    $('#filterPromotionalByQuantity').on('click', function() {
+        $.get(getPromotionalProductsSortedByQuantityApiUrl, function(response) {
+            renderProductsTable(response);
+            updateFilterStatus("Promotional products sorted by quantity");
+        });
+    });
+
+    // Filter promotional products by name
+    $('#filterPromotionalByName').on('click', function() {
+        $.get(getPromotionalProductsSortedByNameApiUrl, function(response) {
+            renderProductsTable(response);
+            updateFilterStatus("Promotional products sorted by name");
+        });
+    });
+
+    // Filter non-promotional products by quantity
+    $('#filterNonPromotionalByQuantity').on('click', function() {
+        $.get(getNonPromotionalProductsSortedByQuantityApiUrl, function(response) {
+            renderProductsTable(response);
+            updateFilterStatus("Non-promotional products sorted by quantity");
+        });
+    });
+
+    // Filter non-promotional products by name
+    $('#filterNonPromotionalByName').on('click', function() {
+        $.get(getNonPromotionalProductsSortedByNameApiUrl, function(response) {
+            renderProductsTable(response);
+            updateFilterStatus("Non-promotional products sorted by name");
+        });
+    });
+
+    // Filter all products by quantity
+    $('#filterAllByQuantity').on('click', function() {
+        $.get(getAllProductsSortedByQuantityApiUrl, function(response) {
+            renderProductsTable(response);
+            updateFilterStatus("All products sorted by quantity");
+        });
+    });
+
+    // Reset filters (load all products)
+    $('#resetFilters').on('click', function() {
+        loadStoreProducts();
+        updateFilterStatus("No filter applied");
+    });
+
+    // Search by UPC
+    $('#searchByUPC').on('click', function() {
+        var upc = $('#upcSearch').val().trim();
+        if (upc) {
+            viewProductDetails(upc);
+        } else {
+            alert('Please enter a UPC to search');
+        }
     });
 
     // Checkbox for promotional product in form
@@ -147,6 +223,48 @@ function initEventHandlers() {
                 var normalPrice = (currentPrice / 0.8).toFixed(4);
                 $('#selling_price').val(normalPrice);
             }
+        }
+    });
+}
+
+// Update filter status text
+function updateFilterStatus(statusText) {
+    $('#filterStatus').text(statusText);
+}
+
+// View product details by UPC
+function viewProductDetails(upc) {
+    $.ajax({
+        url: getProductDetailByUpcApiUrl,
+        type: 'GET',
+        data: { upc: upc },
+        success: function(response) {
+            if (response) {
+                // Format price with VAT
+                const priceWithVAT = parseFloat(response.selling_price).toFixed(2);
+
+                // Calculate price without VAT
+                const priceWithoutVAT = (parseFloat(response.selling_price) / 1.2).toFixed(2);
+
+                // Populate modal with product details
+                $('#detailUPC').text(response.UPC);
+                $('#detailPromUPC').text(response.UPC_prom || '-');
+                $('#detailName').text(response.product_name);
+                $('#detailPrice').text(priceWithVAT);
+                $('#detailPriceNoVAT').text(priceWithoutVAT);
+                $('#detailQuantity').text(response.products_number);
+                $('#detailPromotional').text(response.promotional_product == 1 ? 'Yes' : 'No');
+                $('#detailCharacteristics').text(response.characteristics || 'N/A');
+                $('#detailCategory').text(response.category_number || 'N/A');
+
+                // Show the modal
+                productDetailModal.modal('show');
+            } else {
+                alert('Product not found with UPC: ' + upc);
+            }
+        },
+        error: function(xhr) {
+            alert('Error retrieving product details: ' + xhr.responseText);
         }
     });
 }

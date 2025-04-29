@@ -54,6 +54,24 @@
             color: #6c757d;
             font-size: 0.9em;
         }
+
+        .filter-controls {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+
+        .filter-section {
+            margin-bottom: 10px;
+        }
+
+        .search-section {
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body class="tooltips">
@@ -99,6 +117,58 @@
             <div class="body content rows scroll-y">
                 <div class="box-info full" id="taskFormContainer">
                     <h2>Store Products</h2>
+
+                    <!-- Filter Controls -->
+                    <div class="filter-controls">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h4>Filter Options</h4>
+
+                                <!-- Filter by product type -->
+                                <div class="filter-section">
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="filterPromotionalByQuantity">
+                                            Promotional by Quantity
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="filterPromotionalByName">
+                                            Promotional by Name
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="filterNonPromotionalByQuantity">
+                                            Non-Promotional by Quantity
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="filterNonPromotionalByName">
+                                            Non-Promotional by Name
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="filterAllByQuantity">
+                                            All Products by Quantity
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" id="resetFilters">
+                                            Reset Filters
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Search by UPC -->
+                                <div class="search-section">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="upcSearch" placeholder="Enter UPC">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-outline-secondary" type="button" id="searchByUPC">Search</button>
+                                        </div>
+                                    </div>
+                                    <small class="form-text text-muted">
+                                        Search product by UPC to view detailed information
+                                    </small>
+                                </div>
+
+                                <!-- Current filter status -->
+                                <div class="mt-2">
+                                    <small>Current filter: <span id="filterStatus">No filter applied</span></small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="panel-body pt-0">
                         <div class="row mb-4">
                             <div class="col-sm-12">
@@ -190,6 +260,42 @@
                     <p>Selling Price (with VAT): <span id="vatSellingPrice"></span></p>
                     <p>VAT Amount (20%): <span id="vatAmount"></span></p>
                     <p>Price without VAT: <span id="priceWithoutVAT"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Detail Modal -->
+    <div class="modal fade" id="productDetailModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Product Details</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>UPC:</strong> <span id="detailUPC"></span></p>
+                            <p><strong>Promotional UPC:</strong> <span id="detailPromUPC"></span></p>
+                            <p><strong>Product Name:</strong> <span id="detailName"></span></p>
+                            <p><strong>Selling Price (with VAT):</strong> <span id="detailPrice"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Price without VAT:</strong> <span id="detailPriceNoVAT"></span></p>
+                            <p><strong>Quantity:</strong> <span id="detailQuantity"></span></p>
+                            <p><strong>Promotional:</strong> <span id="detailPromotional"></span></p>
+                            <p><strong>Category:</strong> <span id="detailCategory"></span></p>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <h6>Product Characteristics</h6>
+                            <p id="detailCharacteristics"></p>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

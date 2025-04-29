@@ -14,6 +14,119 @@ def get_all_store_products(connection):
         raise
 
 
+def get_all_store_products_sorted_by_quantity(connection):
+    """
+    Get all products from store_products table sorted by quantity
+    """
+    query = """
+    SELECT sp.*, p.product_name 
+    FROM store_products sp 
+    JOIN products p ON sp.id_product = p.id_product 
+    ORDER BY sp.products_number DESC;
+    """
+    try:
+        result = execute_query(connection, query)
+        return result
+    except Exception as e:
+        print(f"Error in get_all_store_products_sorted_by_quantity: {e}")
+        raise
+
+
+def get_promotional_products_sorted_by_quantity(connection):
+    """
+    Get all promotional products sorted by quantity
+    """
+    query = """
+    SELECT sp.*, p.product_name 
+    FROM store_products sp 
+    JOIN products p ON sp.id_product = p.id_product 
+    WHERE sp.promotional_product = 1
+    ORDER BY sp.products_number DESC;
+    """
+    try:
+        result = execute_query(connection, query)
+        return result
+    except Exception as e:
+        print(f"Error in get_promotional_products_sorted_by_quantity: {e}")
+        raise
+
+
+def get_promotional_products_sorted_by_name(connection):
+    """
+    Get all promotional products sorted by name
+    """
+    query = """
+    SELECT sp.*, p.product_name 
+    FROM store_products sp 
+    JOIN products p ON sp.id_product = p.id_product 
+    WHERE sp.promotional_product = 1
+    ORDER BY p.product_name;
+    """
+    try:
+        result = execute_query(connection, query)
+        return result
+    except Exception as e:
+        print(f"Error in get_promotional_products_sorted_by_name: {e}")
+        raise
+
+
+def get_non_promotional_products_sorted_by_quantity(connection):
+    """
+    Get all non-promotional products sorted by quantity
+    """
+    query = """
+    SELECT sp.*, p.product_name 
+    FROM store_products sp 
+    JOIN products p ON sp.id_product = p.id_product 
+    WHERE sp.promotional_product = 0
+    ORDER BY sp.products_number DESC;
+    """
+    try:
+        result = execute_query(connection, query)
+        return result
+    except Exception as e:
+        print(f"Error in get_non_promotional_products_sorted_by_quantity: {e}")
+        raise
+
+
+def get_non_promotional_products_sorted_by_name(connection):
+    """
+    Get all non-promotional products sorted by name
+    """
+    query = """
+    SELECT sp.*, p.product_name 
+    FROM store_products sp 
+    JOIN products p ON sp.id_product = p.id_product 
+    WHERE sp.promotional_product = 0
+    ORDER BY p.product_name;
+    """
+    try:
+        result = execute_query(connection, query)
+        return result
+    except Exception as e:
+        print(f"Error in get_non_promotional_products_sorted_by_name: {e}")
+        raise
+
+
+def get_store_product_detail_by_upc(connection, upc):
+    """
+    Get detailed information about a product by UPC including price, quantity, name, and characteristics
+    """
+    query = """
+    SELECT sp.UPC, sp.UPC_prom, sp.selling_price, sp.products_number, sp.promotional_product, 
+           p.product_name, p.characteristics, p.category_number
+    FROM store_products sp 
+    JOIN products p ON sp.id_product = p.id_product 
+    WHERE sp.UPC = %s;
+    """
+    try:
+        result = execute_query(connection, query, (upc,))
+        return result[0] if result else None
+    except Exception as e:
+        print(f"Error in get_store_product_detail_by_upc: {e}")
+        raise
+
+
 def get_store_product_by_upc(connection, upc):
     """
     Get a store product by its UPC

@@ -4,10 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f9f0029f-da69-424e-98ae-755ef497d758" name="Changes" comment="category+product (dorobity) + customer + update product with producer">
+    <list default="true" id="f9f0029f-da69-424e-98ae-755ef497d758" name="Changes" comment="troshki store product">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/server.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/manage_product.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/manage_product.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/store_product_dao.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/store_product_dao.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/js/manage-store-product.js" beforeDir="false" afterPath="$PROJECT_DIR$/web/js/manage-store-product.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/manage-employee.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/manage-employee.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/manage_category.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/manage_category.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/manage_customer.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/manage_customer.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/manage_store_product.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/manage_store_product.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -265,7 +269,15 @@
       <option name="project" value="LOCAL" />
       <updated>1745936940493</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="troshki store product">
+      <option name="closed" value="true" />
+      <created>1745941352097</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1745941352097</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -287,6 +299,7 @@
     <MESSAGE value="potyzhni zminy" />
     <MESSAGE value="CATEGORY DONE prodectivna poizdka na avtobyce" />
     <MESSAGE value="category+product (dorobity) + customer + update product with producer" />
-    <option name="LAST_COMMIT_MESSAGE" value="category+product (dorobity) + customer + update product with producer" />
+    <MESSAGE value="troshki store product" />
+    <option name="LAST_COMMIT_MESSAGE" value="troshki store product" />
   </component>
 </project>
