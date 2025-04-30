@@ -148,25 +148,37 @@
   }
 
   function renderTable(data, container) {
-    if (!data || data.length === 0) {
-      container.innerHTML = "<p>Немає даних для цього звіту.</p>";
-      return;
-    }
-    let table = '<table class="table table-bordered"><tr>';
-    for (let key in data[0]) {
-      table += `<th>${key}</th>`;
+  if (!data || data.length === 0) {
+    container.innerHTML = "<p>Немає даних для цього звіту.</p>";
+    return;
+  }
+
+  // Розділення ключів: id-поля спочатку
+  const allKeys = Object.keys(data[0]);
+  const idKeys = allKeys.filter(k => k.toLowerCase().includes("id") || k.toLowerCase().includes("number"));
+  const otherKeys = allKeys.filter(k => !idKeys.includes(k));
+  const orderedKeys = [...idKeys, ...otherKeys];
+
+  // Створення заголовків
+  let table = '<table class="table table-bordered"><tr>';
+  for (let key of orderedKeys) {
+    table += `<th>${key}</th>`;
+  }
+  table += '</tr>';
+
+  // Заповнення рядків
+  for (let row of data) {
+    table += '<tr>';
+    for (let key of orderedKeys) {
+      table += `<td>${row[key]}</td>`;
     }
     table += '</tr>';
-    for (let row of data) {
-      table += '<tr>';
-      for (let key in row) {
-        table += `<td>${row[key]}</td>`;
-      }
-      table += '</tr>';
-    }
-    table += '</table>';
-    container.innerHTML = table;
   }
+
+  table += '</table>';
+  container.innerHTML = table;
+}
+
 
   function printReport() {
     if (document.getElementById('report-output').innerHTML.trim() === "") {
