@@ -4,9 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f9f0029f-da69-424e-98ae-755ef497d758" name="Changes" comment="requests with employee">
+    <list default="true" id="f9f0029f-da69-424e-98ae-755ef497d758" name="Changes" comment="fix">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/manage-employee.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/manage-employee.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/employee_credentials.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/employee_credentials.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/employee_dao.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/employee_dao.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/server.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/js/manage-product.js" beforeDir="false" afterPath="$PROJECT_DIR$/web/js/manage-product.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/manage_product.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/manage_product.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -266,7 +270,15 @@
       <option name="project" value="LOCAL" />
       <updated>1745162368386</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="fix">
+      <option name="closed" value="true" />
+      <created>1746048966110</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1746048966110</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -298,6 +310,7 @@
     <MESSAGE value="HV pidvantazhennia bazy danyh ura" />
     <MESSAGE value="poshuk ale ne info" />
     <MESSAGE value="requests with employee" />
-    <option name="LAST_COMMIT_MESSAGE" value="requests with employee" />
+    <MESSAGE value="fix" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix" />
   </component>
 </project>

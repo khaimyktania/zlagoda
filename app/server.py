@@ -21,16 +21,40 @@ connection = get_sql_connection()
 employees = employee_dao.get_all_employees(connection)
 auto_generate_credentials(employees)
 
+
 def require_role(*roles):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
+            # Відлагоджувальна інформація
+            print(f"Checking role. Session: {session}")
+            print(f"Required roles: {roles}")
+
+            # Перевірка на авторизацію
+            if 'role' not in session or 'id_employee' not in session:
+                print("Authentication required. User not logged in.")
+                return jsonify({
+                    'error': 'Authentication required',
+                    'message': 'Будь ласка, увійдіть в систему'
+                }), 401
+
             user_role = session.get('role')
+            print(f"User role: {user_role}")
+
             if user_role not in roles:
-                return jsonify({'error': 'Access denied'}), 403
+                print(f"Access denied for role {user_role}")
+                return jsonify({
+                    'error': 'Access denied',
+                    'message': f'Ця функція доступна тільки для ролей: {", ".join(roles)}. Ваша роль: {user_role}'
+                }), 403
+
+            print(f"Access granted for role {user_role}")
             return func(*args, **kwargs)
+
         return wrapper
+
     return decorator
+
 
 @app.route('/')
 def home():
@@ -43,13 +67,17 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
 
+        print(f"Login attempt for username: {username}")
+
         credentials = load_credentials()
         for id_emp, cred in credentials.items():
             if cred['login'] == username and cred['password'] == password:
                 session['role'] = cred['role']
                 session['id_employee'] = id_emp
+                print(f"Login successful. Role: {cred['role']}, ID: {id_emp}")
                 return jsonify({'success': True, 'role': cred['role']})
 
+        print("Invalid credentials")
         return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
     except Exception as e:
         print(f"[LOGIN ERROR]: {e}")
@@ -74,6 +102,7 @@ def get_logged_in_employee_info():
     })
 
 @app.route('/manage_product')
+@require_role('cashier','manager')
 def manage_product():
     return app.send_static_file('manage_product.html')
 
@@ -81,13 +110,20 @@ def manage_product():
 def manage_store_product():
     return app.send_static_file('manage_store_product.html')
 
+
 @app.route('/getProducts', methods=['GET'])
+@require_role('cashier', 'manager')
 def get_products():
     connection = None
     try:
+        print("Endpoint /getProducts викликаний")
+        # Печатаємо інформацію про сесію для відлагодження
+        print(f"Поточна сесія: {session}")
+
         connection = get_sql_connection()
-        response = product_dao.get_all_products(connection)
-        response = jsonify(response)
+        products = product_dao.get_all_products(connection)
+        print(f"Retrieved {len(products)} products from database")
+        response = jsonify(products)
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
     except Exception as e:
@@ -96,7 +132,6 @@ def get_products():
     finally:
         if connection:
             connection.close()
-
 
 @app.route('/insertProduct', methods=['POST'])
 @require_role('manager')
@@ -271,7 +306,7 @@ def manage_category():
     return app.send_static_file('manage_category.html')
 
 @app.route('/getCategories', methods=['GET'])
-@require_role('manager')
+@require_role('cashier','manager')
 def get_categories():
     connection = None
     try:

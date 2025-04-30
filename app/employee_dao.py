@@ -30,7 +30,6 @@ def insert_new_employee(connection, employee):
 
     try:
         result = execute_query(connection, query, data)
-        add_or_update_credential(new_id, login='newuser', password='default123')
         return result
     except Exception as e:
         print(f"Помилка додавання працівника: {e}")
