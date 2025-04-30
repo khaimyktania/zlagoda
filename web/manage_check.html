@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GSMS - Check Management</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,300,600,700">
+
+    <!-- Bootstrap + Custom Styles -->
+    <link rel="stylesheet" href="web/static/bootstrap.min.css">
+    <link rel="stylesheet" href="web/static/style.css">
+    <link rel="stylesheet" href="web/static/sidebar-menu.css">
+    <link rel="stylesheet" href="web/static/custom.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+
+    <style>
+        /* Always visible sidebar on desktop */
+        @media (min-width: 992px) {
+            #mySidebar {
+                display: block !important;
+                width: 150;
+                position: fixed;
+                height: 100%;
+                z-index: 1000;
+            }
+            #main {
+                margin-left: 250px;
+            }
+            #openNav {
+                display: none !important;
+            }
+        }
+
+        /* Content margin reset on small screens */
+        @media (max-width: 991px) {
+            #main {
+                margin-left: 0;
+            }
+        }
+
+        /* Check details styling */
+        .check-item {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            padding: 15px;
+            transition: all 0.3s;
+        }
+
+        .check-item:hover {
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .check-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .check-amount {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .check-vat {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        .check-products {
+            margin-top: 10px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+
+        .check-products.active {
+            max-height: 1000px;
+        }
+
+        .check-product-item {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #eee;
+            padding: 5px 0;
+        }
+
+        .filter-controls {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+
+        .filter-section {
+            margin-bottom: 10px;
+        }
+
+        .date-filter {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .statistics-section {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .new-check-product {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+        }
+
+        .product-total-row {
+            border-top: 2px solid #ddd;
+            margin-top: 15px;
+            padding-top: 10px;
+            font-weight: bold;
+        }
+
+        #check-products-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="tooltips">
+
+<!-- Sidebar -->
+<div class="w3-sidebar w3-bar-block w3-card w3-animate-left w3-light-grey" style="display:none;" id="mySidebar">
+    <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">✕ Close</button>
+    <a href="web/manage-employee.html" class="w3-bar-item w3-button"> Workers</a>
+    <a href="/manage_product" class="w3-bar-item w3-button"> Manage Products</a>
+    <a href="/manage_store_product" class="w3-bar-item w3-button"> Store Products</a>
+    <a href="/manage_category" class="w3-bar-item w3-button"> Categories</a>
+    <a href="/manage_customer" class="w3-bar-item w3-button"> Customers</a>
+    <a href="/manage_check" class="w3-bar-item w3-button"> Checks</a>
+    <a href="#" class="w3-bar-item w3-button"> Reports</a>
+</div>
+
+<!-- Main -->
+<div id="main">
+
+    <!-- Header -->
+    <div class="header content rows-content-header">
+        <button id="openNav" class="w3-button w3-teal w3-xlarge">&#9776;</button>
+        <div class="navbar navbar-default" role="navigation">
+            <div class="container">
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav visible-lg visible-md limit-chars">
+                        <ul class="breadcrumb">
+                            <a href="index.html">
+                                <i class="zmdi zmdi-view-dashboard zmdi-hc-fw" title="Orders"></i>
+                            </a>
+                            <a href="/manage_check">
+                                <i class="zmdi zmdi-receipt zmdi-hc-fw" title="Checks"></i>
+                            </a>
+                        </ul>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="right content-page">
+            <div class="body content rows scroll-y">
+                <div class="box-info full" id="taskFormContainer">
+                    <h2>Check Management</h2>
+
+                    <!-- Statistics Section -->
+                    <div class="statistics-section">
+                        <h4>Check Statistics</h4>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <p><strong>Total Checks:</strong> <span id="stats-total-checks">0</span></p>
+                                <p><strong>Total Sales:</strong> <span id="stats-total-sales">$0.00</span></p>
+                            </div>
+                            <div class="col-md-3">
+                                <p><strong>Total VAT:</strong> <span id="stats-total-vat">$0.00</span></p>
+                                <p><strong>Average Check:</strong> <span id="stats-average-check">$0.00</span></p>
+                            </div>
+                            <div class="col-md-3">
+                                <p><strong>Period:</strong> <span id="stats-period">All time</span></p>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-period="today">Today</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-period="week">Week</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-period="month">Month</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-period="year">Year</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-period="all">All</button>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <p><strong>Date Range:</strong> <span id="stats-date-range">N/A</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filter Controls -->
+                   <!-- Replace the existing filter-controls div with this updated version -->
+<div class="filter-controls">
+    <div class="row">
+        <div class="col-md-12">
+            <h4>Filter Checks</h4>
+            <!-- Date Filter Section -->
+            <div class="filter-section">
+                <label>Date Range:</label>
+                <div class="date-filter">
+                    <div class="form-group">
+                        <label for="start-date">From</label>
+                        <input type="date" class="form-control" id="start-date">
+                    </div>
+                    <div class="form-group">
+                        <label for="end-date">To</label>
+                        <input type="date" class="form-control" id="end-date">
+                    </div>
+                </div>
+            </div>
+
+            <!-- NEW: Cashier Filter Section -->
+            <div class="filter-section">
+                <label>Cashier:</label>
+                <div class="cashier-filter">
+                    <div class="form-group">
+                        <select class="form-control" id="cashier-select">
+                            <option value="">All Cashiers</option>
+                            <!-- Cashier options will be populated dynamically -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Actions -->
+            <div class="filter-actions mt-3">
+                <button class="btn btn-primary" id="apply-cashier-filter">Apply Filters</button>
+                <button class="btn btn-outline-secondary" id="reset-date-filter">Reset All</button>
+            </div>
+
+            <!-- Filter Status Display -->
+            <div class="alert alert-info mt-3" id="filter-status" style="display: none;"></div>
+
+            <!-- Check Number Search -->
+            <div class="search-section mt-3">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="check-number-search" placeholder="Enter check number">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="button" id="search-check">Search</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+                    <!-- Action Buttons -->
+                    <div class="row mb-4">
+                        <div class="col-sm-12">
+                            <button type="button" class="btn btn-primary pull-right" data-toggle="modal" data-target="#createCheckModal">
+                                Create New Check
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Checks List -->
+                    <div id="checks-list">
+                        <!-- Check items will be loaded here dynamically -->
+                        <div class="text-center" id="loading-indicator">
+                            <p>Loading checks...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Check Modal -->
+    <div class="modal fade-scale" id="createCheckModal" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Create New Check</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="checkForm">
+                        <!-- Check Header Information -->
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Check Number</label>
+                                    <input class="form-control" id="check-number" type="text" readonly>
+                                    <small class="text-muted">Generated automatically</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Employee</label>
+                                    <select class="form-control" id="employee-select" required>
+                                        <option value="">Select employee</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Customer Card (optional)</label>
+                                    <select class="form-control" id="customer-select">
+                                        <option value="">No customer card</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Product Selection -->
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <h5>Add Products</h5>
+                                <div class="form-row align-items-end">
+                                    <div class="col-md-5">
+                                        <div class="form-group">
+                                            <label>Product</label>
+                                            <select class="form-control" id="product-select">
+                                                <option value="">Select product</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Quantity</label>
+                                            <input type="number" class="form-control" id="product-quantity" min="1" value="1">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Price</label>
+                                            <input type="text" class="form-control" id="product-price" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="button" class="btn btn-success" id="add-product">Add</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Products List -->
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <h5>Products in Check</h5>
+                                <div id="check-products-container">
+                                    <!-- Products will be added here -->
+                                    <div class="text-center" id="no-products-message">
+                                        <p>No products added yet</p>
+                                    </div>
+                                </div>
+
+                                <!-- Totals -->
+                                <div class="row product-total-row">
+                                    <div class="col-md-8 text-right">
+                                        <strong>Total:</strong>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <span id="check-total">0.00</span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-8 text-right">
+                                        <strong>VAT (20%):</strong>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <span id="check-vat">0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="save-check">Save Check</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Check Details Modal -->
+    <div class="modal fade" id="checkDetailsModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Check Details</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Check Number:</strong> <span id="detail-check-number"></span></p>
+                            <p><strong>Date:</strong> <span id="detail-date"></span></p>
+                            <p><strong>Employee:</strong> <span id="detail-employee"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Customer:</strong> <span id="detail-customer"></span></p>
+                            <p><strong>Total Amount:</strong> <span id="detail-total"></span></p>
+                            <p><strong>VAT:</strong> <span id="detail-vat"></span></p>
+                        </div>
+                    </div>
+
+                    <h6 class="mt-4">Products</h6>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>UPC</th>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detail-products">
+                            <!-- Product details will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="delete-check-btn">Delete Check</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="web/js/package/jquery.min.js"></script>
+    <script src="web/js/common.js"></script>
+    <script src="web/js/manage-check.js"></script>
+    <script src="web/js/package/bootstrap.min.js"></script>
+
+    <script>
+        function w3_open() {
+            document.getElementById("mySidebar").style.display = "block";
+            document.getElementById("main").style.marginLeft = "250px";
+            document.getElementById("openNav").style.display = "none";
+        }
+
+        function w3_close() {
+            document.getElementById("mySidebar").style.display = "none";
+            document.getElementById("main").style.marginLeft = "0";
+            document.getElementById("openNav").style.display = "inline-block";
+        }
+    </script>
+</body>
+</html>
