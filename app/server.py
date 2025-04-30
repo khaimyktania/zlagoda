@@ -556,6 +556,50 @@ def get_all_products_sorted_by_quantity():
     finally:
         connection.close()
 
+@app.route('/reports')
+def reports():
+    return app.send_static_file('reports.html')
+
+
+@app.route('/api/reports/employees')
+def report_employees():
+    result = employee_dao.get_all_employees_ordered_by_surname(connection)
+    return jsonify(result)
+
+@app.route('/api/reports/customers')
+def report_customers():
+    result = customer_dao.get_all_customers_ordered_by_surname(connection)
+    return jsonify(result)
+
+@app.route('/api/reports/categories')
+def report_categories():
+    result = category_dao.get_categories(connection)
+    return jsonify(result)
+
+@app.route('/api/reports/products')
+def report_products():
+    result = product_dao.get_all_products(connection)
+    return jsonify(result)
+
+@app.route('/api/reports/store-products')
+def report_store_products():
+    result = store_product_dao.get_all_store_products(connection)
+    return jsonify(result)
+
+@app.route('/api/reports/receipts')
+def report_receipts():
+    query = "SELECT check_number, print_date, sum_total, vat FROM `check` ORDER BY print_date DESC"
+    conn = get_sql_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(query)
+    result = cursor.fetchall()
+    return jsonify(result)
+
+if __name__ == "__main__":
+    print("Starting Python Flask Server For Grocery Store Management System")
+    app.run(port=5000, debug=True)
+
+
 if __name__ == "__main__":
     print("Starting Python Flask Server For Grocery Store Management System")
     app.run(port=5000, debug=True)
