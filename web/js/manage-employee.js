@@ -41,11 +41,11 @@ $(document).on('click', '.edit-employee', function() {
 
         if(employee) {
             // Fill the form with employee data
-            $("#id_employee").val(employee.id_employee);
+              $("#id_employee").val(employee.id_employee);
             $("#empl_surname").val(employee.empl_surname);
             $("#empl_name").val(employee.empl_name);
             $("#empl_patronymic").val(employee.empl_patronymic);
-            $("#empl_role").val(employee.empl_role);
+            $("#empl_role").val(employee.empl_role); // This will now select the option in the dropdown
             $("#salary").val(employee.salary);
             $("#date_of_birth").val(employee.date_of_birth);
             $("#date_of_start").val(employee.date_of_start);

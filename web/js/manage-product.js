@@ -5,10 +5,16 @@ $(function () {
 });
 
 // Завантаження продуктів
-function loadProducts(category_number = null) {
-    let url = category_number
-        ? "/getProductsByCategory?category_number=" + category_number
-        : "/getAllProductsSorted";
+function loadProducts(category_number = null, sorted = false) {
+    let url;
+
+    if (category_number) {
+        url = "/getProductsByCategory?category_number=" + category_number;
+    } else if (sorted) {
+        url = "/getAllProductsSorted";
+    } else {
+        url = "/getProducts"; // Default endpoint for unsorted products
+    }
 
     $.get(url, function (response) {
         if (response) {
@@ -25,6 +31,16 @@ function loadProducts(category_number = null) {
         }
     });
 }
+
+// Add event handler for Sort by Name button
+$("#sortByNameBtn").on("click", function() {
+    loadProducts(null, true); // Load products sorted by name
+});
+
+// Add event handler for default display button
+$("#defaultDisplayBtn").on("click", function() {
+    loadProducts(null, false); // Load products in default order
+});
 
 // Open modal for new product
 $('#addProductBtn').on('click', function() {
@@ -128,7 +144,7 @@ $("#saveProduct").on("click", function () {
                 alert("Product saved successfully!");
             }
             productModal.modal('hide');
-            loadProducts(); // оновити таблицю
+            loadProducts(null, false); // оновити таблицю без сортування
         },
         error: function(xhr, status, error) {
             console.error("Error details:", xhr.responseText); // Debug logging
@@ -147,7 +163,7 @@ $(document).on("click", ".delete-product", function () {
     if (isDelete) {
         $.post(productDeleteApiUrl, data, function(response){
             alert("Product deleted.");
-            loadProducts(); // оновити таблицю
+            loadProducts(null, false); // оновити таблицю без сортування
         }).fail(function(xhr){
             console.error("Error details:", xhr.responseText);
             alert("Error while deleting product.");
@@ -173,7 +189,7 @@ function loadCategories() {
 
 $("#categoryFilter").on("change", function () {
     const selectedCategory = $(this).val();
-    loadProducts(selectedCategory);
+    loadProducts(selectedCategory, false); // фільтр за категорією без сортування
 });
 
 // Категорії для фільтру
@@ -193,7 +209,7 @@ function loadCategoryFilter() {
 
 $(function () {
     loadCategoryFilter();
-    loadProducts(); // початкове завантаження
+    loadProducts(null, false); // початкове завантаження без сортування
 });
 
 // Скидання форми при закритті модалки

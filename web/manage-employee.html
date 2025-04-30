@@ -52,6 +52,7 @@
             <a href="/manage_store_product" class="w3-bar-item w3-button"> Store Products</a>
     <a href="/manage_category" class="w3-bar-item w3-button"> Categories</a>
         <a href="/manage_customer" class="w3-bar-item w3-button"> Customers</a>
+        <a href="/manage_check" class="w3-bar-item w3-button"> Checks</a>
 
     <a href="#" class="w3-bar-item w3-button"> Reports</a>
 </div>
@@ -168,7 +169,10 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Role</label>
-                                    <input class="form-control" name="empl_role" id="empl_role" type="text" placeholder="Role">
+                                    <select class="form-control" name="empl_role" id="empl_role">
+                                        <option value="Cashier">Cashier</option>
+                                        <option value="Manager">Manager</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="col-md-6">

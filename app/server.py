@@ -1,12 +1,13 @@
 from flask import Flask, request, jsonify
 
 from app import category_dao
-from sql_connection import get_sql_connection
+from sql_connection import get_sql_connection, execute_query
 import json
 import employee_dao
 import product_dao
 import customer_dao
 import store_product_dao
+import check_dao
 
 app = Flask(__name__, static_folder='../web', template_folder='../web')
 
@@ -555,6 +556,237 @@ def get_all_products_sorted_by_quantity():
         return jsonify({'success': False, 'error': str(e)}), 500
     finally:
         connection.close()
+
+
+@app.route('/manage_check')
+def manage_check():
+    return app.send_static_file('manage_check.html')
+
+
+@app.route('/getRecentChecks', methods=['GET'])
+def get_recent_checks():
+    connection = None
+    try:
+        connection = get_sql_connection()
+        limit = request.args.get('limit', 50, type=int)
+        response = check_dao.get_recent_checks(connection, limit)
+        return jsonify(response)
+    except Exception as e:
+        print(f"Error in get_recent_checks: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
+
+
+@app.route('/getCheckByNumber', methods=['GET'])
+def get_check_by_number():
+    connection = None
+    try:
+        check_number = request.args.get('check_number')
+        if not check_number:
+            return jsonify({'success': False, 'message': 'Check number is required'}), 400
+
+        connection = get_sql_connection()
+        response = check_dao.get_check_by_number(connection, check_number)
+
+        if response:
+            return jsonify(response)
+        else:
+            return jsonify({'success': False, 'message': 'Check not found'}), 404
+    except Exception as e:
+        print(f"Error in get_check_by_number: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
+
+
+@app.route('/getCheckProducts', methods=['GET'])
+def get_check_products():
+    connection = None
+    try:
+        check_number = request.args.get('check_number')
+        if not check_number:
+            return jsonify({'success': False, 'message': 'Check number is required'}), 400
+
+        connection = get_sql_connection()
+        response = check_dao.get_check_products(connection, check_number)
+        return jsonify(response)
+    except Exception as e:
+        print(f"Error in get_check_products: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
+
+
+@app.route('/getCheckStatistics', methods=['GET'])
+def get_check_statistics():
+    connection = None
+    try:
+        period = request.args.get('period', 'all')
+        connection = get_sql_connection()
+        response = check_dao.get_check_statistics(connection, period)
+        return jsonify(response)
+    except Exception as e:
+        print(f"Error in get_check_statistics: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
+
+
+@app.route('/generateCheckNumber', methods=['GET'])
+def generate_check_number():
+    connection = None
+    try:
+        connection = get_sql_connection()
+        check_number = check_dao.generate_check_number(connection)
+        return jsonify({'success': True, 'check_number': check_number})
+    except Exception as e:
+        print(f"Error in generate_check_number: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
+
+
+@app.route('/insertCheck', methods=['POST'])
+def insert_check():
+    connection = None
+    try:
+        # Debug: Log request content type and data
+        print("Request Content-Type:", request.headers.get('Content-Type'))
+        print("Request data:", request.get_data(as_text=True))
+
+        # Get JSON directly from request
+        request_payload = request.json
+
+        # Debug: Log what we received
+        print("Received payload:", request_payload)
+        print("Employee ID:", request_payload.get('id_employee'), "Type:", type(request_payload.get('id_employee')))
+
+        connection = get_sql_connection()
+
+        # Validate required fields with better debugging
+        if not request_payload.get('check_number'):
+            print("Missing check_number")
+            return jsonify({'success': False, 'message': 'Check number is required'}), 400
+
+        if not request_payload.get('id_employee'):
+            print("Missing id_employee")
+            return jsonify({'success': False, 'message': 'Employee ID is required'}), 400
+
+        if not request_payload.get('sum_total'):
+            print("Missing sum_total")
+            return jsonify({'success': False, 'message': 'Total sum is required'}), 400
+
+        result = check_dao.insert_check(connection, request_payload)
+
+        if result['success']:
+            return jsonify({
+                'success': True,
+                'message': 'Check created successfully',
+                'check_number': result['check_number']
+            })
+        else:
+            print("DAO error:", result['message'])
+            return jsonify({
+                'success': False,
+                'message': result['message']
+            }), 500
+    except Exception as e:
+        print(f"Error in insert_check: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
+
+
+@app.route('/deleteCheck', methods=['POST'])
+def delete_check():
+    connection = None
+    try:
+        # Read JSON data from the request body instead of form data
+        data = request.get_json()
+
+        if not data or 'check_number' not in data:
+            return jsonify({'success': False, 'message': 'Check number is required'}), 400
+
+        check_number = data['check_number']
+
+        connection = get_sql_connection()
+        result = check_dao.delete_check(connection, check_number)
+
+        if result['success']:
+            return jsonify({
+                'success': True,
+                'message': 'Check deleted successfully',
+                'rows_deleted': result['rows_deleted']
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': result['message']
+            }), 500
+    except Exception as e:
+        print(f"Error in delete_check: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
+
+@app.route('/getChecksByDateRange', methods=['GET'])
+def get_checks_by_date_range():
+    connection = None
+    try:
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+
+        if not start_date or not end_date:
+            return jsonify({'success': False, 'message': 'Start and end dates are required'}), 400
+
+        connection = get_sql_connection()
+        response = check_dao.find_checks_by_date_range(connection, start_date, end_date)
+        return jsonify(response)
+    except Exception as e:
+        print(f"Error in get_checks_by_date_range: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
+
+
+@app.route('/getAllEmployees', methods=['GET'])
+def get_all_employees():
+    connection = None
+    try:
+        connection = get_sql_connection()
+        # This needs to be implemented based on your employee_dao module
+        response = employee_dao.get_all_employees(connection)
+        return jsonify(response)
+    except Exception as e:
+        print(f"Error in get_all_employees: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
+
+
+@app.route('/getAllCustomers', methods=['GET'])
+def get_all_customers():
+    connection = None
+    try:
+        connection = get_sql_connection()
+        response = customer_dao.get_all_customers(connection)
+        return jsonify(response)
+    except Exception as e:
+        print(f"Error in get_all_customers: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
 
 if __name__ == "__main__":
     print("Starting Python Flask Server For Grocery Store Management System")
