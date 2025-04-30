@@ -2,6 +2,8 @@ from sql_connection import execute_query, get_sql_connection
 
 
 def insert_new_employee(connection, employee):
+    validate_employee(employee)
+
     query = """
         INSERT INTO employee (
             id_employee, empl_surname, empl_name, empl_patronymic,
@@ -37,6 +39,7 @@ def update_employee(connection, employee):
     if not employee['id_employee']:
         raise ValueError("id_employee обов'язковий для оновлення")
 
+    validate_employee(employee)
     query = """
         UPDATE employee SET
             empl_surname = %s,
@@ -147,3 +150,41 @@ def get_all_employees(connection):
     except Exception as e:
         print(f"Помилка отримання всіх працівників: {e}")
         raise
+
+from datetime import datetime
+
+def validate_employee(employee):
+    errors = []
+
+    # Перевірка обов'язкових полів
+    required_fields = [
+        'id_employee', 'empl_surname', 'empl_name', 'empl_role',
+        'salary', 'date_of_birth', 'date_of_start', 'phone_number'
+    ]
+    for field in required_fields:
+        if not employee.get(field):
+            errors.append(f"Field '{field}' is required.")
+
+    # Перевірка віку (має бути ≥ 18 років)
+    try:
+        birth_date = datetime.strptime(employee['date_of_birth'], '%Y-%m-%d')
+        age = (datetime.today() - birth_date).days // 365
+        if age < 18:
+            errors.append("Employee must be at least 18 years old.")
+    except Exception:
+        errors.append("Invalid date_of_birth format (expected YYYY-MM-DD).")
+
+    # Зарплата має бути ≥ 0
+    try:
+        if float(employee['salary']) < 0:
+            errors.append("Salary must be non-negative.")
+    except Exception:
+        errors.append("Invalid salary format.")
+
+    # Телефон ≤ 13 символів
+    if len(employee.get('phone_number', '')) > 13:
+        errors.append("Phone number must be ≤ 13 characters.")
+
+
+    if errors:
+        raise ValueError("Validation errors: " + "; ".join(errors))

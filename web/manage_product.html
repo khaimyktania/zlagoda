@@ -52,8 +52,8 @@
         <a href="/manage_store_product" class="w3-bar-item w3-button"> Store Products</a>
         <a href="/manage_category" class="w3-bar-item w3-button"> Categories</a>
         <a href="/manage_customer" class="w3-bar-item w3-button"> Customers</a>
-        <a href="/manage_check" class="w3-bar-item w3-button"> Checks</a>
-    <a href="#" class="w3-bar-item w3-button"> Reports</a>
+    <a href="/reports" class="w3-bar-item w3-button">Reports</a>
+
 </div>
 
 <!-- Main -->
@@ -96,16 +96,13 @@
 </div>
 
                         <div class="row mb-4">
-                            <div class="col-sm-12 text-right">
-                                <div class="btn-group" role="group">
-                                    <button type="button" id="defaultDisplayBtn" class="btn btn-sm btn-default">
-                                        Default Display
-                                    </button>
-                                    <button type="button" id="sortByNameBtn" class="btn btn-sm btn-primary">
-                                        Sort by Name
-                                    </button>
-                                </div>
-                                <button type="button" class="btn btn-sm btn-primary" id="addProductBtn">
+                              <div class="col-sm-12 text-right">
+    <button type="button" id="sortByNameBtn" class="btn btn-sm btn-primary">
+      Get All Products Sorted by Name
+    </button>
+  </div>
+                            <div class="col-sm-12">
+                                <button type="button" class="btn btn-sm btn-primary pull-right" data-toggle="modal" data-target="#productModal">
                                     Add New Product
                                 </button>
                             </div>

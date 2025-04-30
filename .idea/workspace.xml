@@ -4,16 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f9f0029f-da69-424e-98ae-755ef497d758" name="Changes" comment="update connection to prevent destroying connection">
+    <list default="true" id="f9f0029f-da69-424e-98ae-755ef497d758" name="Changes" comment="zaebalo ale vono pracye">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/server.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/js/manage-employee.js" beforeDir="false" afterPath="$PROJECT_DIR$/web/js/manage-employee.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/js/manage-product.js" beforeDir="false" afterPath="$PROJECT_DIR$/web/js/manage-product.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/manage-employee.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/manage-employee.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/web/manage_category.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/manage_category.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/manage_customer.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/manage_customer.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/manage_product.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/manage_product.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/manage_store_product.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/manage_store_product.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -287,15 +281,7 @@
       <option name="project" value="LOCAL" />
       <updated>1745946097039</updated>
     </task>
-    <task id="LOCAL-00010" summary="update connection to prevent destroying connection">
-      <option name="closed" value="true" />
-      <created>1745965075272</created>
-      <option name="number" value="00010" />
-      <option name="presentableId" value="LOCAL-00010" />
-      <option name="project" value="LOCAL" />
-      <updated>1745965075272</updated>
-    </task>
-    <option name="localTasksCounter" value="11" />
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -319,7 +305,6 @@
     <MESSAGE value="category+product (dorobity) + customer + update product with producer" />
     <MESSAGE value="troshki store product" />
     <MESSAGE value="zaebalo ale vono pracye" />
-    <MESSAGE value="update connection to prevent destroying connection" />
-    <option name="LAST_COMMIT_MESSAGE" value="update connection to prevent destroying connection" />
+    <option name="LAST_COMMIT_MESSAGE" value="zaebalo ale vono pracye" />
   </component>
 </project>
