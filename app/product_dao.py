@@ -1,4 +1,3 @@
-
 from sql_connection import execute_query, get_sql_connection
 
 
@@ -13,6 +12,7 @@ def get_all_products(connection):
 
 
 def insert_new_product(connection, product):
+    validate_product_fields(product)
     # Перевірка чи це оновлення (id_product існує і не порожній)
     if product.get('id_product') and str(product['id_product']).strip():
         # Це оновлення - використовуємо відповідну функцію
@@ -40,6 +40,7 @@ def insert_new_product(connection, product):
 
 
 def update_product(connection, product):
+    validate_product_fields(product)
     # Переконуємося, що маємо дійсний ID продукту
     if not product.get('id_product') or not str(product['id_product']).strip():
         raise ValueError("id_product обов'язковий для оновлення")
@@ -97,3 +98,38 @@ def get_products_by_category(connection, category_number):
     except Exception as e:
         print(f"Помилка в get_products_by_category: {e}")
         raise
+
+
+def validate_product_fields(product):
+    errors = []
+
+    try:
+        name = product['product_name'].strip()
+        if not name:
+            errors.append("Product name is required.")
+    except Exception:
+        errors.append("Invalid product name format.")
+
+    try:
+        characteristics = product['characteristics'].strip()
+        if not characteristics:
+            errors.append("Product characteristics are required.")
+    except Exception:
+        errors.append("Invalid characteristics format.")
+
+    try:
+        producer = product['producer'].strip()
+        if not producer:
+            errors.append("Producer is required.")
+    except Exception:
+        errors.append("Invalid producer format.")
+
+    try:
+        category = product['category_number']
+        if category is None or str(category).strip() == "":
+            errors.append("Category number is required.")
+    except Exception:
+        errors.append("Invalid category number format.")
+
+    if errors:
+        raise ValueError("Validation error(s): " + "; ".join(errors))

@@ -391,11 +391,10 @@ def get_current_employee():
         return jsonify({'error': 'Employee not found'}), 404
 
     return jsonify({
-        'empl_name':    emp['empl_name'],
+        'empl_name': emp['empl_name'],
         'empl_surname': emp['empl_surname'],
-        'empl_role':    emp['empl_role']
+        'empl_role': emp['empl_role']
     })
-
 
 @app.route('/getCustomersSorted', methods=['GET'])
 @require_role('cashier','manager')

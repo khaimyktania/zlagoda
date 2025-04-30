@@ -3,6 +3,17 @@ from sql_connection import execute_query, get_sql_connection
 def validate_category(category):
     errors = []
 
+    try:
+        name = category['category_name']
+        if not name[0].isupper():
+            errors.append("Name must start with an uppercase letter.")
+        if not name.isalpha():
+            errors.append("Name must contain only letters.")
+        if name != name.capitalize():
+            errors.append("Name must have only the first letter capitalized.")
+    except Exception:
+        errors.append("Invalid Name format.")
+
     name = category.get('category_name', '').strip()
     if not name:
         errors.append("Category name is required.")
@@ -47,6 +58,7 @@ def insert_new_category(connection, category):
 
 def update_category(connection, category):
     # Переконуємося, що маємо дійсний номер категорії
+    validate_category(category)
     if not category.get('category_number') or not str(category['category_number']).strip():
         raise ValueError("category_number обов'язковий для оновлення")
 

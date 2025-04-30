@@ -1,4 +1,6 @@
 from sql_connection import execute_query, get_sql_connection
+from datetime import datetime
+import re
 
 
 def insert_new_employee(connection, employee):
@@ -37,10 +39,10 @@ def insert_new_employee(connection, employee):
 
 def update_employee(connection, employee):
     # Перевірка наявності id_employee
+    validate_employee(employee)
     if not employee['id_employee']:
         raise ValueError("id_employee обов'язковий для оновлення")
 
-    validate_employee(employee)
     query = """
         UPDATE employee SET
             empl_surname = %s,
@@ -153,9 +155,6 @@ def get_all_employees(connection):
         print(f"Помилка отримання всіх працівників: {e}")
         raise
 
-from datetime import datetime
-
-from datetime import datetime
 
 def validate_employee(employee):
     errors = []
@@ -168,6 +167,76 @@ def validate_employee(employee):
     for field in required_fields:
         if not employee.get(field):
             errors.append(f"Field '{field}' is required.")
+
+    # Перевірка імені — перша літера велика, інші малі, тільки літери
+    try:
+        name = employee['empl_name']
+        if not name[0].isupper():
+            errors.append("Name must start with an uppercase letter.")
+        if not name.isalpha():
+            errors.append("Name must contain only letters.")
+        if name != name.capitalize():
+            errors.append("Name must have only the first letter capitalized.")
+    except Exception:
+        errors.append("Invalid empl_name format.")
+
+    # Перевірка прізвища — перша літера велика, інші малі, тільки літери
+    try:
+        surname = employee['empl_surname']
+        if not surname[0].isupper():
+            errors.append("Surname must start with an uppercase letter.")
+        if not surname.isalpha():
+            errors.append("Surname must contain only letters.")
+        if surname != surname.capitalize():
+            errors.append("Surname must have only the first letter capitalized.")
+    except Exception:
+        errors.append("Invalid empl_surname format.")
+
+    # Перевірка по-батькові — перша літера велика, інші малі, тільки літери
+    try:
+        patronymic = employee.get('empl_patronymic', '')
+        if patronymic:  # Перевірка, чи не порожнє поле
+            if not patronymic[0].isupper():
+                errors.append("Patronymic must start with an uppercase letter.")
+            if not patronymic.isalpha():
+                errors.append("Patronymic must contain only letters.")
+            if patronymic != patronymic.capitalize():
+                errors.append("Patronymic must have only the first letter capitalized.")
+    except Exception:
+        errors.append("Invalid empl_patronymic format.")
+
+    # Перевірка міста — перша літера велика, інші малі, тільки літери
+    try:
+        city = employee['city']
+        if not city[0].isupper():
+            errors.append("City must start with an uppercase letter.")
+        if not city.isalpha():
+            errors.append("City must contain only letters.")
+        if city != city.capitalize():
+            errors.append("City must have only the first letter capitalized.")
+    except Exception:
+        errors.append("Invalid city format.")
+
+    # Перевірка zip_code — 5 цифр, тільки цифри
+    try:
+        zipcode = employee['zip_code']
+        if len(zipcode) != 5:
+            errors.append("Zip Code must be exactly 5 characters long.")
+        elif not zipcode.isdigit():
+            errors.append("Zip Code must contain only digits.")
+    except Exception:
+        errors.append("Invalid zip code format.")
+
+    # Перевірка street — перша літера велика, потім назва вулиці, кома і цифра (максимум дві цифри)
+    try:
+        street = employee['street']
+        # Перевірка, чи є вулиця у форматі "Назва вулиці, номер" (українські літери, кома, дві цифри)
+        pattern = r"^[A-Za-zА-ЯЁа-яё]+(?:\s?[A-Za-zА-ЯЁа-яё]*)?,\s\d{1,2}$"
+        if not re.match(pattern, street):
+            errors.append(
+                "Street must start with an uppercase letter, followed by lowercase letters, a comma, and a number (up to two digits).")
+    except Exception:
+        errors.append("Invalid street format.")
 
     # Перевірка дати народження — не молодше 18
     try:
