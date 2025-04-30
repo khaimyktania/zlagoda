@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>ZLAGODA — Звіти</title>
+
+  <!-- Fonts & Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,300,600,700">
+
+  <!-- Bootstrap + Custom Styles -->
+  <link rel="stylesheet" href="static/bootstrap.min.css">
+  <link rel="stylesheet" href="static/style.css">
+  <link rel="stylesheet" href="static/sidebar-menu.css">
+  <link rel="stylesheet" href="static/custom.css">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+
+  <style>
+    @media (min-width: 992px) {
+      #mySidebar {
+        display: block !important;
+        width: 200px;
+        position: fixed;
+        height: 100%;
+        z-index: 1000;
+      }
+      #main {
+        margin-left: 250px;
+      }
+      #openNav {
+        display: none !important;
+      }
+    }
+
+    @media (max-width: 991px) {
+      #main {
+        margin-left: 0;
+      }
+    }
+
+    table {
+      border-collapse: collapse;
+      margin-top: 20px;
+      width: 100%;
+    }
+
+    th, td {
+      border: 1px solid #999;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #eee;
+    }
+
+    @media print {
+      button, .no-print, .w3-sidebar {
+        display: none !important;
+      }
+      #main {
+        margin: 0 !important;
+      }
+    }
+  </style>
+</head>
+<body class="tooltips">
+
+<!-- Sidebar -->
+<div class="w3-sidebar w3-bar-block w3-card w3-animate-left w3-light-grey" style="display:none;" id="mySidebar">
+  <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">✕ Close</button>
+  <a href="web/manage-employee.html" class="w3-bar-item w3-button"> Workers</a>
+  <a href="/manage_product" class="w3-bar-item w3-button">Manage Products</a>
+  <a href="/manage_store_product" class="w3-bar-item w3-button">Store Products</a>
+  <a href="/manage_category" class="w3-bar-item w3-button">Categories</a>
+  <a href="/manage_customer" class="w3-bar-item w3-button">Customers</a>
+  <a href="/reports" class="w3-bar-item w3-button">Reports</a>
+</div>
+
+<!-- Main Content -->
+<div id="main">
+  <div class="container">
+    <div class="right content-page">
+      <div class="body content rows scroll-y">
+        <div class="box-info full">
+          <h2 class="no-print">Звіти</h2>
+
+          <!-- Buttons -->
+          <div class="no-print">
+            <button onclick="loadReport('employees')" class="btn btn-default">🧍 Працівники</button>
+            <button onclick="loadReport('customers')" class="btn btn-default">🪪 Клієнти</button>
+            <button onclick="loadReport('categories')" class="btn btn-default">🗂️ Категорії</button>
+            <button onclick="loadReport('products')" class="btn btn-default">📦 Товари</button>
+            <button onclick="loadReport('store-products')" class="btn btn-default">🛒 Товари у магазині</button>
+            <button onclick="loadReport('receipts')" class="btn btn-default">🧾 Чеки</button>
+            <button onclick="printReport()" class="btn btn-primary">🖨️ Друк звіту</button>
+          </div>
+
+          <!-- Report Title -->
+          <h3 id="report-title" class="mt-4"></h3>
+
+          <!-- Output -->
+          <div id="report-output" class="mt-3"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="js/package/jquery.min.js"></script>
+<script src="js/package/bootstrap.min.js"></script>
+
+<script>
+  function w3_open() {
+    document.getElementById("mySidebar").style.display = "block";
+    document.getElementById("main").style.marginLeft = "250px";
+    document.getElementById("openNav").style.display = "none";
+  }
+
+  function w3_close() {
+    document.getElementById("mySidebar").style.display = "none";
+    document.getElementById("main").style.marginLeft = "0";
+    document.getElementById("openNav").style.display = "inline-block";
+  }
+
+  let currentReportTitle = "";
+
+  async function loadReport(reportType) {
+    const url = `/api/reports/${reportType}`;
+    const container = document.getElementById('report-output');
+    const title = document.getElementById('report-title');
+    container.innerHTML = '<p>Завантаження...</p>';
+    currentReportTitle = reportType;
+
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error ${response.status}`);
+      }
+      const data = await response.json();
+      renderTable(data, container);
+      title.innerText = "Звіт: " + reportTypeToName(reportType);
+    } catch (error) {
+      container.innerHTML = `<p style="color: red;">Помилка: ${error.message}</p>`;
+      title.innerText = "";
+    }
+  }
+
+  function renderTable(data, container) {
+    if (!data || data.length === 0) {
+      container.innerHTML = "<p>Немає даних для цього звіту.</p>";
+      return;
+    }
+    let table = '<table class="table table-bordered"><tr>';
+    for (let key in data[0]) {
+      table += `<th>${key}</th>`;
+    }
+    table += '</tr>';
+    for (let row of data) {
+      table += '<tr>';
+      for (let key in row) {
+        table += `<td>${row[key]}</td>`;
+      }
+      table += '</tr>';
+    }
+    table += '</table>';
+    container.innerHTML = table;
+  }
+
+  function printReport() {
+    if (document.getElementById('report-output').innerHTML.trim() === "") {
+      alert("Спочатку оберіть звіт для друку.");
+      return;
+    }
+    window.print();
+  }
+
+  function reportTypeToName(type) {
+    switch(type) {
+      case 'employees': return 'Працівники';
+      case 'customers': return 'Клієнти';
+      case 'categories': return 'Категорії товарів';
+      case 'products': return 'Товари';
+      case 'store-products': return 'Товари у магазині';
+      case 'receipts': return 'Чеки';
+      default: return type;
+    }
+  }
+</script>
+
+</body>
+</html>
