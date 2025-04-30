@@ -5,14 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f9f0029f-da69-424e-98ae-755ef497d758" name="Changes" comment="requests with employee">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/category_dao.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/category_dao.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/customer_dao.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/customer_dao.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/employee_dao.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/employee_dao.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/product_dao.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/product_dao.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/server.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/employee_credentials.json" beforeDir="false" afterPath="$PROJECT_DIR$/employee_credentials.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/manage-employee.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/manage-employee.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,7 +24,6 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="RESET_MODE" value="KEEP" />
-    <option name="UPDATE_TYPE" value="REBASE" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
   &quot;lastFilter&quot;: {
