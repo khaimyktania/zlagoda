@@ -235,53 +235,83 @@ def get_check_statistics(connection, period='all'):
         raise
 
 
-def find_checks_by_date_range(connection, start_date, end_date):
+def find_checks_by_date_range(connection, start_date, end_date, id_employee=None):
     """
-    Find checks within a date range
+    Find checks within a date range with optional employee filter
     """
-    query = """
-    SELECT c.check_number, c.id_employee, c.card_number, c.print_date, 
-           c.sum_total, c.vat, 
-           CONCAT(e.empl_surname, ' ', e.empl_name) as cashier_name
-    FROM `check` c
-    LEFT JOIN employee e ON c.id_employee = e.id_employee
-    WHERE c.print_date BETWEEN %s AND %s
-    ORDER BY c.print_date DESC;
-    """
+    query_parts = [
+        "SELECT c.check_number, c.id_employee, c.card_number, c.print_date,",
+        "c.sum_total, c.vat,",
+        "CONCAT(e.empl_surname, ' ', e.empl_name) as cashier_name,",
+        "COUNT(s.UPC) as product_count",  # Додаємо підрахунок продуктів
+        "FROM `check` c",
+        "LEFT JOIN employee e ON c.id_employee = e.id_employee",
+        "LEFT JOIN sale s ON c.check_number = s.check_number",
+        "WHERE c.print_date BETWEEN %s AND %s"
+    ]
+
+    params = [start_date, end_date]
+
+    # Add employee filter if specified
+    if id_employee:
+        query_parts.append("AND c.id_employee = %s")
+        params.append(id_employee)
+
+    # Add GROUP BY as we're using COUNT
+    query_parts.append("GROUP BY c.check_number")
+    query_parts.append("ORDER BY c.print_date DESC")
+
+    query = " ".join(query_parts)
+
     try:
-        result = execute_query(connection, query, (start_date, end_date))
+        result = execute_query(connection, query, tuple(params))
         return result
     except Exception as e:
         print(f"Error in find_checks_by_date_range: {e}")
         raise
 
-
 def generate_check_number(connection):
     """
     Generate a unique check number
-    Format: 'CH' + YYYYMMDD + 4 digit sequence number
+    Format: 'CH' + 3 digit sequence number (CH001, CH002, etc.)
     """
-    today = datetime.now().strftime("%Y%m%d")
-    prefix = f"CH{today}"
-
-    # Get the highest sequence number for today
+    # Get the highest sequence number
     query = """
     SELECT MAX(check_number) FROM `check`
-    WHERE check_number LIKE %s;
+    WHERE check_number LIKE 'CH%';
     """
     try:
-        result = execute_query(connection, query, (f"{prefix}%",))
+        result = execute_query(connection, query)
 
         if result[0]['MAX(check_number)']:
             # Extract sequence number and increment
             last_number = result[0]['MAX(check_number)']
-            sequence = int(last_number[-4:]) + 1
+            # Remove 'CH' prefix and convert to integer, then increment
+            sequence = int(last_number[2:]) + 1
         else:
-            # First check of the day
+            # First check in the system
             sequence = 1
 
-        # Format with leading zeros
-        return f"{prefix}{sequence:04d}"
+        # Format with leading zeros (ensuring 3 digits minimum)
+        return f"CH{sequence:03d}"
     except Exception as e:
         print(f"Error in generate_check_number: {e}")
+        raise
+
+
+def get_cashiers(connection):
+    """
+    Get all employees with position 'Cashier'
+    """
+    query = """
+    SELECT id_employee, empl_surname, empl_name
+    FROM employee
+    WHERE empl_role = 'Cashier'
+    ORDER BY empl_surname, empl_name;
+    """
+    try:
+        result = execute_query(connection, query)
+        return result
+    except Exception as e:
+        print(f"Error in get_cashiers: {e}")
         raise

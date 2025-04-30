@@ -20,6 +20,16 @@ const getAllProductsSortedByQuantityApiUrl = "/getAllProductsSortedByQuantity";
 
 $(function () {
     // Initial load of store products
+
+       loadStoreProducts();
+
+    // Завантаження випадаючого списку продуктів для модального вікна
+    loadProductDropdown();
+
+    // Ініціалізація обробників подій
+
+    // Ініціалізація навігації по вкладкам
+    initTabNavigation();
     loadStoreProducts();
 
     // Load product dropdown for modal
@@ -28,7 +38,54 @@ $(function () {
     // Initialize event handlers
     initEventHandlers();
 });
+// Ініціалізація навігації по вкладкам з правильним завантаженням даних
+function initTabNavigation() {
+    // Очищення існуючих обробників кліків по вкладкам, щоб уникнути дублювання
+    $('.tab-link').off('click');
 
+    // Додавання нових обробників кліків
+    $('.tab-link').on('click', function(e) {
+        // Отримання цільової вкладки
+        var targetTab = this.getAttribute('href') || this.getAttribute('data-target');
+
+        // Очищення контейнера перед завантаженням нових даних
+        clearPageData();
+
+        // Завантаження відповідних даних в залежності від обраної вкладки
+        if (targetTab.includes('store-products') || targetTab === '#store-products') {
+            loadStoreProducts();
+            updateFilterStatus("Фільтри не застосовано");
+        } else if (targetTab.includes('categories') || targetTab === '#categories') {
+            if (typeof loadCategories === 'function') {
+                loadCategories();
+            }
+        } else if (targetTab.includes('products') || targetTab === '#products') {
+            if (typeof loadProducts === 'function') {
+                loadProducts();
+            }
+        } else if (targetTab.includes('customers') || targetTab === '#customers') {
+            if (typeof loadCustomers === 'function') {
+                loadCustomers();
+            }
+        }
+        // Додайте інші вкладки за необхідності
+    });
+}
+
+// Покращена функція clearPageData для очищення конкретних контейнерів
+function clearPageData() {
+    // Очищення основного контейнера даних
+    $('#dataContainer').empty();
+
+    // Очищення тіла таблиці продуктів
+    $("table tbody").empty();
+
+    // Скидання статусу фільтра
+    $('#filterStatus').text("");
+
+    // Скидання поля пошуку
+    $('#upcSearch').val("");
+}
 // Load all store products
 function loadStoreProducts() {
     $.get(storeProductsApiUrl, function (response) {

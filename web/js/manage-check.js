@@ -13,6 +13,7 @@ const API_ENDPOINTS = {
     GET_CHECK_PRODUCTS: "/getCheckProducts",
     GET_CHECK_STATISTICS: "/getCheckStatistics",
     GET_EMPLOYEES: "/getAllEmployees",
+     GET_CASHIERS: "/getCashiers",
     GET_CUSTOMERS: "/getAllCustomers",
     GET_STORE_PRODUCTS: "/getStoreProducts",
     GENERATE_CHECK_NUMBER: "/generateCheckNumber",
@@ -22,11 +23,25 @@ const API_ENDPOINTS = {
 
 };
 
+// Додайте цей код у ваш JavaScript-файл
+function clearPageData() {
+  // Очистити всі відображувані дані
+  document.getElementById('dataContainer').innerHTML = '';
+  // Скинути всі форми
+  document.querySelectorAll('form').forEach(form => form.reset());
+}
+
+// Викликайте цю функцію при переході між вкладками
+document.querySelectorAll('.tab-link').forEach(link => {
+  link.addEventListener('click', clearPageData);
+});
+
 // Initialize on document load
 $(document).ready(function() {
     // Load initial data
     loadCheckStatistics('all');
     loadRecentChecks();
+        loadCashierFilter();
 
     // Initialize event handlers
     initEventHandlers();
@@ -73,6 +88,18 @@ function initEventHandlers() {
     // Add product to check
     $('#add-product').on('click', function() {
         addProductToCheck();
+    });
+
+
+    // Add these new event handlers
+    $('#apply-cashier-filter').on('click', function() {
+        applyFilters();
+    });
+
+    // Add this if not already present
+    $('#cashier-select').on('change', function() {
+        // Optional: apply filter on change
+        // applyFilters();
     });
 
     // Save check button
@@ -153,7 +180,7 @@ function setDefaultDates() {
 function loadEmployees() {
     console.log("Loading employees data...");
     return $.ajax({
-        url: API_ENDPOINTS.GET_EMPLOYEES,
+        url: API_ENDPOINTS.GET_CASHIERS,
         type: 'GET',
         success: function(response) {
             console.log("Employees data loaded successfully:", response);
@@ -238,6 +265,28 @@ function loadStoreProducts() {
     });
 }
 
+function loadCashierFilter() {
+    console.log("Loading cashiers for filter...");
+    return $.ajax({
+        url: API_ENDPOINTS.GET_CASHIERS, // Reusing existing endpoint
+        type: 'GET',
+        success: function(response) {
+            console.log("Cashiers loaded successfully:", response);
+
+            // Populate cashier filter dropdown
+            let options = '<option value="">All Cashiers</option>';
+            response.forEach(function(employee) {
+                options += `<option value="${employee.id_employee}">${employee.empl_surname} ${employee.empl_name}</option>`;
+            });
+            $('#cashier-select').html(options);
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading cashiers for filter:', xhr.responseText, status, error);
+            $('#cashier-select').html('<option value="">Error loading cashiers</option>');
+        }
+    });
+}
+
 // Improved prepareCreateCheckModal function with better error handling
 function prepareCreateCheckModal() {
     console.log("Preparing create check modal...");
@@ -271,33 +320,34 @@ function generateCheckNumber() {
         success: function(response) {
             console.log("Check number generated successfully:", response);
 
-            // Ensure check number is no more than 10 characters
-            let checkNumber = response.check_number;
-            if (checkNumber && checkNumber.length > 10) {
-                console.warn("Check number exceeded 10 characters, truncating:", checkNumber);
-                checkNumber = checkNumber.substring(0, 10);
-            }
-
-            $('#check-number').val(checkNumber);
+            // Set the check number - no need to truncate as our new format is short
+            $('#check-number').val(response.check_number);
         },
         error: function(xhr, status, error) {
             console.error('Error generating check number:', xhr.responseText, status, error);
 
-            // Generate a fallback check number (ensure it's max 10 chars)
-            const fallbackNumber = ('ERR' + new Date().getTime().toString().substring(0, 7)).substring(0, 10);
+            // Generate a fallback check number in the format CH + random number
+            const randomNum = Math.floor(Math.random() * 900) + 100; // Random 3-digit number
+            const fallbackNumber = 'CH' + randomNum;
             $('#check-number').val(fallbackNumber);
+
+            alert('Error generating check number. A temporary number has been assigned.');
         }
     });
 }
 
-// Add a validation function for check number input
+// Add a validation function for check number input - updated for new format
 function validateCheckNumberLength(inputField) {
-    const maxLength = 10;
-    if (inputField.value.length > maxLength) {
-        inputField.value = inputField.value.substring(0, maxLength);
-        console.warn("Check number truncated to 10 characters");
+    // Regular expression to match our check number format (CH followed by 3+ digits)
+    const checkNumberPattern = /^CH\d{3,}$/;
+
+    if (inputField.value && !checkNumberPattern.test(inputField.value)) {
+        alert('Check number must be in format CH followed by at least 3 digits (e.g., CH001)');
+        // Reset to empty or previous valid value
+        inputField.value = '';
     }
 }
+
 
 // This function should be called in document.ready
 function addCheckNumberValidation() {
@@ -581,24 +631,32 @@ function updateStatisticsDisplay(stats, period) {
 }
 
 // Load recent checks
-function loadRecentChecks() {
-    $('#loading-indicator').show();
-    $('#checks-list').find('.check-item').remove();
+function renderChecksListItems(checks) {
+    if (checks && checks.length > 0) {
+        // Sort checks by date (newest first)
+        checks.sort((a, b) => new Date(b.print_date) - new Date(a.print_date));
 
-    $.ajax({
-        url: API_ENDPOINTS.GET_CHECKS,
-        type: 'GET',
-        success: function(response) {
-            $('#loading-indicator').hide();
-            renderChecksListItems(response);
-        },
-        error: function(xhr) {
-            $('#loading-indicator').hide();
-            console.error('Error loading checks:', xhr.responseText);
-            $('#checks-list').html('<div class="alert alert-danger">Error loading checks. Please try again later.</div>');
-        }
-    });
+        let checksList = '';
+
+        checks.forEach(function(check) {
+            // Format date
+            const date = new Date(check.print_date);
+            const formattedDate = date.toLocaleString();
+
+            // Rest of your existing code for rendering the checks...
+            checksList += `
+                <div class="check-item" data-check-number="${check.check_number}">
+                    <!-- Existing HTML structure -->
+                </div>
+            `;
+        });
+
+        $('#checks-list').html(checksList);
+    } else {
+        $('#checks-list').html('<div class="alert alert-info">No checks found.</div>');
+    }
 }
+
 
 // Render checks list items
 function renderChecksListItems(checks) {
@@ -695,39 +753,73 @@ function renderCheckProductsDetails(products, container) {
 }
 
 // Apply date filter - FIXED: improved date formatting and parameter handling
-function applyDateFilter() {
+// Apply date filter with improved logging and error handling
+function applyFilters() {
     const startDate = $('#start-date').val();
     const endDate = $('#end-date').val();
+    const cashierId = $('#cashier-select').val();
 
     if (!startDate || !endDate) {
         alert('Please select both start and end dates');
         return;
     }
 
-    // Format dates correctly for backend
+    // Format dates correctly for backend and ensure proper time inclusion
+    // Add time components to ensure we get the full day range
     const startDateFormatted = startDate + ' 00:00:00';
     const endDateFormatted = endDate + ' 23:59:59';
 
     $('#loading-indicator').show();
     $('#checks-list').find('.check-item').remove();
 
+    // Prepare filter parameters
+    const filterParams = {
+        start_date: startDateFormatted,
+        end_date: endDateFormatted
+    };
+
+    // Add cashier filter only if a specific cashier is selected
+    if (cashierId && cashierId !== '') {
+        filterParams.id_employee = cashierId;
+        console.log("Filtering by cashier ID:", cashierId);
+    }
+
+    // Log the complete filter parameters for debugging
+    console.log("Filter parameters:", filterParams);
+
     $.ajax({
         url: API_ENDPOINTS.GET_CHECKS_BY_DATE_RANGE,
         type: 'GET',
-        data: {
-            start_date: startDateFormatted,
-            end_date: endDateFormatted
-        },
+        data: filterParams,
         success: function(response) {
             $('#loading-indicator').hide();
-            renderChecksListItems(response);
+            console.log("Filter response:", response);
+
+            // Check if we have checks in the response
+            if (response && Array.isArray(response)) {
+                if (response.length === 0) {
+                    $('#checks-list').html('<div class="alert alert-info">No checks found for the selected criteria.</div>');
+                } else {
+                    renderChecksListItems(response);
+                }
+            } else {
+                $('#checks-list').html('<div class="alert alert-warning">Invalid response format. Please try again.</div>');
+                console.error("Invalid response format:", response);
+            }
 
             // Update UI to show filter is active
-            $('#date-filter-status').text(`Showing checks from ${startDate} to ${endDate}`).show();
+            let filterStatusText = `Showing checks from ${startDate} to ${endDate}`;
+            if (cashierId && cashierId !== '') {
+                const cashierName = $('#cashier-select option:selected').text();
+                filterStatusText += ` for cashier: ${cashierName}`;
+            } else {
+                filterStatusText += ' for all cashiers';
+            }
+            $('#filter-status').text(filterStatusText).show();
         },
         error: function(xhr, status, error) {
             $('#loading-indicator').hide();
-            console.error('Error applying date filter:', xhr.responseText, status, error);
+            console.error('Error applying filters:', xhr.responseText, status, error);
 
             try {
                 const errorResponse = JSON.parse(xhr.responseText);
@@ -738,14 +830,13 @@ function applyDateFilter() {
         }
     });
 }
-
 // Reset date filter
 function resetDateFilter() {
     setDefaultDates();
-    $('#date-filter-status').hide();
+    $('#cashier-select').val(''); // Reset cashier selection
+    $('#filter-status').hide();
     loadRecentChecks();
 }
-
 // Search check by number
 function searchCheckByNumber() {
     const checkNumber = $('#check-number-search').val().trim();
@@ -795,6 +886,26 @@ function viewCheckDetails(checkNumber) {
         }
     });
 }
+// Load recent checks
+function loadRecentChecks() {
+    $('#loading-indicator').show();
+    $('#checks-list').find('.check-item').remove();
+
+    $.ajax({
+        url: API_ENDPOINTS.GET_CHECKS,
+        type: 'GET',
+        success: function(response) {
+            $('#loading-indicator').hide();
+            renderChecksListItems(response);
+        },
+        error: function(xhr) {
+            $('#loading-indicator').hide();
+            console.error('Error loading checks:', xhr.responseText);
+            $('#checks-list').html('<div class="alert alert-danger">Error loading checks. Please try again later.</div>');
+        }
+    });
+}
+
 
 // Display check details
 function displayCheckDetails(checkData, productsData) {

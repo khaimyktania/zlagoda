@@ -4,6 +4,18 @@ $(function () {
     loadCustomers();
 });
 
+// Додайте цей код у ваш JavaScript-файл
+function clearPageData() {
+  // Очистити всі відображувані дані
+  document.getElementById('dataContainer').innerHTML = '';
+  // Скинути всі форми
+  document.querySelectorAll('form').forEach(form => form.reset());
+}
+
+// Викликайте цю функцію при переході між вкладками
+document.querySelectorAll('.tab-link').forEach(link => {
+  link.addEventListener('click', clearPageData);
+});
 // Load customers
 function loadCustomers() {
     $.get('/getCustomers', function (response) {
