@@ -1,5 +1,14 @@
 from sql_connection import execute_query, get_sql_connection
 
+def validate_category(category):
+    errors = []
+
+    name = category.get('category_name', '').strip()
+    if not name:
+        errors.append("Category name is required.")
+    if errors:
+        raise ValueError("Validation error(s): " + "; ".join(errors))
+
 
 def get_categories(connection):
     query = "SELECT * FROM category;"
@@ -18,6 +27,7 @@ def get_categories(connection):
 
 
 def insert_new_category(connection, category):
+    validate_category(category)
     # Перевірка чи це оновлення (category_number існує і не None)
     if category.get('category_number') and str(category['category_number']).strip():
         # Це оновлення

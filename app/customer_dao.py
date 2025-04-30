@@ -1,7 +1,39 @@
 from sql_connection import execute_query, get_sql_connection
 
+def validate_customer(customer):
+    errors = []
+
+    # Обов'язкові поля
+    required_fields = ['card_number', 'cust_surname', 'cust_name', 'phone_number', 'percent']
+    for field in required_fields:
+        if not customer.get(field):
+            errors.append(f"Field '{field}' is required.")
+
+    # Відсоток має бути в межах 0–100
+    try:
+        percent = float(customer['percent'])
+        if percent < 0 or percent > 100:
+            errors.append("Percent must be between 0 and 100.")
+    except Exception:
+        errors.append("Invalid format for percent.")
+
+    # Телефон не довший за 13 символів
+    if len(customer.get('phone_number', '')) > 13:
+        errors.append("Phone number must be ≤ 13 characters.")
+
+    # Якщо хоч одне поле адреси вказане — усі мають бути
+    has_any_address_field = any(customer.get(field) for field in ['city', 'street', 'zip_code'])
+    if has_any_address_field:
+        for field in ['city', 'street', 'zip_code']:
+            if not customer.get(field):
+                errors.append(f"If address is provided, '{field}' must not be empty.")
+
+    if errors:
+        raise ValueError("Validation error(s): " + "; ".join(errors))
+
 
 def insert_new_customer(connection, customer):
+    validate_customer(customer)
     query = """
         INSERT INTO customer_card (
             card_number, cust_surname, cust_name, cust_patronymic,
@@ -29,9 +61,10 @@ def insert_new_customer(connection, customer):
 
 
 def update_customer(connection, customer):
-    # Check if card_number exists
     if not customer['card_number']:
         raise ValueError("card_number is required for update")
+
+    validate_customer(customer)
 
     query = """
         UPDATE customer_card SET

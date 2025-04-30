@@ -153,19 +153,21 @@ def get_all_employees(connection):
 
 from datetime import datetime
 
+from datetime import datetime
+
 def validate_employee(employee):
     errors = []
-
-    # Перевірка обов'язкових полів
+    # Обов’язкові поля
     required_fields = [
         'id_employee', 'empl_surname', 'empl_name', 'empl_role',
-        'salary', 'date_of_birth', 'date_of_start', 'phone_number'
+        'salary', 'date_of_birth', 'date_of_start', 'phone_number',
+        'city', 'street', 'zip_code'
     ]
     for field in required_fields:
         if not employee.get(field):
             errors.append(f"Field '{field}' is required.")
 
-    # Перевірка віку (має бути ≥ 18 років)
+    # Перевірка дати народження — не молодше 18
     try:
         birth_date = datetime.strptime(employee['date_of_birth'], '%Y-%m-%d')
         age = (datetime.today() - birth_date).days // 365
@@ -174,17 +176,16 @@ def validate_employee(employee):
     except Exception:
         errors.append("Invalid date_of_birth format (expected YYYY-MM-DD).")
 
-    # Зарплата має бути ≥ 0
+    # Перевірка зарплати — не від’ємна
     try:
         if float(employee['salary']) < 0:
             errors.append("Salary must be non-negative.")
     except Exception:
         errors.append("Invalid salary format.")
 
-    # Телефон ≤ 13 символів
+    # Телефон — не більше 13 символів
     if len(employee.get('phone_number', '')) > 13:
         errors.append("Phone number must be ≤ 13 characters.")
-
 
     if errors:
         raise ValueError("Validation errors: " + "; ".join(errors))
