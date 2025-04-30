@@ -406,7 +406,7 @@ def manage_customer():
 
 
 @app.route('/getCustomers', methods=['GET'])
-@require_role('manager')
+@require_role('cashier','manager')
 def get_customers():
     response = customer_dao.get_all_customers(connection)
     response = jsonify(response)
@@ -533,7 +533,7 @@ def delete_customer():
     # Add these routes to your server.py file
 
 @app.route('/getStoreProducts', methods=['GET'])
-@require_role('manager')
+@require_role('cashier','manager')
 def get_store_products():
     connection = get_sql_connection()
     try:
