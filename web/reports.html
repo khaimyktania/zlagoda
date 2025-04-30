@@ -63,19 +63,57 @@
       }
     }
   </style>
+
 </head>
 <body class="tooltips">
 
 <!-- Sidebar -->
-<div class="w3-sidebar w3-bar-block w3-card w3-animate-left w3-light-grey" style="display:none;" id="mySidebar">
+<!-- Sidebar -->
+<!-- Sidebar -->
+<!-- Sidebar -->
+<div id="mySidebar"
+     class="w3-sidebar w3-bar-block w3-card w3-animate-left w3-light-grey"
+     style="display: none;">
   <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">✕ Close</button>
-  <a href="web/manage-employee.html" class="w3-bar-item w3-button"> Workers</a>
-  <a href="/manage_product" class="w3-bar-item w3-button">Manage Products</a>
-  <a href="/manage_store_product" class="w3-bar-item w3-button">Store Products</a>
-  <a href="/manage_category" class="w3-bar-item w3-button">Categories</a>
-  <a href="/manage_customer" class="w3-bar-item w3-button">Customers</a>
-  <a href="/reports" class="w3-bar-item w3-button">Reports</a>
+
+  <!-- Workers (тільки менеджер) -->
+  <a href="/manage-employee" class="w3-bar-item w3-button role-manager">Workers</a>
+
+  <!-- Manage Products (і менеджер, і касир) -->
+  <a href="/manage_product"
+     class="w3-bar-item w3-button role-manager role-cashier">
+    Manage Products
+  </a>
+
+  <!-- Store Products (і менеджер, і касир) -->
+  <a href="/manage_store_product"
+     class="w3-bar-item w3-button role-manager role-cashier">
+    Store Products
+  </a>
+
+  <!-- Categories (тільки менеджер) -->
+  <a href="/manage_category" class="w3-bar-item w3-button role-manager">
+    Categories
+  </a>
+
+  <!-- Customers (і менеджер, і касир) -->
+  <a href="/manage_customer"
+     class="w3-bar-item w3-button role-manager role-cashier">
+    Customers
+  </a>
+
+  <!-- Checks (і менеджер, і касир) -->
+  <a href="/manage_check"
+     class="w3-bar-item w3-button role-manager role-cashier">
+    Checks
+  </a>
+
+  <!-- Reports (тільки менеджер) -->
+  <a href="/reports" class="w3-bar-item w3-button role-manager">Reports</a>
 </div>
+
+
+
 
 <!-- Main Content -->
 <div id="main">
@@ -112,94 +150,48 @@
 <script src="js/package/bootstrap.min.js"></script>
 
 <script>
+  fetch('/api/employee_info', {
+  method: 'GET',
+  credentials: 'include'
+})
+.then(res => {
+  if (!res.ok) {
+    if (res.status === 401) window.location.href = '/login.html';
+    throw new Error('Not authorized');
+  }
+  return res.json();
+})
+.then(data => {
+  const role = data.empl_role.toLowerCase();
+
+  // Сховати всі вкладки спочатку
+  document.querySelectorAll('.role-manager, .role-cashier')
+    .forEach(el => el.style.display = 'none');
+
+  // Показати лише ті, що відповідають ролі
+  document.querySelectorAll(`.role-${role}`)
+    .forEach(el => el.style.display = 'block');
+
+  // Показати сам сайдбар
+  document.getElementById('mySidebar').style.display = 'block';
+})
+.catch(err => {
+  console.error('Role fetch error:', err);
+});
+
+
   function w3_open() {
-    document.getElementById("mySidebar").style.display = "block";
-    document.getElementById("main").style.marginLeft = "250px";
-    document.getElementById("openNav").style.display = "none";
+    document.getElementById('mySidebar').style.display = 'block';
+    document.getElementById('main').style.marginLeft = '250px';
+    document.getElementById('openNav').style.display = 'none';
   }
-
   function w3_close() {
-    document.getElementById("mySidebar").style.display = "none";
-    document.getElementById("main").style.marginLeft = "0";
-    document.getElementById("openNav").style.display = "inline-block";
-  }
-
-  let currentReportTitle = "";
-
-  async function loadReport(reportType) {
-    const url = `/api/reports/${reportType}`;
-    const container = document.getElementById('report-output');
-    const title = document.getElementById('report-title');
-    container.innerHTML = '<p>Завантаження...</p>';
-    currentReportTitle = reportType;
-
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP error ${response.status}`);
-      }
-      const data = await response.json();
-      renderTable(data, container);
-      title.innerText = "Звіт: " + reportTypeToName(reportType);
-    } catch (error) {
-      container.innerHTML = `<p style="color: red;">Помилка: ${error.message}</p>`;
-      title.innerText = "";
-    }
-  }
-
-  function renderTable(data, container) {
-  if (!data || data.length === 0) {
-    container.innerHTML = "<p>Немає даних для цього звіту.</p>";
-    return;
-  }
-
-  // Розділення ключів: id-поля спочатку
-  const allKeys = Object.keys(data[0]);
-  const idKeys = allKeys.filter(k => k.toLowerCase().includes("id") || k.toLowerCase().includes("number"));
-  const otherKeys = allKeys.filter(k => !idKeys.includes(k));
-  const orderedKeys = [...idKeys, ...otherKeys];
-
-  // Створення заголовків
-  let table = '<table class="table table-bordered"><tr>';
-  for (let key of orderedKeys) {
-    table += `<th>${key}</th>`;
-  }
-  table += '</tr>';
-
-  // Заповнення рядків
-  for (let row of data) {
-    table += '<tr>';
-    for (let key of orderedKeys) {
-      table += `<td>${row[key]}</td>`;
-    }
-    table += '</tr>';
-  }
-
-  table += '</table>';
-  container.innerHTML = table;
-}
-
-
-  function printReport() {
-    if (document.getElementById('report-output').innerHTML.trim() === "") {
-      alert("Спочатку оберіть звіт для друку.");
-      return;
-    }
-    window.print();
-  }
-
-  function reportTypeToName(type) {
-    switch(type) {
-      case 'employees': return 'Працівники';
-      case 'customers': return 'Клієнти';
-      case 'categories': return 'Категорії товарів';
-      case 'products': return 'Товари';
-      case 'store-products': return 'Товари у магазині';
-      case 'receipts': return 'Чеки';
-      default: return type;
-    }
+    document.getElementById('mySidebar').style.display = 'none';
+    document.getElementById('main').style.marginLeft = '0';
+    document.getElementById('openNav').style.display = 'inline-block';
   }
 </script>
+
 
 </body>
 </html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Кабінет Касира</title>
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,300,600,700">
+
+    <!-- Bootstrap + Custom Styles -->
+    <link rel="stylesheet" href="static/bootstrap.min.css">
+    <link rel="stylesheet" href="static/style.css">
+    <link rel="stylesheet" href="static/sidebar-menu.css">
+    <link rel="stylesheet" href="static/custom.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+
+    <style>
+        @media (min-width: 992px) {
+            #mySidebar {
+                display: block !important;
+                width: 200px;
+                position: fixed;
+                height: 100%;
+                z-index: 1000;
+            }
+            #main {
+                margin-left: 200px;
+            }
+            #openNav {
+                display: none !important;
+            }
+        }
+
+        @media (max-width: 991px) {
+            #main {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body class="tooltips">
+
+<!-- Sidebar -->
+<!-- Sidebar -->
+<div class="w3-sidebar w3-bar-block w3-card w3-animate-left w3-light-grey" style="display:none;" id="mySidebar">
+    <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">✕ Close</button>
+    <a href="/manage_product" class="w3-bar-item w3-button role-cashier">Manage Products</a>
+    <a href="/manage_store_product" class="w3-bar-item w3-button role-cashier">Store Products</a>
+    <a href="/manage_customer" class="w3-bar-item w3-button role-cashier">Customers</a>
+    <a href="/manage_check" class="w3-bar-item w3-button role-cashier">Checks</a>
+</div>
+
+
+<!-- Main Content -->
+<div id="main" style="padding:20px;">
+    <button id="openNav" class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()">☰</button>
+
+    <h2>Кабінет Касира</h2>
+    <p><strong>Ім’я:</strong> <span id="empl_name"></span></p>
+    <p><strong>Прізвище:</strong> <span id="empl_surname"></span></p>
+    <p><strong>Роль:</strong> <span id="empl_role"></span></p>
+</div>
+
+<!-- Scripts -->
+<script>
+    function w3_open() {
+        document.getElementById("mySidebar").style.display = "block";
+        document.getElementById("main").style.marginLeft = "200px";
+        document.getElementById("openNav").style.display = "none";
+    }
+
+    function w3_close() {
+        document.getElementById("mySidebar").style.display = "none";
+        document.getElementById("main").style.marginLeft = "0";
+        document.getElementById("openNav").style.display = "inline-block";
+    }
+
+    // Підвантажити дані з сервера
+    fetch('/api/current_employee', {
+    method: 'GET',
+    credentials: 'include'
+})
+.then(res => res.json())
+.then(data => {
+    document.getElementById('empl_name').innerText = data.empl_name || '';
+    document.getElementById('empl_surname').innerText = data.empl_surname || '';
+    document.getElementById('empl_role').innerText = data.empl_role || '';
+
+    const role = data.empl_role?.toLowerCase();
+    document.querySelectorAll('[class*="role-"]').forEach(el => {
+        if (!el.classList.contains(`role-${role}`)) {
+            el.style.display = 'none';
+        }
+    });
+})
+.catch(err => console.error('Failed to load employee info:', err));
+
+</script>
+
+</body>
+</html>

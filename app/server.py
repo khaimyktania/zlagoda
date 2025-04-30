@@ -1,4 +1,7 @@
 from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, session
+from functools import wraps
+from credentials_utils import load_credentials, save_credentials, auto_generate_credentials
 
 from app import category_dao
 from sql_connection import get_sql_connection
@@ -9,16 +12,66 @@ import customer_dao
 import store_product_dao
 import check_dao
 
-app = Flask(__name__, static_folder='../web', template_folder='../web')
 
+
+app = Flask(__name__, static_folder='../web', template_folder='../web')
+app.secret_key = 'supersecretkey'  # заміни на щось безпечне
 connection = get_sql_connection()
 
+employees = employee_dao.get_all_employees(connection)
+auto_generate_credentials(employees)
+
+def require_role(*roles):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            user_role = session.get('role')
+            if user_role not in roles:
+                return jsonify({'error': 'Access denied'}), 403
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
 
 @app.route('/')
 def home():
     return app.send_static_file('main.html')
 
 
+@app.route('/login', methods=['POST'])
+def login():
+    try:
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        credentials = load_credentials()
+        for id_emp, cred in credentials.items():
+            if cred['login'] == username and cred['password'] == password:
+                session['role'] = cred['role']
+                session['id_employee'] = id_emp
+                return jsonify({'success': True, 'role': cred['role']})
+
+        return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
+    except Exception as e:
+        print(f"[LOGIN ERROR]: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/employee_info', methods=['GET'])
+def get_logged_in_employee_info():
+    id_emp = session.get('id_employee')
+    if not id_emp:
+        return jsonify({'success': False, 'message': 'Not logged in'}), 401
+
+    employee = employee_dao.get_employee_by_id(connection, id_emp)
+    if not employee:
+        return jsonify({'success': False, 'message': 'Employee not found'}), 404
+
+    return jsonify({
+        'success': True,
+        'empl_name': employee['empl_name'],
+        'empl_surname': employee['empl_surname'],
+        'empl_role': employee['empl_role']
+    })
 
 @app.route('/manage_product')
 def manage_product():
@@ -46,6 +99,7 @@ def get_products():
 
 
 @app.route('/insertProduct', methods=['POST'])
+@require_role('manager')
 def insert_product():
     try:
         request_payload = json.loads(request.form['data'])
@@ -81,6 +135,7 @@ def insert_product():
         }), 500
 
 @app.route('/deleteProduct', methods=['POST'])
+@require_role('manager')
 def delete_product():
     return_id = product_dao.delete_products(connection, request.form['product_id'])
     response = jsonify({
@@ -90,12 +145,14 @@ def delete_product():
     return response
 
 
-@app.route('/manage_employee')
+@app.route('/manage-employee')
+@require_role('manager')
 def manage_employee():
     return app.send_static_file('manage-employee.html')
 
 
 @app.route('/getEmployees', methods=['GET'])
+@require_role('manager')
 def get_employees():
     response = employee_dao.get_all_employees(connection)
     response = jsonify(response)
@@ -104,6 +161,7 @@ def get_employees():
 
 
 @app.route('/insertEmployee', methods=['POST'])
+@require_role('manager')
 def insert_employee():
     request_payload = json.loads(request.form['data'])
 
@@ -138,6 +196,7 @@ def insert_employee():
     return response
 
 @app.route('/updateEmployee', methods=['POST'])
+@require_role('manager')
 def update_employee():
     request_payload = json.loads(request.form['data'])
     rows_updated = employee_dao.update_employee(connection, request_payload)
@@ -150,6 +209,7 @@ def update_employee():
 
 
 @app.route('/deleteEmployee', methods=['POST'])
+@require_role('manager')
 def delete_employee():
     employee_id = request.form['id_employee']
     rows_deleted = employee_dao.delete_employee(connection, employee_id)
@@ -161,6 +221,7 @@ def delete_employee():
 
 
 @app.route('/getCashiers', methods=['GET'])
+@require_role('manager')
 def get_cashiers():
     cashiers = employee_dao.get_cashiers_ordered_by_surname(connection)
     response = jsonify(cashiers)
@@ -174,12 +235,14 @@ def get_employees_sorted():
     return jsonify(employees)
 
 @app.route('/getCashiersSorted')
+@require_role('manager')
 def get_cashiers_sorted():
     connection = get_sql_connection()
     cashiers = employee_dao.get_cashiers_ordered_by_surname(connection)
     return jsonify(cashiers)
 
 @app.route('/getContactBySurname')
+@require_role('manager')
 def get_contact_by_surname_api():
     surname = request.args.get('surname')
     connection = get_sql_connection()
@@ -190,21 +253,25 @@ def get_contact_by_surname_api():
         return jsonify(None)
 
 @app.route('/getAllProductsSorted', methods=['GET'])
+@require_role('cashier','manager')
 def get_all_products_sorted():
     return jsonify(product_dao.get_all_products_sorted(connection))
 
 
 @app.route('/getProductsByCategory', methods=['GET'])
+@require_role('cashier','manager')
 def get_products_by_category():
     category_number = request.args.get('category_number')
     return jsonify(product_dao.get_products_by_category(connection, category_number))
 
 
 @app.route('/manage_category')
+@require_role('manager')
 def manage_category():
     return app.send_static_file('manage_category.html')
 
 @app.route('/getCategories', methods=['GET'])
+@require_role('manager')
 def get_categories():
     connection = None
     try:
@@ -222,6 +289,7 @@ def get_categories():
 
 
 @app.route('/saveCategory', methods=['POST'])
+@require_role('manager')
 def save_category():
     connection = None
     try:
@@ -263,6 +331,7 @@ def save_category():
 
 
 @app.route('/deleteCategory', methods=['POST'])
+@require_role('manager')
 def delete_category():
     connection = None
     try:
@@ -296,11 +365,13 @@ def delete_category():
 
 # Add these routes to your server.py file
 @app.route('/manage_customer')
+@require_role('cashier','manager')
 def manage_customer():
     return app.send_static_file('manage_customer.html')
 
 
 @app.route('/getCustomers', methods=['GET'])
+@require_role('manager')
 def get_customers():
     response = customer_dao.get_all_customers(connection)
     response = jsonify(response)
@@ -308,7 +379,26 @@ def get_customers():
     return response
 
 
+@app.route('/api/current_employee')
+@app.route('/api/current_employee')
+def get_current_employee():
+    id_employee = session.get('id_employee')
+    if not id_employee:
+        return jsonify({'error': 'Not logged in'}), 401
+
+    emp = employee_dao.get_employee_by_id(connection, id_employee)
+    if not emp:
+        return jsonify({'error': 'Employee not found'}), 404
+
+    return jsonify({
+        'empl_name':    emp['empl_name'],
+        'empl_surname': emp['empl_surname'],
+        'empl_role':    emp['empl_role']
+    })
+
+
 @app.route('/getCustomersSorted', methods=['GET'])
+@require_role('cashier','manager')
 def get_customers_sorted():
     response = customer_dao.get_all_customers_ordered_by_surname(connection)
     response = jsonify(response)
@@ -317,6 +407,7 @@ def get_customers_sorted():
 
 
 @app.route('/getPremiumCustomers', methods=['GET'])
+@require_role('cashier','manager')
 def get_premium_customers():
     response = customer_dao.get_premium_customers(connection)
     response = jsonify(response)
@@ -325,6 +416,7 @@ def get_premium_customers():
 
 
 @app.route('/getCustomerContactBySurname', methods=['GET'])
+@require_role('manager')
 def get_customer_contact_by_surname():
     surname = request.args.get('surname')
     response = customer_dao.get_contact_by_surname(connection, surname)
@@ -334,6 +426,7 @@ def get_customer_contact_by_surname():
 
 
 @app.route('/insertCustomer', methods=['POST'])
+@require_role('manager')
 def insert_customer():
     try:
         request_payload = json.loads(request.form['data'])
@@ -383,6 +476,7 @@ def insert_customer():
 
 
 @app.route('/deleteCustomer', methods=['POST'])
+@require_role('manager')
 def delete_customer():
     try:
         card_number = request.form['card_number']
@@ -405,6 +499,7 @@ def delete_customer():
     # Add these routes to your server.py file
 
 @app.route('/getStoreProducts', methods=['GET'])
+@require_role('manager')
 def get_store_products():
     connection = get_sql_connection()
     try:
@@ -416,6 +511,7 @@ def get_store_products():
         connection.close()
 
 @app.route('/getStoreProductByUPC', methods=['GET'])
+@require_role('cashier','manager')
 def get_store_product_by_upc():
     upc = request.args.get('upc')
     if not upc:
@@ -433,6 +529,7 @@ def get_store_product_by_upc():
         connection.close()
 
 @app.route('/insertStoreProduct', methods=['POST'])
+@require_role('manager')
 def insert_store_product():
     connection = get_sql_connection()
     try:
@@ -451,6 +548,7 @@ def insert_store_product():
         connection.close()
 
 @app.route('/deleteStoreProduct', methods=['POST'])
+@require_role('manager')
 def delete_store_product():
     connection = get_sql_connection()
     try:
@@ -463,6 +561,7 @@ def delete_store_product():
         connection.close()
 
 @app.route('/makePromotional', methods=['POST'])
+@require_role('manager')
 def make_promotional():
     connection = get_sql_connection()
     try:
@@ -476,6 +575,7 @@ def make_promotional():
         connection.close()
 
 @app.route('/updateProductQuantity', methods=['POST'])
+@require_role('manager')
 def update_product_quantity():
     connection = get_sql_connection()
     try:
@@ -489,6 +589,7 @@ def update_product_quantity():
         connection.close()
 
 @app.route('/getProductVAT', methods=['GET'])
+@require_role('cashier','manager')
 def get_product_vat():
     upc = request.args.get('upc')
     if not upc:
@@ -503,6 +604,7 @@ def get_product_vat():
         connection.close()
 
 @app.route('/getPromotionalProductsSortedByQuantity', methods=['GET'])
+@require_role('cashier', 'manager')
 def get_promotional_products_sorted_by_quantity():
     connection = get_sql_connection()
     try:
@@ -514,6 +616,7 @@ def get_promotional_products_sorted_by_quantity():
         connection.close()
 
 @app.route('/getPromotionalProductsSortedByName', methods=['GET'])
+@require_role('cashier', 'manager')
 def get_promotional_products_sorted_by_name():
     connection = get_sql_connection()
     try:
@@ -525,6 +628,7 @@ def get_promotional_products_sorted_by_name():
         connection.close()
 
 @app.route('/getNonPromotionalProductsSortedByQuantity', methods=['GET'])
+@require_role('cashier', 'manager')
 def get_non_promotional_products_sorted_by_quantity():
     connection = get_sql_connection()
     try:
@@ -536,6 +640,7 @@ def get_non_promotional_products_sorted_by_quantity():
         connection.close()
 
 @app.route('/getNonPromotionalProductsSortedByName', methods=['GET'])
+@require_role('cashier', 'manager')
 def get_non_promotional_products_sorted_by_name():
     connection = get_sql_connection()
     try:
@@ -547,6 +652,7 @@ def get_non_promotional_products_sorted_by_name():
         connection.close()
 
 @app.route('/getAllProductsSortedByQuantity', methods=['GET'])
+@require_role('cashier', 'manager')
 def get_all_products_sorted_by_quantity():
     connection = get_sql_connection()
     try:
@@ -559,11 +665,13 @@ def get_all_products_sorted_by_quantity():
 
 
 @app.route('/manage_check')
+@require_role('cashier', 'manager')
 def manage_check():
     return app.send_static_file('manage_check.html')
 
 
 @app.route('/getRecentChecks', methods=['GET'])
+@require_role('cashier', 'manager')
 def get_recent_checks():
     connection = None
     try:
@@ -580,6 +688,7 @@ def get_recent_checks():
 
 
 @app.route('/getCheckByNumber', methods=['GET'])
+@require_role('cashier', 'manager')
 def get_check_by_number():
     connection = None
     try:
@@ -603,6 +712,7 @@ def get_check_by_number():
 
 
 @app.route('/getCheckProducts', methods=['GET'])
+@require_role('cashier', 'manager')
 def get_check_products():
     connection = None
     try:
@@ -622,6 +732,7 @@ def get_check_products():
 
 
 @app.route('/getCheckStatistics', methods=['GET'])
+@require_role('manager')
 def get_check_statistics():
     connection = None
     try:
@@ -638,6 +749,7 @@ def get_check_statistics():
 
 
 @app.route('/generateCheckNumber', methods=['GET'])
+@require_role('cashier')
 def generate_check_number():
     connection = None
     try:
@@ -653,6 +765,7 @@ def generate_check_number():
 
 
 @app.route('/insertCheck', methods=['POST'])
+@require_role('cashier')
 def insert_check():
     connection = None
     try:
@@ -705,6 +818,7 @@ def insert_check():
 
 
 @app.route('/deleteCheck', methods=['POST'])
+@require_role('manager')
 def delete_check():
     connection = None
     try:
@@ -739,6 +853,7 @@ def delete_check():
 
 
 @app.route('/getChecksByDateRange', methods=['GET'])
+@require_role('manager')
 def get_checks_by_date_range():
     connection = None
     try:
@@ -760,6 +875,7 @@ def get_checks_by_date_range():
 
 
 @app.route('/getAllEmployees', methods=['GET'])
+@require_role('manager')
 def get_all_employees():
     connection = None
     try:
@@ -776,6 +892,7 @@ def get_all_employees():
 
 
 @app.route('/getAllCustomers', methods=['GET'])
+@require_role('manager')
 def get_all_customers():
     connection = None
     try:
@@ -793,31 +910,37 @@ def get_all_customers():
 def reports():
     return app.send_static_file('reports.html')
 @app.route('/api/reports/employees')
+@require_role('manager')
 def report_employees():
     result = employee_dao.get_all_employees_ordered_by_surname(connection)
     return jsonify(result)
 
 @app.route('/api/reports/customers')
+@require_role('manager')
 def report_customers():
     result = customer_dao.get_all_customers_ordered_by_surname(connection)
     return jsonify(result)
 
 @app.route('/api/reports/categories')
+@require_role('manager')
 def report_categories():
     result = category_dao.get_categories(connection)
     return jsonify(result)
 
 @app.route('/api/reports/products')
+@require_role('manager')
 def report_products():
     result = product_dao.get_all_products(connection)
     return jsonify(result)
 
 @app.route('/api/reports/store-products')
+@require_role('manager')
 def report_store_products():
     result = store_product_dao.get_all_store_products(connection)
     return jsonify(result)
 
 @app.route('/api/reports/receipts')
+@require_role('manager')
 def report_receipts():
     connection = get_sql_connection()
     cursor = connection.cursor(dictionary=True)
@@ -825,6 +948,27 @@ def report_receipts():
     result = cursor.fetchall()
     return jsonify(result)
 
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.pop('role', None)
+    return jsonify({'success': True, 'message': 'Logged out'})
+@app.route('/login.html')
+def login_page():
+    return app.send_static_file('login.html')
+
+@app.route('/manager_account.html')
+@require_role('manager')
+def manager_account():
+    return app.send_static_file('manager_account.html')
+
+@app.route('/cashier_account.html')
+@require_role('cashier')
+def cashier_account():
+    return app.send_static_file('cashier_account.html')
+
+@app.route('/debug/credentials', methods=['GET'])
+def debug_credentials():
+    return jsonify(load_credentials())
 
 if __name__ == "__main__":
     print("Starting Python Flask Server For Grocery Store Management System")

@@ -28,6 +28,7 @@ def insert_new_employee(connection, employee):
 
     try:
         result = execute_query(connection, query, data)
+        add_or_update_credential(new_id, login='newuser', password='default123')
         return result
     except Exception as e:
         print(f"Помилка додавання працівника: {e}")
@@ -82,6 +83,7 @@ def delete_employee(connection, employee_id):
     query = "DELETE FROM employee WHERE id_employee = %s;"
     try:
         result = execute_query(connection, query, (employee_id,))
+        delete_credential(employee_id)
         return result
     except Exception as e:
         print(f"Помилка видалення працівника: {e}")
@@ -189,3 +191,18 @@ def validate_employee(employee):
 
     if errors:
         raise ValueError("Validation errors: " + "; ".join(errors))
+
+
+def get_employee_by_id(connection, id_employee):
+    cursor = connection.cursor()
+    query = "SELECT empl_name, empl_surname, empl_role FROM employee WHERE id_employee = %s"
+    cursor.execute(query, (id_employee,))
+    row = cursor.fetchone()
+    cursor.close()
+
+    if row:
+        columns = ['empl_name', 'empl_surname', 'empl_role']
+        return dict(zip(columns, row))
+    else:
+        return None
+

@@ -6,8 +6,16 @@
   <component name="ChangeListManager">
     <list default="true" id="f9f0029f-da69-424e-98ae-755ef497d758" name="Changes" comment="requests with employee">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/customer_dao.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/customer_dao.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/employee_dao.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/employee_dao.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/server.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/main.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/main.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/manage-employee.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/manage-employee.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/manage_category.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/manage_category.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/manage_check.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/manage_check.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/manage_customer.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/manage_customer.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/manage_product.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/manage_product.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/manage_store_product.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/manage_store_product.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/reports.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/reports.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -17,8 +25,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Python Script" />
         <option value="HTML File" />
+        <option value="Python Script" />
       </list>
     </option>
   </component>

@@ -21,7 +21,7 @@
         @media (min-width: 992px) {
             #mySidebar {
                 display: block !important;
-                width: 150;
+                width: 200px;
                 position: fixed;
                 height: 100%;
                 z-index: 1000;
@@ -41,22 +41,56 @@
             }
         }
     </style>
+
 </head>
 <body class="tooltips">
 
 <!-- Sidebar -->
-<div class="w3-sidebar w3-bar-block w3-card w3-animate-left w3-light-grey" style="display:none;" id="mySidebar">
-    <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">✕ Close</button>
-    <a href="web/manage-employee.html" class="w3-bar-item w3-button"> Workers</a>
-    <a href="/manage_product" class="w3-bar-item w3-button"> Manage Products</a>
-    <a href="/manage_store_product" class="w3-bar-item w3-button"> Store Products</a>
-    <a href="/manage_category" class="w3-bar-item w3-button"> Categories</a>
-        <a href="/manage_customer" class="w3-bar-item w3-button"> Customers</a>
-        <a href="/manage_check" class="w3-bar-item w3-button"> Checks</a>
+<!-- Sidebar -->
+<!-- Sidebar -->
+<!-- Sidebar -->
+<div id="mySidebar"
+     class="w3-sidebar w3-bar-block w3-card w3-animate-left w3-light-grey"
+     style="display: none;">
+  <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">✕ Close</button>
 
-    <a href="/reports" class="w3-bar-item w3-button">Reports</a>
+  <!-- Workers (тільки менеджер) -->
+  <a href="/manage-employee" class="w3-bar-item w3-button role-manager">Workers</a>
 
+  <!-- Manage Products (і менеджер, і касир) -->
+  <a href="/manage_product"
+     class="w3-bar-item w3-button role-manager role-cashier">
+    Manage Products
+  </a>
+
+  <!-- Store Products (і менеджер, і касир) -->
+  <a href="/manage_store_product"
+     class="w3-bar-item w3-button role-manager role-cashier">
+    Store Products
+  </a>
+
+  <!-- Categories (тільки менеджер) -->
+  <a href="/manage_category" class="w3-bar-item w3-button role-manager">
+    Categories
+  </a>
+
+  <!-- Customers (і менеджер, і касир) -->
+  <a href="/manage_customer"
+     class="w3-bar-item w3-button role-manager role-cashier">
+    Customers
+  </a>
+
+  <!-- Checks (і менеджер, і касир) -->
+  <a href="/manage_check"
+     class="w3-bar-item w3-button role-manager role-cashier">
+    Checks
+  </a>
+
+  <!-- Reports (тільки менеджер) -->
+  <a href="/reports" class="w3-bar-item w3-button role-manager">Reports</a>
 </div>
+
+
 
 <!-- Main -->
 <div id="main">
@@ -150,18 +184,49 @@
 <script src="web/js/manage-category.js"></script>
 
 <script>
-    function w3_open() {
-        document.getElementById("mySidebar").style.display = "block";
-        document.getElementById("main").style.marginLeft = "250px";
-        document.getElementById("openNav").style.display = "none";
-    }
+  fetch('/api/employee_info', {
+  method: 'GET',
+  credentials: 'include'
+})
+.then(res => {
+  if (!res.ok) {
+    if (res.status === 401) window.location.href = '/login.html';
+    throw new Error('Not authorized');
+  }
+  return res.json();
+})
+.then(data => {
+  const role = data.empl_role.toLowerCase();
 
-    function w3_close() {
-        document.getElementById("mySidebar").style.display = "none";
-        document.getElementById("main").style.marginLeft = "0";
-        document.getElementById("openNav").style.display = "inline-block";
-    }
+  // Сховати всі вкладки спочатку
+  document.querySelectorAll('.role-manager, .role-cashier')
+    .forEach(el => el.style.display = 'none');
+
+  // Показати лише ті, що відповідають ролі
+  document.querySelectorAll(`.role-${role}`)
+    .forEach(el => el.style.display = 'block');
+
+  // Показати сам сайдбар
+  document.getElementById('mySidebar').style.display = 'block';
+})
+.catch(err => {
+  console.error('Role fetch error:', err);
+});
+
+
+  function w3_open() {
+    document.getElementById('mySidebar').style.display = 'block';
+    document.getElementById('main').style.marginLeft = '250px';
+    document.getElementById('openNav').style.display = 'none';
+  }
+  function w3_close() {
+    document.getElementById('mySidebar').style.display = 'none';
+    document.getElementById('main').style.marginLeft = '0';
+    document.getElementById('openNav').style.display = 'inline-block';
+  }
 </script>
+
+
 
 </body>
 </html>
