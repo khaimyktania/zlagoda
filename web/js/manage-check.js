@@ -5,6 +5,8 @@ let currentVAT = 0;
 let employees = [];
 let customers = [];
 let storeProducts = [];
+let currentUserRole = '';
+let currentUserId = '';
 
 // API endpoints
 const API_ENDPOINTS = {
@@ -39,6 +41,7 @@ document.querySelectorAll('.tab-link').forEach(link => {
 // Initialize on document load
 $(document).ready(function() {
     // Load initial data
+     checkCurrentUserRole();
     loadCheckStatistics('all');
     loadRecentChecks();
         loadCashierFilter();
@@ -51,6 +54,84 @@ $(document).ready(function() {
 
     // Add validation for check number fields
     addCheckNumberValidation();
+
+    // Додайте цей код до функції $(document).ready() або до ініціалізації сторінки
+
+// Обробник для кнопки "Apply Filters"
+$('#apply-cashier-filter').on('click', function() {
+    applyFilters();
+});
+
+// Обробник для кнопки "Reset All"
+$('#reset-date-filter').on('click', function() {
+    // Скинути значення фільтрів
+    $('#start-date').val('');
+    $('#end-date').val('');
+
+    // Скинути вибір касира, якщо користувач не є касиром
+    if (currentUserRole.toLowerCase() !== 'cashier') {
+        $('#cashier-select').val('');
+    }
+
+    // Приховати статус фільтра
+    $('#filter-status').hide();
+
+    // Перезавантажити список чеків
+    loadRecentChecks();
+});
+
+// Обробник для пошуку за номером чека
+$('#search-check').on('click', function() {
+    const checkNumber = $('#check-number-search').val().trim();
+
+    if (!checkNumber) {
+        alert('Please enter a check number');
+        return;
+    }
+
+    // Очистити список чеків
+    $('#checks-list').find('.check-item').remove();
+    $('#loading-indicator').show();
+
+    $.ajax({
+        url: API_ENDPOINTS.GET_CHECK_BY_NUMBER,
+        type: 'GET',
+        data: { check_number: checkNumber },
+        success: function(response) {
+            $('#loading-indicator').hide();
+
+            if (response && response.check_number) {
+                // Здійснюємо запит на отримання додаткової інформації (продукти, касир тощо)
+                $.ajax({
+                    url: API_ENDPOINTS.GET_CHECK_DETAILS,
+                    type: 'GET',
+                    data: { check_number: checkNumber },
+                    success: function(details) {
+                        // Об'єднуємо дані та відображаємо чек
+                        const checkData = {...response, ...details};
+                        const checksList = [checkData]; // Масив з одним елементом
+                        renderChecksListItems(checksList);
+
+                        // Оновити статус фільтра
+                        $('#filter-status').text(`Showing check number: ${checkNumber}`).show();
+                    },
+                    error: function() {
+                        // Якщо не вдалося отримати деталі, відображаємо базову інформацію
+                        const checksList = [response];
+                        renderChecksListItems(checksList);
+                    }
+                });
+            } else {
+                $('#checks-list').html('<div class="alert alert-warning">Check not found</div>');
+            }
+        },
+        error: function(xhr) {
+            $('#loading-indicator').hide();
+            console.error('Error searching for check:', xhr.responseText);
+            $('#checks-list').html('<div class="alert alert-danger">Error searching for check</div>');
+        }
+    });
+});
 });
 
 // Initialize all event handlers
@@ -174,6 +255,119 @@ function setDefaultDates() {
 
     $('#end-date').val(formatDateForInput(today));
     $('#start-date').val(formatDateForInput(thirtyDaysAgo));
+}
+
+
+function checkCurrentUserRole() {
+    console.log("Checking current user role...");
+
+    $.ajax({
+        url: '/api/employee_info',
+        type: 'GET',
+        success: function(response) {
+            currentUserRole = response.empl_role;
+            currentUserId = response.id_employee;
+
+            console.log("Current user role:", currentUserRole);
+            console.log("Current user ID:", currentUserId);
+
+            adjustUIBasedOnRole();
+
+            // Якщо користувач - касир, автоматично застосовуємо фільтр на його чеки
+            if (currentUserRole.toLowerCase() === 'cashier') {
+                applyFiltersForCashier();
+            } else {
+                loadCashierFilter();
+            }
+
+            loadCheckStatistics('all');
+            loadRecentChecks();
+        },
+        error: function(xhr) {
+            console.error('Error getting user info:', xhr.responseText);
+            currentUserRole = 'cashier';
+            currentUserId = '';
+            alert('Error loading user information. Limited functionality available.');
+            adjustUIBasedOnRole();
+            loadCheckStatistics('all');
+            loadRecentChecks();
+        }
+    });
+}
+
+function applyFiltersForCashier() {
+    // Для касирів автоматично застосовуємо фільтр за їхнім id_employee
+    const startDate = $('#start-date').val() || getDefaultStartDate();
+    const endDate = $('#end-date').val() || getDefaultEndDate();
+
+    const startDateFormatted = startDate + ' 00:00:00';
+    const endDateFormatted = endDate + ' 23:59:59';
+
+    $('#loading-indicator').show();
+    $('#checks-list').find('.check-item').remove();
+
+    const filterParams = {
+        start_date: startDateFormatted,
+        end_date: endDateFormatted,
+        id_employee: currentUserId
+    };
+
+    $.ajax({
+        url: API_ENDPOINTS.GET_CHECKS_BY_DATE_RANGE,
+        type: 'GET',
+        data: filterParams,
+        success: function(response) {
+            $('#loading-indicator').hide();
+            if (response && Array.isArray(response)) {
+                if (response.length === 0) {
+                    $('#checks-list').html('<div class="alert alert-info">No checks found for the selected period.</div>');
+                } else {
+                    renderChecksListItems(response);
+                }
+            } else {
+                $('#checks-list').html('<div class="alert alert-warning">Invalid response format.</div>');
+            }
+            $('#filter-status').text(`Showing your checks from ${startDate} to ${endDate}`).show();
+        },
+        error: function(xhr) {
+            $('#loading-indicator').hide();
+            console.error('Error applying filters:', xhr.responseText);
+            $('#checks-list').html('<div class="alert alert-danger">Error loading checks.</div>');
+        }
+    });
+}
+
+// 3. Створення нової функції для налаштування інтерфейсу залежно від ролі
+function adjustUIBasedOnRole() {
+    if (currentUserRole.toLowerCase() === 'cashier') {
+        // Приховуємо фільтр вибору касира
+        $('.cashier-filter').hide();
+        // Приховуємо елементи, доступні тільки менеджерам
+        $('.admin-only').hide();
+        // Встановлюємо заголовок для касирів
+        $('#checks-heading').text('My Checks');
+    } else {
+        // Показуємо фільтр вибору касира
+        $('.cashier-filter').show();
+        // Показуємо елементи для менеджерів
+        $('.admin-only').show();
+        // Встановлюємо заголовок для менеджерів
+        $('#checks-heading').text('All Checks');
+        // Дозволяємо вибір будь-якого касира
+        $('#cashier-select').prop('disabled', false);
+    }
+}
+
+
+// Add this function to adjust UI for cashier role
+// Add this function to adjust UI for cashier role
+function adjustUIForCashierRole() {
+    // Hide elements that should not be visible to cashiers
+    // For example, if there are admin-only buttons
+    $('.admin-only').hide();
+
+    // Update UI text to reflect limited view
+    $('#checks-heading').text('My Checks');
 }
 
 // Load employees data with enhanced debugging
@@ -770,34 +964,30 @@ function renderCheckProductsDetails(products, container) {
 function applyFilters() {
     const startDate = $('#start-date').val();
     const endDate = $('#end-date').val();
-    const cashierId = $('#cashier-select').val();
+    let cashierId = $('#cashier-select').val();
 
     if (!startDate || !endDate) {
         alert('Please select both start and end dates');
         return;
     }
 
-    // Format dates correctly for backend and ensure proper time inclusion
-    // Add time components to ensure we get the full day range
     const startDateFormatted = startDate + ' 00:00:00';
     const endDateFormatted = endDate + ' 23:59:59';
 
     $('#loading-indicator').show();
     $('#checks-list').find('.check-item').remove();
 
-    // Prepare filter parameters
     const filterParams = {
         start_date: startDateFormatted,
         end_date: endDateFormatted
     };
 
-    // Add cashier filter only if a specific cashier is selected
-    if (cashierId && cashierId !== '') {
+    if (currentUserRole.toLowerCase() === 'cashier') {
+        filterParams.id_employee = currentUserId;
+    } else if (cashierId && cashierId !== '') {
         filterParams.id_employee = cashierId;
-        console.log("Filtering by cashier ID:", cashierId);
     }
 
-    // Log the complete filter parameters for debugging
     console.log("Filter parameters:", filterParams);
 
     $.ajax({
@@ -808,7 +998,6 @@ function applyFilters() {
             $('#loading-indicator').hide();
             console.log("Filter response:", response);
 
-            // Check if we have checks in the response
             if (response && Array.isArray(response)) {
                 if (response.length === 0) {
                     $('#checks-list').html('<div class="alert alert-info">No checks found for the selected criteria.</div>');
@@ -820,26 +1009,22 @@ function applyFilters() {
                 console.error("Invalid response format:", response);
             }
 
-            // Update UI to show filter is active
             let filterStatusText = `Showing checks from ${startDate} to ${endDate}`;
-            if (cashierId && cashierId !== '') {
+            if (currentUserRole.toLowerCase() === 'cashier') {
+                filterStatusText += ' for your checks only';
+            } else if (cashierId && cashierId !== '') {
                 const cashierName = $('#cashier-select option:selected').text();
                 filterStatusText += ` for cashier: ${cashierName}`;
             } else {
                 filterStatusText += ' for all cashiers';
             }
+
             $('#filter-status').text(filterStatusText).show();
         },
         error: function(xhr, status, error) {
             $('#loading-indicator').hide();
             console.error('Error applying filters:', xhr.responseText, status, error);
-
-            try {
-                const errorResponse = JSON.parse(xhr.responseText);
-                $('#checks-list').html(`<div class="alert alert-danger">Error applying filter: ${errorResponse.message || 'Unknown error'}</div>`);
-            } catch (e) {
-                $('#checks-list').html(`<div class="alert alert-danger">Error applying filter: ${error}</div>`);
-            }
+            $('#checks-list').html(`<div class="alert alert-danger">Error applying filter: ${xhr.responseText || error}</div>`);
         }
     });
 }
@@ -863,8 +1048,8 @@ function searchCheckByNumber() {
 }
 
 // View check details
+// View check details
 function viewCheckDetails(checkNumber) {
-    // Show loading indicator in the modal
     $('#checkDetailsModal .modal-body').html('<div class="text-center py-5"><div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div><p class="mt-2">Loading check details...</p></div>');
     $('#checkDetailsModal').modal('show');
 
@@ -874,7 +1059,12 @@ function viewCheckDetails(checkNumber) {
         data: { check_number: checkNumber },
         success: function(checkData) {
             if (checkData) {
-                // Get check products
+                if (currentUserRole.toLowerCase() === 'cashier' && checkData.id_employee !== currentUserId) {
+                    $('#checkDetailsModal').modal('hide');
+                    alert('You do not have permission to view this check.');
+                    return;
+                }
+
                 $.ajax({
                     url: API_ENDPOINTS.GET_CHECK_PRODUCTS,
                     type: 'GET',
@@ -904,21 +1094,31 @@ function loadRecentChecks() {
     $('#loading-indicator').show();
     $('#checks-list').find('.check-item').remove();
 
+    let requestData = {};
+    if (currentUserRole.toLowerCase() === 'cashier') {
+        requestData.id_employee = currentUserId;
+    }
+
     $.ajax({
         url: API_ENDPOINTS.GET_CHECKS,
         type: 'GET',
+        data: requestData,
         success: function(response) {
             $('#loading-indicator').hide();
             renderChecksListItems(response);
+            if (currentUserRole.toLowerCase() === 'cashier') {
+                $('#filter-status').text('Showing your checks only').show();
+            } else {
+                $('#filter-status').hide();
+            }
         },
         error: function(xhr) {
             $('#loading-indicator').hide();
             console.error('Error loading checks:', xhr.responseText);
-            $('#checks-list').html('<div class="alert alert-danger">Error loading checks. Please try again later.</div>');
+            $('#checks-list').html('<div class="alert alert-danger">Error loading checks.</div>');
         }
     });
 }
-
 
 // Display check details
 function displayCheckDetails(checkData, productsData) {
@@ -1040,4 +1240,43 @@ function deleteCheck(checkNumber) {
             }
         });
     }
+}
+
+function loadCashierFilter() {
+    // Цей ендпоінт повинен повертати список всіх касирів
+    $.ajax({
+        url: '/api/cashiers',  // Припускаємо, що у вас є такий ендпоінт
+        type: 'GET',
+        success: function(cashiers) {
+            const cashierSelect = $('#cashier-select');
+
+            // Очистити поточні опції, крім першої (All Cashiers)
+            cashierSelect.find('option:not(:first)').remove();
+
+            // Додати опції для кожного касира
+            if (Array.isArray(cashiers)) {
+                cashiers.forEach(function(cashier) {
+                    const fullName = `${cashier.empl_surname} ${cashier.empl_name}`;
+                    cashierSelect.append(
+                        $('<option></option>')
+                            .attr('value', cashier.id_employee)
+                            .text(fullName)
+                    );
+                });
+
+                console.log(`Loaded ${cashiers.length} cashiers for filter`);
+            } else {
+                console.error('Invalid cashiers data format:', cashiers);
+            }
+
+            // Якщо користувач є касиром, вибрати його та деактивувати селект
+            if (currentUserRole.toLowerCase() === 'cashier') {
+                cashierSelect.val(currentUserId);
+                cashierSelect.prop('disabled', true);
+            }
+        },
+        error: function(xhr) {
+            console.error('Error loading cashiers:', xhr.responseText);
+        }
+    });
 }

@@ -2,27 +2,38 @@ from sql_connection import execute_query, get_sql_connection
 from datetime import datetime
 
 
-def get_all_checks(connection):
+def get_all_checks(connection, id_employee=None):
     """
     Get all check records from database
+    If id_employee is provided, only return checks created by that employee
     """
-    query = """
-    SELECT c.check_number, c.id_employee, c.card_number, c.print_date, 
-           c.sum_total, c.vat, 
-           e.empl_surname, e.empl_name,
-           CONCAT(cu.cust_surname, ' ', cu.cust_name) as customer_name
-    FROM `check` c
-    LEFT JOIN employee e ON c.id_employee = e.id_employee
-    LEFT JOIN customer_card cu ON c.card_number = cu.card_number
-    ORDER BY c.print_date DESC;
-    """
+    query_parts = [
+        "SELECT c.check_number, c.id_employee, c.card_number, c.print_date,",
+        "c.sum_total, c.vat,",
+        "e.empl_surname, e.empl_name,",
+        "CONCAT(cu.cust_surname, ' ', cu.cust_name) as customer_name"
+        "FROM `check` c",
+        "LEFT JOIN employee e ON c.id_employee = e.id_employee",
+        "LEFT JOIN customer_card cu ON c.card_number = cu.card_number"
+    ]
+
+    params = []
+
+    # Add filter for specific employee if provided
+    if id_employee:
+        query_parts.append("WHERE c.id_employee = %s")
+        params.append(id_employee)
+
+    query_parts.append("ORDER BY c.print_date DESC")
+
+    query = " ".join(query_parts)
+
     try:
-        result = execute_query(connection, query)
+        result = execute_query(connection, query, tuple(params) if params else None)
         return result
     except Exception as e:
         print(f"Error in get_all_checks: {e}")
         raise
-
 
 def get_check_by_number(connection, check_number):
     """
@@ -175,37 +186,52 @@ def delete_check(connection, check_number):
         return {"success": False, "message": str(e)}
 
 
-
-def get_recent_checks(connection, limit=50):
+def get_recent_checks(connection, limit=50, id_employee=None):
     """
     Get most recent checks with limit
+    If id_employee is provided, only return checks created by that employee
     """
-    query = """
-    SELECT c.check_number, c.id_employee, c.print_date, 
-           c.sum_total, c.vat, 
-           CONCAT(e.empl_surname, ' ', e.empl_name) as cashier_name,
-           COUNT(s.UPC) as product_count
-    FROM `check` c
-    LEFT JOIN employee e ON c.id_employee = e.id_employee
-    LEFT JOIN sale s ON c.check_number = s.check_number
-    GROUP BY c.check_number
-    ORDER BY c.print_date DESC
-    LIMIT %s;
-    """
+    query_parts = [
+        "SELECT c.check_number, c.id_employee, c.print_date,",
+        "c.sum_total, c.vat,",
+        "CONCAT(e.empl_surname, ' ', e.empl_name) as cashier_name,",
+        "COUNT(s.UPC) as product_count",
+        "FROM `check` c",
+        "LEFT JOIN employee e ON c.id_employee = e.id_employee",
+        "LEFT JOIN sale s ON c.check_number = s.check_number"
+    ]
+
+    params = []
+
+    # Add filter for specific employee if provided
+    if id_employee:
+        query_parts.append("WHERE c.id_employee = %s")
+        params.append(id_employee)
+
+    query_parts.append("GROUP BY c.check_number")
+    query_parts.append("ORDER BY c.print_date DESC")
+    query_parts.append("LIMIT %s")
+    params.append(limit)
+
+    query = " ".join(query_parts)
+
     try:
-        result = execute_query(connection, query, (limit,))
+        result = execute_query(connection, query, tuple(params))
         return result
     except Exception as e:
         print(f"Error in get_recent_checks: {e}")
         raise
 
 
-def get_check_statistics(connection, period='all'):
+def get_check_statistics(connection, period='all', id_employee=None):
     """
     Get statistics about checks for a specific period
     period: 'today', 'week', 'month', 'year', 'all'
+    id_employee: optional filter for specific employee
     """
     time_condition = ""
+    params = []
+
     if period == 'today':
         time_condition = "WHERE DATE(c.print_date) = CURRENT_DATE"
     elif period == 'week':
@@ -214,6 +240,13 @@ def get_check_statistics(connection, period='all'):
         time_condition = "WHERE c.print_date >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)"
     elif period == 'year':
         time_condition = "WHERE c.print_date >= DATE_SUB(CURRENT_DATE, INTERVAL 1 YEAR)"
+    else:  # all - без часового фільтру
+        time_condition = "WHERE 1=1"  # Завжди true для додавання AND
+
+    # Додаємо фільтр по ID співробітника, якщо передано
+    if id_employee:
+        time_condition += " AND c.id_employee = %s"
+        params.append(id_employee)
 
     query = f"""
     SELECT 
@@ -228,7 +261,7 @@ def get_check_statistics(connection, period='all'):
     """
 
     try:
-        result = execute_query(connection, query)
+        result = execute_query(connection, query, tuple(params) if params else None)
         return result[0] if result else None
     except Exception as e:
         print(f"Error in get_check_statistics: {e}")
