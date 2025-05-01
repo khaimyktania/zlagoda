@@ -16,6 +16,7 @@ function clearPageData() {
 document.querySelectorAll('.tab-link').forEach(link => {
   link.addEventListener('click', clearPageData);
 });
+
 // Load customers
 function loadCustomers() {
     $.get('/getCustomers', function (response) {
@@ -27,9 +28,33 @@ function loadCustomers() {
                     '<td>'+ customer.cust_surname + ' ' + customer.cust_name + ' ' + customer.cust_patronymic +'</td>'+
                     '<td>'+ customer.phone_number +'</td>'+
                     '<td>'+ customer.percent +'</td>'+
-                    '<td><span class="btn btn-xs btn-primary edit-customer">Edit</span> <span class="btn btn-xs btn-danger delete-customer">Delete</span></td></tr>';
+                    '<td><span class="btn btn-xs btn-primary edit-customer">Edit</span> <span class="btn btn-xs btn-danger delete-customer role-manager">Delete</span></td></tr>';
             });
             $("table").find('tbody').empty().html(table);
+
+            // Повторно застосовуємо стилі лише для role-manager у таблиці
+            fetch('/api/employee_info', {
+                method: 'GET',
+                credentials: 'include'
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to fetch role');
+                return res.json();
+            })
+            .then(data => {
+                const role = data.empl_role.toLowerCase().replace(/cashier/i, 'cashier').replace(/manager/i, 'manager');
+                console.log("Role in loadCustomers:", role); // Дебаг
+                if (role === 'cashier') {
+                    const hiddenElements = document.querySelectorAll('table .role-manager');
+                    console.log("Hiding", hiddenElements.length, "role-manager elements in table"); // Дебаг
+                    hiddenElements.forEach(el => {
+                        el.style.display = 'none';
+                    });
+                }
+            })
+            .catch(err => {
+                console.error('Error fetching role in loadCustomers:', err);
+            });
         }
     });
 }
@@ -206,9 +231,33 @@ $("#sortSelect").on("change", function () {
                     '<td>'+ customer.cust_surname + ' ' + customer.cust_name + ' ' + customer.cust_patronymic +'</td>'+
                     '<td>'+ customer.phone_number +'</td>'+
                     '<td>'+ customer.percent +'</td>'+
-                    '<td><span class="btn btn-xs btn-primary edit-customer">Edit</span> <span class="btn btn-xs btn-danger delete-customer">Delete</span></td></tr>';
+                    '<td><span class="btn btn-xs btn-primary edit-customer">Edit</span> <span class="btn btn-xs btn-danger delete-customer role-manager">Delete</span></td></tr>';
             });
             $("table").find('tbody').empty().html(table);
+
+            // Повторно застосовуємо стилі лише для role-manager у таблиці
+            fetch('/api/employee_info', {
+                method: 'GET',
+                credentials: 'include'
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to fetch role');
+                return res.json();
+            })
+            .then(data => {
+                const role = data.empl_role.toLowerCase().replace(/cashier/i, 'cashier').replace(/manager/i, 'manager');
+                console.log("Role in sortSelect:", role); // Дебаг
+                if (role === 'cashier') {
+                    const hiddenElements = document.querySelectorAll('table .role-manager');
+                    console.log("Hiding", hiddenElements.length, "role-manager elements in table"); // Дебаг
+                    hiddenElements.forEach(el => {
+                        el.style.display = 'none';
+                    });
+                }
+            })
+            .catch(err => {
+                console.error('Error fetching role in sortSelect:', err);
+            });
         }
     });
 });

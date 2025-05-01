@@ -480,7 +480,7 @@ def get_customer_contact_by_surname():
 
 
 @app.route('/insertCustomer', methods=['POST'])
-@require_role('manager')
+@require_role('manager', 'cashier')
 def insert_customer():
     try:
         request_payload = json.loads(request.form['data'])

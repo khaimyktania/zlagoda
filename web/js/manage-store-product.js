@@ -18,6 +18,7 @@ const getNonPromotionalProductsSortedByQuantityApiUrl = "/getNonPromotionalProdu
 const getNonPromotionalProductsSortedByNameApiUrl = "/getNonPromotionalProductsSortedByName";
 const getAllProductsSortedByQuantityApiUrl = "/getAllProductsSortedByQuantity";
 
+
 $(function () {
     // Initial load of store products
 
@@ -94,6 +95,7 @@ function loadStoreProducts() {
 }
 
 // Render products table with the given data
+// Render products table with the given data
 function renderProductsTable(products) {
     if (products) {
         let table = '';
@@ -123,16 +125,22 @@ function renderProductsTable(products) {
                 '<td>' + product.products_number + '</td>' +
                 '<td>' + (product.promotional_product == 1 ? 'Yes' : 'No') + '</td>' +
                 '<td>' +
-                    '<div class="btn-group">' +
-                        '<button class="btn btn-xs btn-primary edit-store-product">Edit</button> ' +
-                        '<button class="btn btn-xs btn-info view-product-details">Details</button> ' +
-                        '<button class="btn btn-xs btn-danger delete-store-product">Delete</button> ' +
-                        (product.promotional_product == 1 ?
+                    '<div class="btn-group">';
+
+            // Додаємо кнопку "Details" для всіх ролей
+            table += '<button class="btn btn-xs btn-info view-product-details">Details</button> ';
+
+            // Додаємо інші кнопки лише для ролі manager
+            if (currentRole === 'manager') {
+                table += '<button class="btn btn-xs btn-primary edit-store-product">Edit</button> ' +
+                         '<button class="btn btn-xs btn-danger delete-store-product">Delete</button> ' +
+                         (product.promotional_product == 1 ?
                             '<button class="btn btn-xs btn-warning make-non-promotional">Make Non-Promotional</button>' :
                             '<button class="btn btn-xs btn-success make-promotional">Make Promotional</button>'
-                        ) +
-                    '</div>' +
-                '</td></tr>';
+                         );
+            }
+
+            table += '</div></td></tr>';
         });
 
         $("table").find('tbody').empty().html(table);

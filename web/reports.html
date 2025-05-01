@@ -3,23 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <title>ZLAGODA — Звіти</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Fonts & Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,300,600,700">
 
   <!-- Bootstrap + Custom Styles -->
-  <link rel="stylesheet" href="static/bootstrap.min.css">
-  <link rel="stylesheet" href="static/style.css">
-  <link rel="stylesheet" href="static/sidebar-menu.css">
-  <link rel="stylesheet" href="static/custom.css">
+  <link rel="stylesheet" href="web/static/bootstrap.min.css">
+  <link rel="stylesheet" href="web/static/style.css">
+  <link rel="stylesheet" href="web/static/sidebar-menu.css">
+  <link rel="stylesheet" href="web/static/custom.css">
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
 
   <style>
     .logout-btn-fixed {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+    }
+    /* Always visible sidebar on desktop */
     @media (min-width: 992px) {
       #mySidebar {
         display: block !important;
@@ -36,28 +40,55 @@
       }
     }
 
+    /* Content margin reset on small screens */
     @media (max-width: 991px) {
       #main {
         margin-left: 0;
       }
     }
 
+    /* Table styles */
+    #report-output {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto; /* Горизонтальна прокрутка */
+      box-sizing: border-box; /* Включаємо padding і border у ширину */
+      padding: 0 10px; /* Додаємо невеликий відступ */
+    }
     table {
+      width: 100%;
+      max-width: 100%; /* Уникаємо перевищення контейнера */
+      table-layout: fixed; /* Фіксована ширина колонок */
       border-collapse: collapse;
       margin-top: 20px;
-      width: 100%;
     }
-
     th, td {
       border: 1px solid #999;
       padding: 8px;
       text-align: left;
+      white-space: normal;
+      word-wrap: break-word;
+      box-sizing: border-box;
+      min-width: 100px; /* Мінімальна ширина колонок */
+      max-width: 250px; /* Максимальна ширина колонок */
+      overflow: hidden; /* Обрізаємо надлишковий вміст */
+      text-overflow: ellipsis; /* Додаємо три крапки для довгого тексту */
     }
-
     th {
       background-color: #eee;
+      font-weight: bold;
     }
 
+    /* Адаптивність для малих екранів */
+    @media (max-width: 768px) {
+      th, td {
+        min-width: 80px; /* Зменшуємо ширину колонок */
+        max-width: 150px;
+        font-size: 14px; /* Зменшуємо шрифт */
+      }
+    }
+
+    /* Print styles */
     @media print {
       button, .no-print, .w3-sidebar {
         display: none !important;
@@ -65,68 +96,64 @@
       #main {
         margin: 0 !important;
       }
+      #report-output {
+        overflow: visible;
+        padding: 0;
+      }
+      table {
+        width: 100%;
+        max-width: 100%;
+        table-layout: auto; /* Дозволяємо таблиці адаптуватися */
+      }
+      th, td {
+        font-size: 10px; /* Ще менший шрифт для друку */
+        min-width: 50px;
+        max-width: none; /* Знімаємо обмеження */
+        overflow: visible;
+        text-overflow: clip;
+      }
     }
   </style>
-
 </head>
 <body class="tooltips">
 
 <!-- Sidebar -->
-<!-- Sidebar -->
-<!-- Sidebar -->
-<!-- Sidebar -->
-<div id="mySidebar"
-     class="w3-sidebar w3-bar-block w3-card w3-animate-left w3-light-grey"
-     style="display: none;">
+<div id="mySidebar" class="w3-sidebar w3-bar-block w3-card w3-animate-left w3-light-grey" style="display: none;">
   <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">✕ Close</button>
-
-  <!-- Workers (тільки менеджер) -->
   <a href="/manage-employee" class="w3-bar-item w3-button role-manager">Workers</a>
-
-  <!-- Manage Products (і менеджер, і касир) -->
-  <a href="/manage_product"
-     class="w3-bar-item w3-button role-manager role-cashier">
-    Manage Products
-  </a>
-
-  <!-- Store Products (і менеджер, і касир) -->
-  <a href="/manage_store_product"
-     class="w3-bar-item w3-button role-manager role-cashier">
-    Store Products
-  </a>
-
-  <!-- Categories (тільки менеджер) -->
-  <a href="/manage_category" class="w3-bar-item w3-button role-manager">
-    Categories
-  </a>
-
-  <!-- Customers (і менеджер, і касир) -->
-  <a href="/manage_customer"
-     class="w3-bar-item w3-button role-manager role-cashier">
-    Customers
-  </a>
-
-  <!-- Checks (і менеджер, і касир) -->
-  <a href="/manage_check"
-     class="w3-bar-item w3-button role-manager role-cashier">
-    Checks
-  </a>
-
-  <!-- Reports (тільки менеджер) -->
+  <a href="/manage_product" class="w3-bar-item w3-button role-manager role-cashier">Manage Products</a>
+  <a href="/manage_store_product" class="w3-bar-item w3-button role-manager role-cashier">Store Products</a>
+  <a href="/manage_category" class="w3-bar-item w3-button role-manager">Categories</a>
+  <a href="/manage_customer" class="w3-bar-item w3-button role-manager role-cashier">Customers</a>
+  <a href="/manage_check" class="w3-bar-item w3-button role-manager role-cashier">Checks</a>
   <a href="/reports" class="w3-bar-item w3-button role-manager">Reports</a>
-
   <a href="/manager_account.html" class="w3-bar-item w3-button role-manager">My Account</a>
-<a href="/cashier_account.html" class="w3-bar-item w3-button role-cashier">My Account</a>
-<a href="/logout" class="w3-bar-item w3-button logout-btn-fixed">Log Out</a>
-
-
+  <a href="/cashier_account.html" class="w3-bar-item w3-button role-cashier">My Account</a>
+  <a href="/logout" class="w3-bar-item w3-button logout-btn-fixed">Log Out</a>
 </div>
-
-
-
 
 <!-- Main Content -->
 <div id="main">
+  <div class="header content rows-content-header">
+    <button id="openNav" class="w3-button w3-teal w3-xlarge">☰</button>
+    <div class="navbar navbar-default" role="navigation">
+      <div class="container">
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav visible-lg visible-md limit-chars">
+            <ul class="breadcrumb">
+              <a href="index.html">
+                <i class="zmdi zmdi-view-dashboard zmdi-hc-fw" title="Orders"></i>
+              </a>
+              <a href="reports.html">
+                <i class="zmdi zmdi-assignment zmdi-hc-fw" title="Reports"></i>
+              </a>
+            </ul>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="container">
     <div class="right content-page">
       <div class="body content rows scroll-y">
@@ -160,6 +187,48 @@
 <script src="js/package/bootstrap.min.js"></script>
 
 <script>
+  fetch('/api/employee_info', {
+    method: 'GET',
+    credentials: 'include'
+  })
+  .then(res => {
+    if (!res.ok) {
+      if (res.status === 401) window.location.href = '/login.html';
+      throw new Error('Not authorized');
+    }
+    return res.json();
+  })
+  .then(data => {
+    const role = data.empl_role.toLowerCase().replace(/cashier/i, 'cashier').replace(/manager/i, 'manager');
+    console.log("User role:", role); // Дебаг
+
+    // Приховуємо всі елементи з класами role-manager і role-cashier
+    document.querySelectorAll('.role-manager, .role-cashier')
+        .forEach(el => el.style.display = 'none');
+
+    // Показуємо елементи, що відповідають ролі
+    document.querySelectorAll(`.role-${role}`)
+        .forEach(el => el.style.display = 'block');
+
+    // Показуємо бічну панель
+    document.getElementById('mySidebar').style.display = 'block';
+  })
+  .catch(err => {
+    console.error('Role fetch error:', err);
+  });
+
+  function w3_open() {
+    document.getElementById('mySidebar').style.display = 'block';
+    document.getElementById('main').style.marginLeft = '250px';
+    document.getElementById('openNav').style.display = 'none';
+  }
+
+  function w3_close() {
+    document.getElementById('mySidebar').style.display = 'none';
+    document.getElementById('main').style.marginLeft = '0';
+    document.getElementById('openNav').style.display = 'inline-block';
+  }
+
   function loadReport(type) {
     const endpoints = {
       'employees': '/api/reports/employees',
@@ -191,7 +260,7 @@
       })
       .then(data => {
         document.getElementById('report-title').innerText = titles[type];
-        document.getElementById('report-output').innerHTML = generateTable(data);
+        document.getElementById('report-output').innerHTML = generateTable(data, type);
       })
       .catch(err => {
         console.error('Помилка завантаження звіту:', err);
@@ -199,65 +268,81 @@
       });
   }
 
-  function generateTable(data) {
+  function generateTable(data, reportType) {
     if (!Array.isArray(data) || data.length === 0) {
       return '<p>Немає даних для відображення.</p>';
     }
 
     // Визначення назв колонок для кожного атрибута
     const columnNames = {
+      // Employees
       'id_employee': 'Employee ID',
-      'empl_surname': 'Surname',
-      'empl_name': 'Name',
-      'empl_patronymic': 'Patronymic',
+      'empl_surname': 'Last Name',
+      'empl_name': 'First Name',
+      'empl_patronymic': 'Middle Name',
       'empl_role': 'Role',
       'salary': 'Salary',
-      'date_of_birth': 'Birthday',
+      'date_of_birth': 'Date of Birth',
       'date_of_start': 'Start Date',
-      'phone_number': 'Phone',
+      'phone_number': 'Phone Number',
       'city': 'City',
       'street': 'Street',
-      'zip_code': 'ZIP',
+      'zip_code': 'ZIP Code',
 
+      // Customers
       'card_number': 'Card Number',
-      'cust_surname': 'Surname',
-      'cust_name': 'Name',
-      'cust_patronymic': 'Patronymic',
-      'phone_number': 'Phone',
-      'city': 'City',
-      'street': 'Street',
-      'zip_code': 'ZIP',
-      'percent': 'Discount %',
+      'cust_surname': 'Last Name',
+      'cust_name': 'First Name',
+      'cust_patronymic': 'Middle Name',
+      'percent': 'Discount (%)',
 
+      // Categories
       'category_number': 'Category ID',
       'category_name': 'Category Name',
 
+      // Products
       'id_product': 'Product ID',
       'product_name': 'Product Name',
       'characteristics': 'Characteristics',
       'producer': 'Producer',
-      'category_number': 'Category ID',
 
+      // Store Products
       'UPC': 'UPC',
-      'id_product': 'Product ID',
-      'selling_price': 'Price',
-      'products_number': 'Quantity',
-      'promotional_product': 'Promo',
+      'UPC_prom': 'Promotional UPC',
+      'selling_price': 'Selling Price',
+      'products_number': 'Quantity in Store',
+      'promotional_product': 'Promotional',
 
-      'check_number': 'Check #',
-      'print_date': 'Printed',
-      'sum_total': 'Total',
-      'vat': 'VAT',
+      'check_number': 'Number of check',
+      'print_date': 'Date',
+      'sum_total': 'Sum',
+      'vat': 'VAT'
+    };
+
+    // Зіставлення числових ключів для звіту receipts
+    const receiptKeyMapping = {
+      '1': 'check_number',
+      '2': 'print_date',
+      '3': 'sum_total',
+      '4': 'vat'
     };
 
     // Витягуємо всі унікальні ключі з усіх рядків
     const keysSet = new Set();
     data.forEach(row => Object.keys(row).forEach(key => keysSet.add(key)));
 
-    // Порядок: унікальний ID → решта атрибутів
-    const idKeys = ['id_employee', 'card_number', 'category_number', 'id_product', 'UPC', 'check_number'];
-    const otherKeys = [...keysSet].filter(k => !idKeys.includes(k)).sort();
-    const finalKeys = idKeys.filter(k => keysSet.has(k)).concat(otherKeys);
+    // Для receipts заміняємо числові ключі на правильні
+    let finalKeys;
+    if (reportType === 'receipts') {
+      const mappedKeys = [...keysSet].map(key => receiptKeyMapping[key] || key);
+      const idKeys = ['check_number'];
+      const otherKeys = mappedKeys.filter(k => !idKeys.includes(k)).sort();
+      finalKeys = idKeys.filter(k => mappedKeys.includes(k)).concat(otherKeys);
+    } else {
+      const idKeys = ['id_employee', 'card_number', 'category_number', 'id_product', 'UPC', 'check_number'];
+      const otherKeys = [...keysSet].filter(k => !idKeys.includes(k)).sort();
+      finalKeys = idKeys.filter(k => keysSet.has(k)).concat(otherKeys);
+    }
 
     let html = '<table><thead><tr>';
     finalKeys.forEach(key => {
@@ -268,22 +353,21 @@
     data.forEach(row => {
       html += '<tr>';
       finalKeys.forEach(key => {
-        html += `<td>${row[key] !== null ? row[key] : ''}</td>`;
+        // Для receipts використовуємо оригінальний ключ із даних
+        const dataKey = reportType === 'receipts' ? Object.keys(receiptKeyMapping).find(k => receiptKeyMapping[k] === key) || key : key;
+        html += `<td>${row[dataKey] !== null ? row[dataKey] : ''}</td>`;
       });
       html += '</tr>';
     });
 
     html += '</tbody></table>';
     return html;
-    }
-
+  }
 
   function printReport() {
     window.print();
   }
 </script>
-
-
 
 </body>
 </html>

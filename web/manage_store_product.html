@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>GSMS - Store Products</title>
+    <title>Store Products</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -186,15 +186,16 @@
                                         <button type="button" class="btn btn-sm btn-outline-primary" id="filterNonPromotionalByName">
                                             Non-Promotional by Name
                                         </button>
-                                        <button type="button" class="btn btn-sm btn-outline-primary" id="filterAllByQuantity">
+                                        <button type="button" class="btn btn-sm btn-outline-primary role-manager" id="filterAllByQuantity">
                                             All Products by Quantity
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" id="resetFilters">
-                                            Reset Filters
                                         </button>
                                         <button type="button" class="btn btn-sm btn-outline-success" id="getAllStoreProductsSorted">
                                             All Store Products by Name
                                         </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" id="resetFilters">
+                                            Reset Filters
+                                        </button>
+
 
                                     </div>
                                 </div>
@@ -223,7 +224,7 @@
                     <div class="panel-body pt-0">
                         <div class="row mb-4">
                             <div class="col-sm-12">
-                                <button type="button" class="btn btn-sm btn-primary pull-right" data-toggle="modal" data-target="#storeProductModal">
+                                <button type="button" class="btn btn-sm btn-primary pull-right role-manager" data-toggle="modal" data-target="#storeProductModal">
                                     Add New Store Product
                                 </button>
                             </div>
@@ -363,46 +364,48 @@
 <script src="web/js/manage-store-product.js"></script>
 <script src="web/js/package/bootstrap.min.js"></script>
 <script>
-  fetch('/api/employee_info', {
-  method: 'GET',
-  credentials: 'include'
-})
-.then(res => {
-  if (!res.ok) {
-    if (res.status === 401) window.location.href = '/login.html';
-    throw new Error('Not authorized');
-  }
-  return res.json();
-})
-.then(data => {
-  const role = data.empl_role.toLowerCase();
+    fetch('/api/employee_info', {
+        method: 'GET',
+        credentials: 'include'
+    })
+    .then(res => {
+        if (!res.ok) {
+            if (res.status === 401) window.location.href = '/login.html';
+            throw new Error('Not authorized');
+        }
+        return res.json();
+    })
+    .then(data => {
+        const role = data.empl_role.toLowerCase();
+        window.currentRole = role; // Зберігаємо роль у глобальній змінній
+        console.log("User role:", window.currentRole); // Для дебагу
+        document.querySelectorAll('.role-manager, .role-cashier')
+            .forEach(el => el.style.display = 'none');
+        document.querySelectorAll(`.role-${role}`)
+            .forEach(el => el.style.display = 'block');
+        document.getElementById('mySidebar').style.display = 'block';
+        // Викликаємо loadStoreProducts після ініціалізації ролі
+        if (typeof loadStoreProducts === 'function') {
+            loadStoreProducts();
+        }
+    })
+    .catch(err => {
+        console.error('Role fetch error:', err);
+    });
 
-  // Сховати всі вкладки спочатку
-  document.querySelectorAll('.role-manager, .role-cashier')
-    .forEach(el => el.style.display = 'none');
+    function w3_open() {
+        document.getElementById('mySidebar').style.display = 'block';
+        document.getElementById('main').style.marginLeft = '250px';
+        document.getElementById('openNav').style.display = 'none';
+    }
 
-  // Показати лише ті, що відповідають ролі
-  document.querySelectorAll(`.role-${role}`)
-    .forEach(el => el.style.display = 'block');
+    function w3_close() {
+        document.getElementById('mySidebar').style.display = 'none';
+        document.getElementById('main').style.marginLeft = '0';
+        document.getElementById('openNav').style.display = 'inline-block';
+    }
 
-  // Показати сам сайдбар
-  document.getElementById('mySidebar').style.display = 'block';
-})
-.catch(err => {
-  console.error('Role fetch error:', err);
-});
-
-  function w3_open() {
-    document.getElementById('mySidebar').style.display = 'block';
-    document.getElementById('main').style.marginLeft = '250px';
-    document.getElementById('openNav').style.display = 'none';
-  }
-  function w3_close() {
-    document.getElementById('mySidebar').style.display = 'none';
-    document.getElementById('main').style.marginLeft = '0';
-    document.getElementById('openNav').style.display = 'inline-block';
-  }
+    document.getElementById('openNav').addEventListener('click', w3_open);
 </script>
-
 </body>
 </html>
