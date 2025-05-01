@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>GSMS</title>
+    <title>GSMS - Manage Products</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -41,134 +41,172 @@
             }
         }
     </style>
-
 </head>
 <body class="tooltips">
 
-<!-- Sidebar -->
-<!-- Sidebar -->
-<!-- Sidebar -->
-<!-- Sidebar -->
-<div id="mySidebar"
-     class="w3-sidebar w3-bar-block w3-card w3-animate-left w3-light-grey"
-     style="display: none;">
-  <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">✕ Close</button>
+    <!-- Sidebar -->
+    <div id="mySidebar" class="w3-sidebar w3-bar-block w3-card w3-animate-left w3-light-grey" style="display: none;">
+        <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">✕ Close</button>
+        <a href="/manage-employee" class="w3-bar-item w3-button role-manager">Workers</a>
+        <a href="/manage_product" class="w3-bar-item w3-button role-manager role-cashier">Manage Products</a>
+        <a href="/manage_store_product" class="w3-bar-item w3-button role-manager role-cashier">Store Products</a>
+        <a href="/manage_category" class="w3-bar-item w3-button role-manager">Categories</a>
+        <a href="/manage_customer" class="w3-bar-item w3-button role-manager role-cashier">Customers</a>
+        <a href="/manage_check" class="w3-bar-item w3-button role-manager role-cashier">Checks</a>
+        <a href="/reports" class="w3-bar-item w3-button role-manager">Reports</a>
+        <a href="/manager_account.html" class="w3-bar-item w3-button role-manager">My Account</a>
+        <a href="/cashier_account.html" class="w3-bar-item w3-button role-cashier">My Account</a>
+    </div>
 
-  <!-- Workers (тільки менеджер) -->
-  <a href="/manage-employee" class="w3-bar-item w3-button role-manager">Workers</a>
-
-  <!-- Manage Products (і менеджер, і касир) -->
-  <a href="/manage_product"
-     class="w3-bar-item w3-button role-manager role-cashier">
-    Manage Products
-  </a>
-
-  <!-- Store Products (і менеджер, і касир) -->
-  <a href="/manage_store_product"
-     class="w3-bar-item w3-button role-manager role-cashier">
-    Store Products
-  </a>
-
-  <!-- Categories (тільки менеджер) -->
-  <a href="/manage_category" class="w3-bar-item w3-button role-manager">
-    Categories
-  </a>
-
-  <!-- Customers (і менеджер, і касир) -->
-  <a href="/manage_customer"
-     class="w3-bar-item w3-button role-manager role-cashier">
-    Customers
-  </a>
-
-  <!-- Checks (і менеджер, і касир) -->
-  <a href="/manage_check"
-     class="w3-bar-item w3-button role-manager role-cashier">
-    Checks
-  </a>
-
-  <!-- Reports (тільки менеджер) -->
-  <a href="/reports" class="w3-bar-item w3-button role-manager">Reports</a>
-
-    <a href="/manager_account.html" class="w3-bar-item w3-button role-manager">My Account</a>
-<a href="/cashier_account.html" class="w3-bar-item w3-button role-cashier">My Account</a>
-
-</div>
-
-
-
-
-<!-- Main -->
-<div id="main">
-
-    <!-- Header -->
-    <div class="header content rows-content-header">
-        <button id="openNav" class="w3-button w3-teal w3-xlarge">&#9776;</button>
-        <div class="navbar navbar-default" role="navigation">
-            <div class="container">
-                <div class="navbar-collapse collapse">
-                    <ul class="nav navbar-nav visible-lg visible-md limit-chars">
-                        <ul class="breadcrumb">
-                            <a href="index.html">
-                                <i class="zmdi zmdi-view-dashboard zmdi-hc-fw" title="Orders"></i>
-                            </a>
-                            <a href="manage-product.html">
-                                <i class="zmdi zmdi-assignment zmdi-hc-fw" title="Products"></i>
-                            </a>
+    <!-- Main Content Area -->
+    <div id="main">
+        <!-- Header -->
+        <div class="header content rows-content-header">
+            <button id="openNav" class="w3-button w3-teal w3-xlarge">&#9776;</button>
+            <div class="navbar navbar-default" role="navigation">
+                <div class="container">
+                    <div class="navbar-collapse collapse">
+                        <ul class="nav navbar-nav visible-lg visible-md limit-chars">
+                            <ul class="breadcrumb">
+                                <a href="index.html">
+                                    <i class="zmdi zmdi-view-dashboard zmdi-hc-fw" title="Orders"></i>
+                                </a>
+                                <a href="manage-product.html">
+                                    <i class="zmdi zmdi-assignment zmdi-hc-fw" title="Products"></i>
+                                </a>
+                            </ul>
                         </ul>
-                    </ul>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Main Content -->
-    <div class="container">
-        <div class="right content-page">
-            <div class="body content rows scroll-y">
-                <div class="box-info full" id="taskFormContainer">
-                    <h2>Manage Products</h2>
-                    <div class="panel-body pt-0">
-                        <div class="form-group">
-    <label for="categoryFilter">Filter by Category:</label>
-    <select id="categoryFilter" class="form-control">
-        <option value="">All Categories</option>
-        <!-- Категорії будуть довантажуватись -->
-    </select>
-</div>
+        <!-- Main Content -->
+        <div class="container">
+            <div class="right content-page">
+                <div class="body content rows scroll-y">
+                    <div class="box-info full" id="taskFormContainer">
+                        <h2>Manage Products</h2>
+                        <div class="panel-body pt-0">
+                            <!-- Category Filter -->
+                            <div class="form-group">
+                                <label for="categoryFilter">Filter by Category:</label>
+                                <select id="categoryFilter" class="form-control">
+                                    <option value="">All Categories</option>
+                                    <!-- Categories will be loaded dynamically -->
+                                </select>
+                            </div>
 
-                        <div class="row mb-4">
-                              <div class="col-sm-12 text-right">
-    <button type="button" id="sortByNameBtn" class="btn btn-sm btn-primary">
-      Get All Products Sorted by Name
-    </button>
-  </div>
-                            <div class="col-sm-12">
-                                <button type="button" class="btn btn-sm btn-primary pull-right" data-toggle="modal" data-target="#productModal">
-                                    Add New Product
-                                </button>
+                            <!-- Main Content Row -->
+                            <div class="row">
+                                <!-- Product Table Column -->
+                                <div class="col-md-8">
+                                    <div class="card">
+                                        <div class="card-header bg-primary text-white">
+                                            <h5 class="mb-0">Product Search</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <!-- Search Form -->
+                                            <form id="searchForm" class="form-inline mb-3">
+                                                <div class="input-group w-100">
+                                                    <input type="text" id="searchInput" class="form-control" placeholder="Search by product name...">
+                                                    <div class="input-group-append">
+                                                        <button type="submit" class="btn btn-primary">
+                                                            <i class="zmdi zmdi-search"></i> Search
+                                                        </button>
+                                                        <button type="button" id="clearSearchBtn" class="btn btn-secondary">
+                                                            <i class="zmdi zmdi-close"></i> Clear
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+
+                                            <!-- Sort and Add Buttons -->
+                                            <div class="row mb-4">
+                                                <div class="col-sm-6">
+                                                    <button type="button" id="sortByNameBtn" class="btn btn-sm btn-primary">
+                                                        Get All Products Sorted by Name
+                                                    </button>
+                                                </div>
+                                                <div class="col-sm-6 text-right">
+                                                    <button type="button" class="btn btn-sm btn-primary pull-right" id="addProductBtn" data-toggle="modal" data-target="#productModal">
+                                                        Add New Product
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <!-- Main Products Table Container -->
+                                            <div id="mainProductsContainer">
+                                                <table class="table table-bordered" id="productsTable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Category</th>
+                                                            <th>Characteristics</th>
+                                                            <th>Producer</th>
+                                                            <th style="width: 150px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <!-- Product rows will be loaded dynamically -->
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            <!-- Search Results Area -->
+                                            <div id="searchResults" class="mt-3" style="display: none;">
+                                                <div class="alert alert-info mb-3">
+                                                    <span id="searchResultsCount">0</span> products found for "<span id="searchQuery"></span>"
+                                                </div>
+                                            </div>
+
+                                            <!-- No Results Message -->
+                                            <div id="noResultsMessage" class="alert alert-warning mt-3" style="display: none;">
+                                                No products found for "<span id="noResultsQuery"></span>"
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Search Statistics Column -->
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header bg-info text-white">
+                                            <h5 class="mb-0">Search Statistics</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="list-group">
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    Total results
+                                                    <span class="badge badge-primary badge-pill" id="totalResultsCount">0</span>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    Categories found
+                                                    <span class="badge badge-info badge-pill" id="categoriesFoundCount">0</span>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    Producers found
+                                                    <span class="badge badge-success badge-pill" id="producersFoundCount">0</span>
+                                                </li>
+                                            </ul>
+
+                                            <div class="mt-3">
+                                                <button id="backToAllProducts" class="btn btn-outline-primary btn-block">
+                                                    <i class="zmdi zmdi-format-list-bulleted"></i> Show All Products
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <table class="table table-bordered" id="productsTable">
-                           <thead>
-    <tr>
-        <th>Name</th>
-        <th>Category</th>
-        <th>Characteristics</th>
-        <th>Producer</th>  <!-- New column -->
-        <th style="width: 150px">Action</th>
-    </tr>
-</thead>
-                            <tbody>
-                                <!-- Product rows go here -->
-                            </tbody>
-                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal -->
+    <!-- Product Modal -->
     <div class="modal fade-scale" id="productModal" role="dialog" data-backdrop="static">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -176,27 +214,27 @@
                     <h4 class="modal-title">Add New Product</h4>
                 </div>
                 <div class="modal-body">
-                 <form id="productForm">
-    <input type="hidden" name="id_product" id="id_product">
-    <div class="form-group">
-        <label>Product Name</label>
-        <input class="form-control" name="product_name" id="product_name" type="text" placeholder="Product Name">
-    </div>
-    <div class="form-group">
-        <label>Category Number</label>
-        <select class="form-control" name="category_number" id="category_number">
-            <option value="">Select category</option>
-        </select>
-    </div>
-    <div class="form-group">
-        <label>Characteristics</label>
-        <input class="form-control" name="characteristics" id="characteristics" type="text" placeholder="Characteristics">
-    </div>
-    <div class="form-group">
-        <label>Producer</label>
-        <input class="form-control" name="producer" id="producer" type="text" placeholder="Producer">
-    </div>
-</form>
+                    <form id="productForm">
+                        <input type="hidden" name="id_product" id="id_product">
+                        <div class="form-group">
+                            <label>Product Name</label>
+                            <input class="form-control" name="product_name" id="product_name" type="text" placeholder="Product Name">
+                        </div>
+                        <div class="form-group">
+                            <label>Category Number</label>
+                            <select class="form-control" name="category_number" id="category_number">
+                                <option value="">Select category</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Characteristics</label>
+                            <input class="form-control" name="characteristics" id="characteristics" type="text" placeholder="Characteristics">
+                        </div>
+                        <div class="form-group">
+                            <label>Producer</label>
+                            <input class="form-control" name="producer" id="producer" type="text" placeholder="Producer">
+                        </div>
+                    </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -206,58 +244,55 @@
         </div>
     </div>
 
-</div> <!-- #main -->
+    <!-- Scripts -->
+    <script src="web/js/package/jquery.min.js"></script>
+    <script src="web/js/common.js"></script>
+    <script src="web/js/manage-product.js"></script>
+    <script src="web/js/package/bootstrap.min.js"></script>
 
-<!-- Scripts -->
-<script src="web/js/package/jquery.min.js"></script>
-<script src="web/js/common.js"></script>
-<script src="web/js/manage-product.js"></script>
-<script src="web/js/package/bootstrap.min.js"></script>
+    <script>
+        // Load employee role information
+        fetch('/api/employee_info', {
+            method: 'GET',
+            credentials: 'include'
+        })
+        .then(res => {
+            if (!res.ok) {
+                if (res.status === 401) window.location.href = '/login.html';
+                throw new Error('Not authorized');
+            }
+            return res.json();
+        })
+        .then(data => {
+            const role = data.empl_role.toLowerCase();
 
-<script>
-  fetch('/api/employee_info', {
-  method: 'GET',
-  credentials: 'include'
-})
-.then(res => {
-  if (!res.ok) {
-    if (res.status === 401) window.location.href = '/login.html';
-    throw new Error('Not authorized');
-  }
-  return res.json();
-})
-.then(data => {
-  const role = data.empl_role.toLowerCase();
+            // Hide all tabs initially
+            document.querySelectorAll('.role-manager, .role-cashier')
+                .forEach(el => el.style.display = 'none');
 
-  // Сховати всі вкладки спочатку
-  document.querySelectorAll('.role-manager, .role-cashier')
-    .forEach(el => el.style.display = 'none');
+            // Show only tabs for the current role
+            document.querySelectorAll(`.role-${role}`)
+                .forEach(el => el.style.display = 'block');
 
-  // Показати лише ті, що відповідають ролі
-  document.querySelectorAll(`.role-${role}`)
-    .forEach(el => el.style.display = 'block');
+            // Show the sidebar
+            document.getElementById('mySidebar').style.display = 'block';
+        })
+        .catch(err => {
+            console.error('Role fetch error:', err);
+        });
 
-  // Показати сам сайдбар
-  document.getElementById('mySidebar').style.display = 'block';
-})
-.catch(err => {
-  console.error('Role fetch error:', err);
-});
+        // Sidebar toggle functions for mobile
+        function w3_open() {
+            document.getElementById('mySidebar').style.display = 'block';
+            document.getElementById('main').style.marginLeft = '250px';
+            document.getElementById('openNav').style.display = 'none';
+        }
 
-
-  // Функції відкриття / закриття для маленьких екранів
-  function w3_open() {
-    document.getElementById('mySidebar').style.display = 'block';
-    document.getElementById('main').style.marginLeft = '250px';
-    document.getElementById('openNav').style.display = 'none';
-  }
-  function w3_close() {
-    document.getElementById('mySidebar').style.display = 'none';
-    document.getElementById('main').style.marginLeft = '0';
-    document.getElementById('openNav').style.display = 'inline-block';
-  }
-</script>
-
-
+        function w3_close() {
+            document.getElementById('mySidebar').style.display = 'none';
+            document.getElementById('main').style.marginLeft = '0';
+            document.getElementById('openNav').style.display = 'inline-block';
+        }
+    </script>
 </body>
 </html>

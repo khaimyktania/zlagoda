@@ -4,10 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f9f0029f-da69-424e-98ae-755ef497d758" name="Changes" comment="requests with employee">
+    <list default="true" id="f9f0029f-da69-424e-98ae-755ef497d758" name="Changes" comment="yettiii">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/employee_credentials.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/employee_credentials.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/product_dao.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/product_dao.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/server.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/js/manage-product.js" beforeDir="false" afterPath="$PROJECT_DIR$/web/js/manage-product.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/manage_product.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/manage_product.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -267,7 +270,23 @@
       <option name="project" value="LOCAL" />
       <updated>1745162368386</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="yettiii">
+      <option name="closed" value="true" />
+      <created>1746122354671</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1746122354671</updated>
+    </task>
+    <task id="LOCAL-00008" summary="yettiii">
+      <option name="closed" value="true" />
+      <created>1746122363435</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1746122363435</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -299,6 +318,7 @@
     <MESSAGE value="HV pidvantazhennia bazy danyh ura" />
     <MESSAGE value="poshuk ale ne info" />
     <MESSAGE value="requests with employee" />
-    <option name="LAST_COMMIT_MESSAGE" value="requests with employee" />
+    <MESSAGE value="yettiii" />
+    <option name="LAST_COMMIT_MESSAGE" value="yettiii" />
   </component>
 </project>

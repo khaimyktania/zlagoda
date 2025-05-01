@@ -123,3 +123,16 @@ def validate_product_fields(product):
     if errors:
         raise ValueError("Validation error(s): " + "; ".join(errors))
 
+
+def search_products_by_name(connection, name):
+    """
+    Пошук продуктів за назвою (використовуючи часткове співпадіння)
+    """
+    query = "SELECT * FROM products WHERE product_name LIKE %s ORDER BY product_name ASC;"
+    search_pattern = f"%{name}%"
+    try:
+        result = execute_query(connection, query, (search_pattern,))
+        return result
+    except Exception as e:
+        print(f"Помилка в search_products_by_name: {e}")
+        raise

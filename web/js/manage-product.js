@@ -13,6 +13,7 @@ var productModal = $("#productModal");
 // API endpoints
 var productSaveApiUrl = '/insertProduct';
 var productDeleteApiUrl = '/deleteProduct';
+var searchProductByNameApiUrl = '/searchProductsByName';
 
 // Змінена функція для перевірки, чи це сторінка продуктів
 function isProductPage() {
@@ -95,6 +96,54 @@ function loadProducts(category_number = null, sorted = false) {
     });
 }
 
+// Оновлена функція пошуку продуктів за назвою
+// Modified updateSearchUI function to avoid duplicate display
+function searchProductsByName(productName) {
+    // Показуємо індикатор завантаження
+    $("#productsTable").find('tbody').html('<tr><td colspan="5"><div class="text-center"><i class="zmdi zmdi-spinner zmdi-hc-spin"></i> Пошук...</div></td></tr>');
+
+    // Скидаємо попередні результати
+    resetSearchUI();
+
+    // Встановлюємо текст запиту в елементах UI
+    $("#searchQuery, #noResultsQuery").text(productName);
+
+    $.ajax({
+        url: searchProductByNameApiUrl,
+        type: 'GET',
+        data: { name: productName },
+        success: function(response) {
+            if (response && Array.isArray(response)) {
+                // Якщо результати пошуку порожні
+                if (response.length === 0) {
+                    $("#productsTable").find('tbody').html('<tr><td colspan="5">За вашим запитом "' + productName + '" продукти не знайдено</td></tr>');
+                    $("#noResultsMessage").show();
+                    return;
+                }
+
+                // Оновлюємо основну таблицю продуктів
+                updateProductsTable(response);
+
+                // Оновлюємо статистику пошуку
+                updateSearchStatistics(response);
+
+                // Показуємо блок результатів пошуку
+                $("#searchResults").show();
+                console.log("Products table updated with " + response.length + " search results");
+            } else {
+                console.error("Invalid response format:", response);
+                $("#productsTable").find('tbody').html('<tr><td colspan="5">Помилка при пошуку</td></tr>');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Error searching products:", error);
+            $("#productsTable").find('tbody').html('<tr><td colspan="5">Помилка при пошуку: ' + error + '</td></tr>');
+            alert('Error searching products: ' + xhr.responseText);
+        }
+    });
+}
+
+
 // Оновлена document.ready функція
 $(document).ready(function() {
     console.log("Document ready, checking if product page:", isProductPage());
@@ -135,7 +184,16 @@ $(document).ready(function() {
             loadProducts(selectedCategory, false);
         });
 
-        // Save product button handler - використовуємо функцію обробника безпосередньо
+        // Ініціалізація пошуку
+        initSearchForm();
+
+        // Повернення до всіх продуктів
+        $("#backToAllProducts").on("click", function() {
+            resetSearchUI();
+            loadProducts();
+        });
+
+        // Save product button handler
         $("#saveProduct").on("click", function() {
             var data = $("#productForm").serializeArray();
             var requestPayload = {
@@ -318,3 +376,104 @@ function loadCategoryFilter() {
         });
     });
 }
+
+// Ініціалізація форми пошуку
+function initSearchForm() {
+    // Search form submission
+    $("#searchForm").on("submit", function(e) {
+        e.preventDefault();
+        const searchTerm = $("#searchInput").val().trim();
+
+        if (searchTerm === "") {
+            alert("Please enter a product name to search");
+            return;
+        }
+
+        searchProductsByName(searchTerm);
+    });
+
+    // Clear search button
+    $("#clearSearchBtn").on("click", function() {
+        $("#searchInput").val("");
+        resetSearchUI();
+        loadProducts();
+    });
+}
+
+// Оновлення основної таблиці продуктів з результатами пошуку
+function updateProductsTable(products) {
+    let tableContent = '';
+
+    $.each(products, function(index, product) {
+        // Захист від undefined полів
+        const productName = product.product_name || '';
+        const categoryNumber = product.category_number || '';
+        const characteristics = product.characteristics || '';
+        const producer = product.producer || '';
+
+        tableContent += '<tr data-id="' + (product.id_product || '') + '" data-name="' + productName + '" data-category="' + categoryNumber + '" data-char="' + characteristics + '" data-producer="' + producer + '">' +
+            '<td>' + productName + '</td>' +
+            '<td>' + categoryNumber + '</td>' +
+            '<td>' + characteristics + '</td>' +
+            '<td>' + producer + '</td>' +
+            '<td><span class="btn btn-xs btn-primary edit-product">Edit</span> <span class="btn btn-xs btn-danger delete-product">Delete</span></td></tr>';
+    });
+
+    $("#productsTable").find('tbody').html(tableContent);
+}
+
+// Оновлення таблиці результатів пошуку
+function updateSearchResultsTable(products) {
+    let tableContent = '';
+
+    $.each(products, function(index, product) {
+        // Захист від undefined полів
+        const productName = product.product_name || '';
+        const categoryNumber = product.category_number || '';
+        const characteristics = product.characteristics || '';
+        const producer = product.producer || '';
+
+        tableContent += '<tr data-id="' + (product.id_product || '') + '" data-name="' + productName + '" data-category="' + categoryNumber + '" data-char="' + characteristics + '" data-producer="' + producer + '">' +
+            '<td>' + productName + '</td>' +
+            '<td>' + categoryNumber + '</td>' +
+            '<td>' + characteristics + '</td>' +
+            '<td>' + producer + '</td>' +
+            '<td><span class="btn btn-xs btn-primary edit-product">Edit</span> <span class="btn btn-xs btn-danger delete-product">Delete</span></td></tr>';
+    });
+
+    $("#searchResultsTable").find('tbody').html(tableContent);
+}
+
+// Оновлення статистики пошуку
+function updateSearchStatistics(products) {
+    const totalResults = products.length;
+
+    // Підрахунок унікальних категорій та виробників
+    const uniqueCategories = new Set();
+    const uniqueProducers = new Set();
+
+    $.each(products, function(index, product) {
+        if (product.category_number) uniqueCategories.add(product.category_number);
+        if (product.producer) uniqueProducers.add(product.producer);
+    });
+
+    // Оновлення елементів UI з підрахунками
+    $("#searchResultsCount, #totalResultsCount").text(totalResults);
+    $("#categoriesFoundCount").text(uniqueCategories.size);
+    $("#producersFoundCount").text(uniqueProducers.size);
+}
+
+// Скидання елементів UI пошуку
+function resetSearchUI() {
+    $("#searchResults, #noResultsMessage").hide();
+    $("#searchResultsTable").find('tbody').empty();
+    $("#totalResultsCount, #categoriesFoundCount, #producersFoundCount").text("0");
+}
+
+// Ця функція забезпечує правильну ініціалізацію пошуку
+// при навігації на сторінку після первинного завантаження
+$(window).on('hashchange', function() {
+    if (isProductPage()) {
+        initSearchForm();
+    }
+});

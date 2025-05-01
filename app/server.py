@@ -183,6 +183,20 @@ def delete_product():
     return response
 
 
+@app.route('/searchProductsByName', methods=['GET'])
+def search_products_by_name_api():
+    connection = get_sql_connection()
+    product_name = request.args.get('name')
+
+    products = []
+    if product_name:
+        products = product_dao.search_products_by_name(connection, product_name)
+    else:
+        products = product_dao.get_all_products(connection)
+
+    connection.close()
+    return jsonify(products)
+
 @app.route('/manage-employee')
 @require_role('manager')
 def manage_employee():
