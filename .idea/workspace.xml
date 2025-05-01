@@ -6,12 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="f9f0029f-da69-424e-98ae-755ef497d758" name="Changes" comment="fix all display of data">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/check_dao.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/check_dao.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/server.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/store_product_dao.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/store_product_dao.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/js/manage-category.js" beforeDir="false" afterPath="$PROJECT_DIR$/web/js/manage-category.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/web/js/manage-check.js" beforeDir="false" afterPath="$PROJECT_DIR$/web/js/manage-check.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/js/manage-store-product.js" beforeDir="false" afterPath="$PROJECT_DIR$/web/js/manage-store-product.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/manage_category.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/manage_category.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -295,7 +292,15 @@
       <option name="project" value="LOCAL" />
       <updated>1746057127945</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="fix all display of data">
+      <option name="closed" value="true" />
+      <created>1746059525130</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1746059525130</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

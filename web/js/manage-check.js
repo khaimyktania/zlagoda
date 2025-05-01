@@ -312,6 +312,7 @@ function prepareCreateCheckModal() {
 }
 
 // Generate new check number with improved error handling
+// Generate new check number with improved error handling
 function generateCheckNumber() {
     console.log("Generating check number...");
     $.ajax({
@@ -336,6 +337,19 @@ function generateCheckNumber() {
     });
 }
 
+// Add a validation function for check number input - updated for new format
+function validateCheckNumberLength(inputField) {
+    // Regular expression to match our check number format (CH followed by 3+ digits)
+    const checkNumberPattern = /^CH\d{3,}$/;
+
+    if (inputField.value && !checkNumberPattern.test(inputField.value)) {
+        alert('Check number must be in format CH followed by at least 3 digits (e.g., CH001)');
+        // Reset to empty or previous valid value
+        inputField.value = '';
+    }
+}
+
+// Add a validation function for check number input - updated for new format
 // Add a validation function for check number input - updated for new format
 function validateCheckNumberLength(inputField) {
     // Regular expression to match our check number format (CH followed by 3+ digits)

@@ -257,7 +257,7 @@ def delete_employee():
 
 
 @app.route('/getCashiers', methods=['GET'])
-@require_role('manager')
+@require_role('cashier','manager')
 def get_cashiers():
     cashiers = employee_dao.get_cashiers_ordered_by_surname(connection)
     response = jsonify(cashiers)
@@ -416,7 +416,7 @@ def get_customers():
 
 
 @app.route('/api/current_employee')
-@app.route('/api/current_employee')
+@require_role('cashier','manager')
 def get_current_employee():
     id_employee = session.get('id_employee')
     if not id_employee:
@@ -915,7 +915,7 @@ def get_checks_by_date_range():
             connection.close()
 
 @app.route('/getAllEmployees', methods=['GET'])
-@require_role('manager')
+@require_role('cashier', 'manager')
 def get_all_employees():
     connection = None
     try:
@@ -932,7 +932,7 @@ def get_all_employees():
 
 
 @app.route('/getAllCustomers', methods=['GET'])
-@require_role('manager')
+@require_role('cashier', 'manager')
 def get_all_customers():
     connection = None
     try:
