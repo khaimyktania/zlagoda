@@ -1,6 +1,9 @@
 from sql_connection import execute_query, get_sql_connection
 from datetime import datetime
+from credentials_utils import auto_generate_credentials, load_credentials, save_credentials, hash_password
+import secrets
 import re
+
 
 
 def insert_new_employee(connection, employee):
@@ -30,6 +33,21 @@ def insert_new_employee(connection, employee):
 
     try:
         result = execute_query(connection, query, data)
+        # Автоматичне створення облікових даних
+        role = employee['empl_role'].lower()
+        login = f"{role}{employee['id_employee']}"
+        raw_password = login
+        salt = secrets.token_hex(8)
+        hashed_password = hash_password(raw_password, salt)
+
+        creds = load_credentials()
+        creds[str(employee['id_employee'])] = {
+            "login": login,
+            "password_hash": hashed_password,
+            "salt": salt,
+            "role": role
+        }
+        save_credentials(creds)
         return result
     except Exception as e:
         print(f"Помилка додавання працівника: {e}")
@@ -74,6 +92,22 @@ def update_employee(connection, employee):
 
     try:
         result = execute_query(connection, query, data)
+        # Оновлення облікових даних після зміни ролі або ідентифікатора
+        role = employee['empl_role'].lower()
+        login = f"{role}{employee['id_employee']}"
+        raw_password = login
+        salt = secrets.token_hex()
+        hashed_password = hash_password(raw_password, salt)
+
+        creds = load_credentials()
+        creds[str(employee['id_employee'])] = {
+            "login": login,
+            "password_hash": hashed_password,
+            "salt": salt,
+            "role": role
+        }
+        save_credentials(creds)
+
         return result
     except Exception as e:
         print(f"Помилка оновлення працівника: {e}")

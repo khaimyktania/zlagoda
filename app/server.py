@@ -62,6 +62,8 @@ def home():
     return app.send_static_file('main.html')
 
 
+from credentials_utils import check_password  # додай імпорт
+
 @app.route('/login', methods=['POST'])
 def login():
     try:
@@ -72,7 +74,7 @@ def login():
 
         credentials = load_credentials()
         for id_emp, cred in credentials.items():
-            if cred['login'] == username and cred['password'] == password:
+            if cred['login'] == username and check_password(password, cred['password_hash'], cred['salt']):
                 session['role'] = cred['role']
                 session['id_employee'] = id_emp
                 print(f"Login successful. Role: {cred['role']}, ID: {id_emp}")
