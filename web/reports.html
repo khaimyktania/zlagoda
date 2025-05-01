@@ -150,47 +150,129 @@
 <script src="js/package/bootstrap.min.js"></script>
 
 <script>
-  fetch('/api/employee_info', {
-  method: 'GET',
-  credentials: 'include'
-})
-.then(res => {
-  if (!res.ok) {
-    if (res.status === 401) window.location.href = '/login.html';
-    throw new Error('Not authorized');
+  function loadReport(type) {
+    const endpoints = {
+      'employees': '/api/reports/employees',
+      'customers': '/api/reports/customers',
+      'categories': '/api/reports/categories',
+      'products': '/api/reports/products',
+      'store-products': '/api/reports/store-products',
+      'receipts': '/api/reports/receipts',
+    };
+
+    const titles = {
+      'employees': 'Звіт по працівниках',
+      'customers': 'Звіт по клієнтах',
+      'categories': 'Звіт по категоріях',
+      'products': 'Звіт по товарах',
+      'store-products': 'Звіт по товарах у магазині',
+      'receipts': 'Звіт по чеках',
+    };
+
+    if (!endpoints[type]) {
+      alert('Невідомий тип звіту');
+      return;
+    }
+
+    fetch(endpoints[type])
+      .then(res => {
+        if (!res.ok) throw new Error(`Помилка ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        document.getElementById('report-title').innerText = titles[type];
+        document.getElementById('report-output').innerHTML = generateTable(data);
+      })
+      .catch(err => {
+        console.error('Помилка завантаження звіту:', err);
+        document.getElementById('report-output').innerHTML = '<p style="color:red;">Не вдалося завантажити звіт.</p>';
+      });
   }
-  return res.json();
-})
-.then(data => {
-  const role = data.empl_role.toLowerCase();
 
-  // Сховати всі вкладки спочатку
-  document.querySelectorAll('.role-manager, .role-cashier')
-    .forEach(el => el.style.display = 'none');
+  function generateTable(data) {
+    if (!Array.isArray(data) || data.length === 0) {
+      return '<p>Немає даних для відображення.</p>';
+    }
 
-  // Показати лише ті, що відповідають ролі
-  document.querySelectorAll(`.role-${role}`)
-    .forEach(el => el.style.display = 'block');
+    // Визначення назв колонок для кожного атрибута
+    const columnNames = {
+      'id_employee': 'Employee ID',
+      'empl_surname': 'Surname',
+      'empl_name': 'Name',
+      'empl_patronymic': 'Patronymic',
+      'empl_role': 'Role',
+      'salary': 'Salary',
+      'date_of_birth': 'Birthday',
+      'date_of_start': 'Start Date',
+      'phone_number': 'Phone',
+      'city': 'City',
+      'street': 'Street',
+      'zip_code': 'ZIP',
 
-  // Показати сам сайдбар
-  document.getElementById('mySidebar').style.display = 'block';
-})
-.catch(err => {
-  console.error('Role fetch error:', err);
-});
+      'card_number': 'Card Number',
+      'cust_surname': 'Surname',
+      'cust_name': 'Name',
+      'cust_patronymic': 'Patronymic',
+      'phone_number': 'Phone',
+      'city': 'City',
+      'street': 'Street',
+      'zip_code': 'ZIP',
+      'percent': 'Discount %',
+
+      'category_number': 'Category ID',
+      'category_name': 'Category Name',
+
+      'id_product': 'Product ID',
+      'product_name': 'Product Name',
+      'characteristics': 'Characteristics',
+      'producer': 'Producer',
+      'category_number': 'Category ID',
+
+      'UPC': 'UPC',
+      'id_product': 'Product ID',
+      'selling_price': 'Price',
+      'products_number': 'Quantity',
+      'promotional_product': 'Promo',
+
+      'check_number': 'Check #',
+      'print_date': 'Printed',
+      'sum_total': 'Total',
+      'vat': 'VAT',
+    };
+
+    // Витягуємо всі унікальні ключі з усіх рядків
+    const keysSet = new Set();
+    data.forEach(row => Object.keys(row).forEach(key => keysSet.add(key)));
+
+    // Порядок: унікальний ID → решта атрибутів
+    const idKeys = ['id_employee', 'card_number', 'category_number', 'id_product', 'UPC', 'check_number'];
+    const otherKeys = [...keysSet].filter(k => !idKeys.includes(k)).sort();
+    const finalKeys = idKeys.filter(k => keysSet.has(k)).concat(otherKeys);
+
+    let html = '<table><thead><tr>';
+    finalKeys.forEach(key => {
+      html += `<th>${columnNames[key] || key}</th>`;
+    });
+    html += '</tr></thead><tbody>';
+
+    data.forEach(row => {
+      html += '<tr>';
+      finalKeys.forEach(key => {
+        html += `<td>${row[key] !== null ? row[key] : ''}</td>`;
+      });
+      html += '</tr>';
+    });
+
+    html += '</tbody></table>';
+    return html;
+    }
 
 
-  function w3_open() {
-    document.getElementById('mySidebar').style.display = 'block';
-    document.getElementById('main').style.marginLeft = '250px';
-    document.getElementById('openNav').style.display = 'none';
-  }
-  function w3_close() {
-    document.getElementById('mySidebar').style.display = 'none';
-    document.getElementById('main').style.marginLeft = '0';
-    document.getElementById('openNav').style.display = 'inline-block';
+  function printReport() {
+    window.print();
   }
 </script>
+
 
 
 </body>

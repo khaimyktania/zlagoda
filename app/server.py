@@ -2,7 +2,8 @@ from flask import Flask, request, jsonify
 from flask import Flask, request, jsonify, session
 from functools import wraps
 from credentials_utils import load_credentials, save_credentials, auto_generate_credentials
-
+from flask import jsonify, session
+from datetime import date
 from app import category_dao
 from sql_connection import get_sql_connection
 import json
@@ -21,16 +22,40 @@ connection = get_sql_connection()
 employees = employee_dao.get_all_employees(connection)
 auto_generate_credentials(employees)
 
+
 def require_role(*roles):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
+            # Відлагоджувальна інформація
+            print(f"Checking role. Session: {session}")
+            print(f"Required roles: {roles}")
+
+            # Перевірка на авторизацію
+            if 'role' not in session or 'id_employee' not in session:
+                print("Authentication required. User not logged in.")
+                return jsonify({
+                    'error': 'Authentication required',
+                    'message': 'Будь ласка, увійдіть в систему'
+                }), 401
+
             user_role = session.get('role')
+            print(f"User role: {user_role}")
+
             if user_role not in roles:
-                return jsonify({'error': 'Access denied'}), 403
+                print(f"Access denied for role {user_role}")
+                return jsonify({
+                    'error': 'Access denied',
+                    'message': f'Ця функція доступна тільки для ролей: {", ".join(roles)}. Ваша роль: {user_role}'
+                }), 403
+
+            print(f"Access granted for role {user_role}")
             return func(*args, **kwargs)
+
         return wrapper
+
     return decorator
+
 
 @app.route('/')
 def home():
@@ -43,13 +68,17 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
 
+        print(f"Login attempt for username: {username}")
+
         credentials = load_credentials()
         for id_emp, cred in credentials.items():
             if cred['login'] == username and cred['password'] == password:
                 session['role'] = cred['role']
                 session['id_employee'] = id_emp
+                print(f"Login successful. Role: {cred['role']}, ID: {id_emp}")
                 return jsonify({'success': True, 'role': cred['role']})
 
+        print("Invalid credentials")
         return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
     except Exception as e:
         print(f"[LOGIN ERROR]: {e}")
@@ -74,6 +103,7 @@ def get_logged_in_employee_info():
     })
 
 @app.route('/manage_product')
+@require_role('cashier','manager')
 def manage_product():
     return app.send_static_file('manage_product.html')
 
@@ -81,13 +111,20 @@ def manage_product():
 def manage_store_product():
     return app.send_static_file('manage_store_product.html')
 
+
 @app.route('/getProducts', methods=['GET'])
+@require_role('cashier', 'manager')
 def get_products():
     connection = None
     try:
+        print("Endpoint /getProducts викликаний")
+        # Печатаємо інформацію про сесію для відлагодження
+        print(f"Поточна сесія: {session}")
+
         connection = get_sql_connection()
-        response = product_dao.get_all_products(connection)
-        response = jsonify(response)
+        products = product_dao.get_all_products(connection)
+        print(f"Retrieved {len(products)} products from database")
+        response = jsonify(products)
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
     except Exception as e:
@@ -96,7 +133,6 @@ def get_products():
     finally:
         if connection:
             connection.close()
-
 
 @app.route('/insertProduct', methods=['POST'])
 @require_role('manager')
@@ -221,7 +257,7 @@ def delete_employee():
 
 
 @app.route('/getCashiers', methods=['GET'])
-@require_role('manager')
+@require_role('cashier','manager')
 def get_cashiers():
     cashiers = employee_dao.get_cashiers_ordered_by_surname(connection)
     response = jsonify(cashiers)
@@ -271,7 +307,7 @@ def manage_category():
     return app.send_static_file('manage_category.html')
 
 @app.route('/getCategories', methods=['GET'])
-@require_role('manager')
+@require_role('cashier','manager')
 def get_categories():
     connection = None
     try:
@@ -371,7 +407,7 @@ def manage_customer():
 
 
 @app.route('/getCustomers', methods=['GET'])
-@require_role('manager')
+@require_role('cashier','manager')
 def get_customers():
     response = customer_dao.get_all_customers(connection)
     response = jsonify(response)
@@ -380,7 +416,7 @@ def get_customers():
 
 
 @app.route('/api/current_employee')
-@app.route('/api/current_employee')
+@require_role('cashier','manager')
 def get_current_employee():
     id_employee = session.get('id_employee')
     if not id_employee:
@@ -498,7 +534,7 @@ def delete_customer():
     # Add these routes to your server.py file
 
 @app.route('/getStoreProducts', methods=['GET'])
-@require_role('manager')
+@require_role('cashier','manager')
 def get_store_products():
     connection = get_sql_connection()
     try:
@@ -517,7 +553,8 @@ def get_store_product_by_upc():
         return jsonify({"success": False, "message": "UPC is required"}), 400
     connection = get_sql_connection()
     try:
-        response = store_product_dao.get_store_product_by_upc(connection, upc)
+        # Змінено: використовуємо get_store_product_detail_by_upc замість get_store_product_by_upc
+        response = store_product_dao.get_store_product_detail_by_upc(connection, upc)
         if response:
             return jsonify(response)
         else:
@@ -858,12 +895,17 @@ def get_checks_by_date_range():
     try:
         start_date = request.args.get('start_date')
         end_date = request.args.get('end_date')
+        id_employee = request.args.get('id_employee')  # Може бути None або порожнім
 
         if not start_date or not end_date:
             return jsonify({'success': False, 'message': 'Start and end dates are required'}), 400
 
         connection = get_sql_connection()
-        response = check_dao.find_checks_by_date_range(connection, start_date, end_date)
+
+        # Передаємо id_employee як None, якщо воно порожнє
+        employee_id = id_employee if id_employee and id_employee.strip() else None
+        response = check_dao.find_checks_by_date_range(connection, start_date, end_date, employee_id)
+
         return jsonify(response)
     except Exception as e:
         print(f"Error in get_checks_by_date_range: {str(e)}")
@@ -872,9 +914,8 @@ def get_checks_by_date_range():
         if connection:
             connection.close()
 
-
 @app.route('/getAllEmployees', methods=['GET'])
-@require_role('manager')
+@require_role('cashier', 'manager')
 def get_all_employees():
     connection = None
     try:
@@ -891,7 +932,7 @@ def get_all_employees():
 
 
 @app.route('/getAllCustomers', methods=['GET'])
-@require_role('manager')
+@require_role('cashier', 'manager')
 def get_all_customers():
     connection = None
     try:
@@ -942,7 +983,7 @@ def report_store_products():
 @require_role('manager')
 def report_receipts():
     connection = get_sql_connection()
-    cursor = connection.cursor(dictionary=True)
+    cursor = connection.cursor()
     cursor.execute("SELECT check_number, print_date, sum_total, vat FROM `check` ORDER BY print_date DESC")
     result = cursor.fetchall()
     return jsonify(result)
@@ -968,6 +1009,34 @@ def cashier_account():
 @app.route('/debug/credentials', methods=['GET'])
 def debug_credentials():
     return jsonify(load_credentials())
+
+@app.route('/api/employee_full_info', methods=['GET'])
+@require_role('manager', 'cashier')
+def get_full_employee_info():
+    id_emp = session.get('id_employee')
+    if not id_emp:
+        return jsonify({'success': False, 'message': 'Not logged in'}), 401
+
+    employee = employee_dao.get_employee_info_by_id(connection, id_emp)
+    if not employee:
+        return jsonify({'success': False, 'message': 'Employee not found'}), 404
+
+    # Прямо тут обробляємо значення для JSON
+    return jsonify({
+        'success': True,
+        'id_employee': employee['id_employee'],
+        'empl_surname': employee['empl_surname'],
+        'empl_name': employee['empl_name'],
+        'empl_patronymic': employee['empl_patronymic'],
+        'empl_role': employee['empl_role'],
+        'salary': float(employee['salary']),  # Decimal → float
+        'date_of_birth': employee['date_of_birth'].isoformat(),  # date → str
+        'date_of_start': employee['date_of_start'].isoformat(),  # date → str
+        'phone_number': employee['phone_number'].strip(),  # прибираємо \t або пробіли
+        'city': employee['city'],
+        'street': employee['street'],
+        'zip_code': employee['zip_code']
+    })
 
 if __name__ == "__main__":
     print("Starting Python Flask Server For Grocery Store Management System")

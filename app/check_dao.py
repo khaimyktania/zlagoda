@@ -298,7 +298,6 @@ def generate_check_number(connection):
         print(f"Error in generate_check_number: {e}")
         raise
 
-
 def get_cashiers(connection):
     """
     Get all employees with position 'Cashier'

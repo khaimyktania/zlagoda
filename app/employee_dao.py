@@ -311,3 +311,34 @@ def get_employee_by_id(connection, id_employee):
     else:
         return None
 
+def get_employee_info_by_id(connection, id_employee):
+    cursor = connection.cursor()
+    query = """
+        SELECT id_employee, empl_surname, empl_name, empl_patronymic, empl_role,
+               salary, date_of_birth, date_of_start, phone_number,
+               city, street, zip_code
+        FROM employee
+        WHERE id_employee = %s
+    """
+    cursor.execute(query, (id_employee,))
+    row = cursor.fetchone()
+    cursor.close()
+
+    if row is None:
+        return None
+
+    # Повертаємо у вигляді словника вручну
+    return {
+        'id_employee': row[0],
+        'empl_surname': row[1],
+        'empl_name': row[2],
+        'empl_patronymic': row[3],
+        'empl_role': row[4],
+        'salary': row[5],
+        'date_of_birth': row[6],
+        'date_of_start': row[7],
+        'phone_number': row[8],
+        'city': row[9],
+        'street': row[10],
+        'zip_code': row[11]
+    }
