@@ -1,6 +1,7 @@
 from sql_connection import execute_query, get_sql_connection
 import re
 
+
 def validate_customer(customer):
     errors = []
 
@@ -12,37 +13,48 @@ def validate_customer(customer):
     # Перевірка імені — перша літера велика, інші малі, тільки літери
     try:
         name = customer['cust_name']
-        if not name[0].isupper():
-            errors.append("Name must start with an uppercase letter.")
-        if not name.isalpha():
-            errors.append("Name must contain only letters.")
-        if name != name.capitalize():
-            errors.append("Name must have only the first letter capitalized.")
+        if not name:
+            errors.append("Name is required.")
+        elif len(name) > 50:
+            errors.append("Name must not exceed 50 characters.")
+        elif not all(char.isalpha() or char in "'-" for char in name):
+            errors.append("Name must contain only letters, apostrophes, or hyphens.")
+        else:
+            if not re.fullmatch(r"[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)*(?:'[A-Za-zА-Яа-яіїєґ]*)?", name):
+                errors.append(
+                    "Name must start with a capital letter, and after any hyphen, the next part must start with a capital letter.")
     except Exception:
         errors.append("Invalid cust_name format.")
 
     # Перевірка прізвища — перша літера велика, інші малі, тільки літери
     try:
         surname = customer['cust_surname']
-        if not surname[0].isupper():
-            errors.append("Surname must start with an uppercase letter.")
-        if not surname.isalpha():
-            errors.append("Surname must contain only letters.")
-        if surname != surname.capitalize():
-            errors.append("Surname must have only the first letter capitalized.")
+        if not surname:
+            errors.append("Surname is required.")
+        elif len(surname) > 50:
+            errors.append("Surname must not exceed 50 characters.")
+        elif not all(char.isalpha() or char in "'-" for char in surname):
+            errors.append("Surname must contain only letters, apostrophes, or hyphens.")
+        else:
+            # Перевірка: перша літера велика, решта малі, після дефіса перша велика
+            if not re.fullmatch(r"[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)*(?:'[A-Za-zА-Яа-яіїєґ]*)?", surname):
+                errors.append("Surname must start with a capital letter, and after any hyphen, the next part must start with a capital letter.")
     except Exception:
         errors.append("Invalid cust_surname format.")
 
     # Перевірка по-батькові — перша літера велика, інші малі, тільки літери
     try:
-        patronymic = customer['cust_patronymic']
+        patronymic = customer.get('cust_patronymic', '')
         if patronymic:  # Перевірка, чи не порожнє поле
-            if not patronymic[0].isupper():
-                errors.append("Patronymic must start with an uppercase letter.")
-            if not patronymic.isalpha():
-                errors.append("Patronymic must contain only letters.")
-            if patronymic != patronymic.capitalize():
-                errors.append("Patronymic must have only the first letter capitalized.")
+            if len(patronymic) > 50:
+                errors.append("Patronymic must not exceed 50 characters.")
+            elif not all(char.isalpha() or char in "'-" for char in patronymic):
+                errors.append("Patronymic must contain only letters, apostrophes, or hyphens.")
+            else:
+                # Перевірка: перша літера велика, решта малі, після дефіса перша велика
+                if not re.fullmatch(r"[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)*(?:'[A-Za-zА-Яа-яіїєґ]*)?", patronymic):
+                    errors.append(
+                        "Patronymic must start with a capital letter, and after any hyphen, the next part must start with a capital letter.")
     except Exception:
         errors.append("Invalid cust_patronymic format.")
 
@@ -51,22 +63,21 @@ def validate_customer(customer):
     zipcode = customer.get('zip_code', '').strip()
     street = customer.get('street', '').strip()
 
-    # Якщо хоч одне з полів адреси не порожнє — перевіряємо всі
     if city or zipcode or street:
-        # Перевірка міста
         try:
             if not city:
-                errors.append("City is required if address is partially filled.")
-            elif not city[0].isupper():
-                errors.append("City must start with an uppercase letter.")
-            elif not city.isalpha():
-                errors.append("City must contain only letters.")
-            elif city != city.capitalize():
-                errors.append("City must have only the first letter capitalized.")
+                errors.append("City is required.")
+            elif len(city) > 50:
+                errors.append("City must not exceed 50 characters.")
+            elif not all(char.isalpha() or char in "'-" for char in city):
+                errors.append("City must contain only letters, apostrophes, or hyphens.")
+            else:
+                if not re.fullmatch(r"[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)?", city):
+                    errors.append(
+                        "City must start with a capital letter, and after any hyphen, the next part must start with a capital letter.")
         except Exception:
             errors.append("Invalid city format.")
 
-        # Перевірка zip_code — 5 цифр, тільки цифри
         try:
             if not zipcode:
                 errors.append("Zip Code is required if address is partially filled.")
@@ -77,14 +88,13 @@ def validate_customer(customer):
         except Exception:
             errors.append("Invalid zip code format.")
 
-        # Перевірка street
         try:
             if not street:
                 errors.append("Street is required if address is partially filled.")
             else:
-                pattern = r"^[A-Za-zА-Яа-яЇїІіЄєҐґ]+(?:\s[A-Za-zА-Яа-яЇїІіЄєҐґ]*)?,\s\d{1,2}$"
+                pattern = r"^([A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)([-\s][A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)*,\s\d{1,3}[A-ZА-ЯІЇЄҐ]?$"
                 if not re.match(pattern, street):
-                    errors.append("Street must be in format 'Name, number' (e.g. Курчатова, 1).")
+                    errors.append("Street must have each word starting with an uppercase letter, if hyphen is used, the next letter should also be uppercase, followed by a comma and a number (up to three digits).")
         except Exception:
             errors.append("Invalid street format.")
 
@@ -107,9 +117,10 @@ def validate_customer(customer):
     except Exception:
         errors.append("Invalid card number format.")
 
-    # Телефон не довший за 13 символів
-    if len(customer.get('phone_number', '')) > 13:
-        errors.append("Phone number must be ≤ 13 characters.")
+    # Телефон — строго 13 символів: + і 12 цифр
+    phone = customer.get('phone_number', '')
+    if not re.fullmatch(r'\+\d{12}', phone):
+        errors.append("Phone number must be in format +XXXXXXXXXXXX (12 digits).")
 
     # Якщо хоч одне поле адреси вказане — усі мають бути
     has_any_address_field = any(customer.get(field) for field in ['city', 'street', 'zip_code'])
@@ -118,10 +129,8 @@ def validate_customer(customer):
             if not customer.get(field):
                 errors.append(f"If address is provided, '{field}' must not be empty.")
 
-
     if errors:
         raise ValueError("Validation error(s): " + "; ".join(errors))
-
 
 def insert_new_customer(connection, customer):
     validate_customer(customer)

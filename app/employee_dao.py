@@ -30,7 +30,6 @@ def insert_new_employee(connection, employee):
 
     try:
         result = execute_query(connection, query, data)
-        add_or_update_credential(new_id, login='newuser', password='default123')
         return result
     except Exception as e:
         print(f"Помилка додавання працівника: {e}")
@@ -168,27 +167,35 @@ def validate_employee(employee):
         if not employee.get(field):
             errors.append(f"Field '{field}' is required.")
 
-    # Перевірка імені — перша літера велика, інші малі, тільки літери
     try:
         name = employee['empl_name']
-        if not name[0].isupper():
-            errors.append("Name must start with an uppercase letter.")
-        if not name.isalpha():
-            errors.append("Name must contain only letters.")
-        if name != name.capitalize():
-            errors.append("Name must have only the first letter capitalized.")
+        if not name:
+            errors.append("Name is required.")
+        elif len(name) > 50:
+            errors.append("Name must not exceed 50 characters.")
+        elif not all(char.isalpha() or char in "'-" for char in name):
+            errors.append("Name must contain only letters, apostrophes, or hyphens.")
+        else:
+            if not re.fullmatch(r"[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)*(?:'[A-Za-zА-Яа-яіїєґ]*)?", name):
+                errors.append(
+                    "Name must start with a capital letter, and after any hyphen, the next part must start with a capital letter.")
     except Exception:
         errors.append("Invalid empl_name format.")
 
     # Перевірка прізвища — перша літера велика, інші малі, тільки літери
     try:
         surname = employee['empl_surname']
-        if not surname[0].isupper():
-            errors.append("Surname must start with an uppercase letter.")
-        if not surname.isalpha():
-            errors.append("Surname must contain only letters.")
-        if surname != surname.capitalize():
-            errors.append("Surname must have only the first letter capitalized.")
+        if not surname:
+            errors.append("Surname is required.")
+        elif len(surname) > 50:
+            errors.append("Surname must not exceed 50 characters.")
+        elif not all(char.isalpha() or char in "'-" for char in surname):
+            errors.append("Surname must contain only letters, apostrophes, or hyphens.")
+        else:
+            # Перевірка: перша літера велика, решта малі, після дефіса перша велика
+            if not re.fullmatch(r"[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)*(?:'[A-Za-zА-Яа-яіїєґ]*)?", surname):
+                errors.append(
+                    "Surname must start with a capital letter, and after any hyphen, the next part must start with a capital letter.")
     except Exception:
         errors.append("Invalid empl_surname format.")
 
@@ -196,30 +203,40 @@ def validate_employee(employee):
     try:
         patronymic = employee.get('empl_patronymic', '')
         if patronymic:  # Перевірка, чи не порожнє поле
-            if not patronymic[0].isupper():
-                errors.append("Patronymic must start with an uppercase letter.")
-            if not patronymic.isalpha():
-                errors.append("Patronymic must contain only letters.")
-            if patronymic != patronymic.capitalize():
-                errors.append("Patronymic must have only the first letter capitalized.")
+            if len(patronymic) > 50:
+                errors.append("Patronymic must not exceed 50 characters.")
+            elif not all(char.isalpha() or char in "'-" for char in patronymic):
+                errors.append("Patronymic must contain only letters, apostrophes, or hyphens.")
+            else:
+                # Перевірка: перша літера велика, решта малі, після дефіса перша велика
+                if not re.fullmatch(r"[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)*(?:'[A-Za-zА-Яа-яіїєґ]*)?", patronymic):
+                    errors.append(
+                        "Patronymic must start with a capital letter, and after any hyphen, the next part must start with a capital letter.")
     except Exception:
         errors.append("Invalid empl_patronymic format.")
 
     # Перевірка міста — перша літера велика, інші малі, тільки літери
     try:
         city = employee['city']
-        if not city[0].isupper():
-            errors.append("City must start with an uppercase letter.")
-        if not city.isalpha():
-            errors.append("City must contain only letters.")
-        if city != city.capitalize():
-            errors.append("City must have only the first letter capitalized.")
+        if not city:
+            errors.append("City is required.")
+        elif len(city) > 50:
+            errors.append("City must not exceed 50 characters.")
+        elif not all(char.isalpha() or char in "'-" for char in city):
+            errors.append("City must contain only letters, apostrophes, or hyphens.")
+        else:
+            # Перевірка: перша літера велика, решта малі, після дефіса перша велика
+            if not re.fullmatch(r"[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)?", city):
+                errors.append(
+                    "City must start with a capital letter, and after any hyphen, the next part must start with a capital letter.")
     except Exception:
         errors.append("Invalid city format.")
 
     # Перевірка zip_code — 5 цифр, тільки цифри
     try:
         zipcode = employee['zip_code']
+        if not zipcode:
+            errors.append("Zip Code is required.")
         if len(zipcode) != 5:
             errors.append("Zip Code must be exactly 5 characters long.")
         elif not zipcode.isdigit():
@@ -227,36 +244,55 @@ def validate_employee(employee):
     except Exception:
         errors.append("Invalid zip code format.")
 
-    # Перевірка street — перша літера велика, потім назва вулиці, кома і цифра (максимум дві цифри)
     try:
         street = employee['street']
-        # Перевірка, чи є вулиця у форматі "Назва вулиці, номер" (українські літери, кома, дві цифри)
-        pattern = r"^[A-Za-zА-ЯЁа-яё]+(?:\s?[A-Za-zА-ЯЁа-яё]*)?,\s\d{1,2}$"
-        if not re.match(pattern, street):
-            errors.append(
-                "Street must start with an uppercase letter, followed by lowercase letters, a comma, and a number (up to two digits).")
+        if not street:
+            errors.append("Street is required.")
+        else:
+            pattern = r"^([A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)([-\s][A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)*,\s\d{1,3}[A-ZА-ЯІЇЄҐ]?$"
+            if not re.match(pattern, street):
+                errors.append(
+                    "Street must have each word starting with an uppercase letter, if hyphen is used, the next letter should also be uppercase, followed by a comma and a number (up to three digits).")
     except Exception:
         errors.append("Invalid street format.")
 
-    # Перевірка дати народження — не молодше 18
+    # Перевірка дати народження — обов’язково вказана, не молодше 18, не старше 135, не в майбутньому
     try:
-        birth_date = datetime.strptime(employee['date_of_birth'], '%Y-%m-%d')
-        age = (datetime.today() - birth_date).days // 365
-        if age < 18:
-            errors.append("Employee must be at least 18 years old.")
+        birthdate = employee.get('date_of_birth')
+        if not birthdate:
+            errors.append("Date of birth is required.")
+        else:
+            birth_date = datetime.strptime(birthdate, '%Y-%m-%d')
+            today = datetime.today()
+
+            # Перевірка, чи дата народження в майбутньому
+            if birth_date > today:
+                errors.append("Date of birth cannot be in the future.")
+            else:
+                age = (today - birth_date).days // 365
+                if age < 18:
+                    errors.append("Employee must be at least 18 years old.")
+                elif age > 135:
+                    errors.append("Employee must be no older than 135 years old.")
     except Exception:
         errors.append("Invalid date_of_birth format (expected YYYY-MM-DD).")
 
-    # Перевірка зарплати — не від’ємна
+    # Перевірка зарплати — обов'язково вказана, числова і не від’ємна
     try:
-        if float(employee['salary']) < 0:
-            errors.append("Salary must be non-negative.")
+        salary_raw = employee['salary']
+        if salary_raw is None or salary_raw == '':
+            errors.append("Salary is required.")
+        else:
+            salary = float(salary_raw)
+            if salary < 0:
+                errors.append("Salary must be non-negative.")
     except Exception:
         errors.append("Invalid salary format.")
 
-    # Телефон — не більше 13 символів
-    if len(employee.get('phone_number', '')) > 13:
-        errors.append("Phone number must be ≤ 13 characters.")
+    # Телефон — строго 13 символів: + і 12 цифр
+    phone = employee.get('phone_number', '')
+    if not re.fullmatch(r'\+\d{12}', phone):
+        errors.append("Phone number must be in format +XXXXXXXXXXXX (12 digits).")
 
     if errors:
         raise ValueError("Validation errors: " + "; ".join(errors))

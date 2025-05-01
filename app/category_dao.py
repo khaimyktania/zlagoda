@@ -4,19 +4,17 @@ def validate_category(category):
     errors = []
 
     try:
-        name = category['category_name']
-        if not name[0].isupper():
-            errors.append("Name must start with an uppercase letter.")
-        if not name.isalpha():
-            errors.append("Name must contain only letters.")
-        if name != name.capitalize():
-            errors.append("Name must have only the first letter capitalized.")
+        name = category['category_name'].strip()
+
+        if not name:
+            errors.append("Category name is required.")
+        elif len(name) > 50:
+            errors.append("Category name must not exceed 50 characters.")
+        elif any(char.isdigit() for char in name):
+            errors.append("Category name must not contain digits.")
     except Exception:
         errors.append("Invalid Name format.")
 
-    name = category.get('category_name', '').strip()
-    if not name:
-        errors.append("Category name is required.")
     if errors:
         raise ValueError("Validation error(s): " + "; ".join(errors))
 

@@ -103,33 +103,23 @@ def get_products_by_category(connection, category_number):
 def validate_product_fields(product):
     errors = []
 
-    try:
-        name = product['product_name'].strip()
-        if not name:
-            errors.append("Product name is required.")
-    except Exception:
-        errors.append("Invalid product name format.")
+    # Перевірка для назви продукту
+    if not product.get('product_name'):
+        errors.append("Product name is required.")
 
-    try:
-        characteristics = product['characteristics'].strip()
-        if not characteristics:
-            errors.append("Product characteristics are required.")
-    except Exception:
-        errors.append("Invalid characteristics format.")
+    # Перевірка для характеристик продукту
+    if not product.get('characteristics'):
+        errors.append("Product characteristics are required.")
 
-    try:
-        producer = product['producer'].strip()
-        if not producer:
-            errors.append("Producer is required.")
-    except Exception:
-        errors.append("Invalid producer format.")
+    # Перевірка для виробника
+    if not product.get('producer'):
+        errors.append("Producer is required.")
 
-    try:
-        category = product['category_number']
-        if category is None or str(category).strip() == "":
-            errors.append("Category number is required.")
-    except Exception:
-        errors.append("Invalid category number format.")
+    # Перевірка для категорії продукту
+    if not product.get('category_number'):
+        errors.append("Category number is required.")
 
+    # Якщо є помилки, викидаємо виключення
     if errors:
         raise ValueError("Validation error(s): " + "; ".join(errors))
+
