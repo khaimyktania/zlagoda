@@ -729,7 +729,17 @@ def get_recent_checks():
     try:
         connection = get_sql_connection()
         limit = request.args.get('limit', 50, type=int)
-        response = check_dao.get_recent_checks(connection, limit)
+
+        # Отримуємо роль та ID користувача з сесії
+        user_role = session.get('role')
+        user_id = session.get('id_employee')  # Змінено з 'user_id' на 'id_employee'
+
+        # Касир бачить тільки свої чеки, менеджер - всі
+        if user_role == 'cashier':
+            response = check_dao.get_recent_checks(connection, limit, user_id)
+        else:  # 'manager'
+            response = check_dao.get_recent_checks(connection, limit)
+
         return jsonify(response)
     except Exception as e:
         print(f"Error in get_recent_checks: {str(e)}")
@@ -752,6 +762,10 @@ def get_check_by_number():
         response = check_dao.get_check_by_number(connection, check_number)
 
         if response:
+            user_role = session.get('role')
+            user_id = session.get('id_employee')
+            if user_role == 'cashier' and response['id_employee'] != user_id:
+                return jsonify({'success': False, 'message': 'You do not have permission to view this check'}), 403
             return jsonify(response)
         else:
             return jsonify({'success': False, 'message': 'Check not found'}), 404
@@ -784,13 +798,21 @@ def get_check_products():
 
 
 @app.route('/getCheckStatistics', methods=['GET'])
-@require_role('manager')
+@require_role('manager', 'cashier')
 def get_check_statistics():
     connection = None
     try:
         period = request.args.get('period', 'all')
         connection = get_sql_connection()
-        response = check_dao.get_check_statistics(connection, period)
+
+        user_role = session.get('role')
+        user_id = session.get('id_employee')
+
+        if user_role == 'cashier':
+            response = check_dao.get_check_statistics(connection, period, user_id)
+        else:
+            response = check_dao.get_check_statistics(connection, period)
+
         return jsonify(response)
     except Exception as e:
         print(f"Error in get_check_statistics: {str(e)}")
@@ -905,21 +927,28 @@ def delete_check():
 
 
 @app.route('/getChecksByDateRange', methods=['GET'])
-@require_role('manager')
+@require_role('manager', 'cashier')
 def get_checks_by_date_range():
     connection = None
     try:
         start_date = request.args.get('start_date')
         end_date = request.args.get('end_date')
-        id_employee = request.args.get('id_employee')  # Може бути None або порожнім
+
+        user_role = session.get('role')
+        user_id = session.get('id_employee')
+
+        id_employee = request.args.get('id_employee')
 
         if not start_date or not end_date:
             return jsonify({'success': False, 'message': 'Start and end dates are required'}), 400
 
         connection = get_sql_connection()
 
-        # Передаємо id_employee як None, якщо воно порожнє
-        employee_id = id_employee if id_employee and id_employee.strip() else None
+        if user_role == 'cashier':
+            employee_id = user_id
+        else:
+            employee_id = id_employee if id_employee and id_employee.strip() else None
+
         response = check_dao.find_checks_by_date_range(connection, start_date, end_date, employee_id)
 
         return jsonify(response)
@@ -929,6 +958,7 @@ def get_checks_by_date_range():
     finally:
         if connection:
             connection.close()
+
 
 @app.route('/getAllEmployees', methods=['GET'])
 @require_role('cashier', 'manager')
