@@ -1,21 +1,22 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-    <meta charset="UTF-8">
-    <title>Кабінет Касира</title>
+       <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Fonts & Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,300,600,700">
 
     <!-- Bootstrap + Custom Styles -->
-    <link rel="stylesheet" href="static/bootstrap.min.css">
-    <link rel="stylesheet" href="static/style.css">
-    <link rel="stylesheet" href="static/sidebar-menu.css">
-    <link rel="stylesheet" href="static/custom.css">
+    <link rel="stylesheet" href="web/static/bootstrap.min.css">
+    <link rel="stylesheet" href="web/static/style.css">
+    <link rel="stylesheet" href="web/static/sidebar-menu.css">
+    <link rel="stylesheet" href="web/static/custom.css">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
 
     <style>
+        /* Always visible sidebar on desktop */
         @media (min-width: 992px) {
             #mySidebar {
                 display: block !important;
@@ -25,13 +26,14 @@
                 z-index: 1000;
             }
             #main {
-                margin-left: 200px;
+                margin-left: 250px;
             }
             #openNav {
                 display: none !important;
             }
         }
 
+        /* Content margin reset on small screens */
         @media (max-width: 991px) {
             #main {
                 margin-left: 0;
@@ -49,6 +51,9 @@
     <a href="/manage_store_product" class="w3-bar-item w3-button role-cashier">Store Products</a>
     <a href="/manage_customer" class="w3-bar-item w3-button role-cashier">Customers</a>
     <a href="/manage_check" class="w3-bar-item w3-button role-cashier">Checks</a>
+    <a href="/manager_account.html" class="w3-bar-item w3-button role-manager">My Account</a>
+    <a href="/cashier_account.html" class="w3-bar-item w3-button role-cashier">My Account</a>
+
 </div>
 
 
@@ -60,10 +65,71 @@
     <p><strong>Ім’я:</strong> <span id="empl_name"></span></p>
     <p><strong>Прізвище:</strong> <span id="empl_surname"></span></p>
     <p><strong>Роль:</strong> <span id="empl_role"></span></p>
+
+    <!-- Додано кнопку та блок для повної інформації -->
+<button class="btn btn-info mt-3" onclick="viewFullInfo()">View Info</button>
+<div id="infoOutput" class="mt-4 border rounded p-3 bg-light" style="display: none;"></div>
+
 </div>
 
 <!-- Scripts -->
 <script>
+function viewFullInfo() {
+    const infoBox = document.getElementById('infoOutput');
+    const button = document.querySelector('button.btn.btn-info');
+
+    if (infoBox.style.display === 'block') {
+        infoBox.style.display = 'none';
+        button.innerText = 'View Info';
+        return;
+    }
+
+    fetch('/api/employee_full_info', {
+        method: 'GET',
+        credentials: 'include'
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("Server error");
+        return res.json();
+    })
+    .then(data => {
+        let output = '';
+        if (!data.success) {
+            output = `<p class="text-danger">${data.message || 'Помилка отримання інформації.'}</p>`;
+        } else {
+            const fields = [
+                ['ID', data.id_employee],
+                ['Ім’я', data.empl_name],
+                ['Прізвище', data.empl_surname],
+                ['По батькові', data.empl_patronymic],
+                ['Роль', data.empl_role],
+                ['Зарплата', data.salary != null ? parseFloat(data.salary).toFixed(2) : null],
+                ['Дата народження', data.date_of_birth ? new Date(data.date_of_birth).toLocaleDateString() : null],
+                ['Дата початку роботи', data.date_of_start ? new Date(data.date_of_start).toLocaleDateString() : null],
+                ['Телефон', data.phone_number?.trim()],
+                ['Адреса', (data.city && data.street && data.zip_code) ? `${data.city}, ${data.street}, ${data.zip_code}` : null]
+            ];
+
+            output = fields
+                .filter(([_, value]) => value && value !== '')
+                .map(([label, value]) => `<p><strong>${label}:</strong> ${value}</p>`)
+                .join('');
+        }
+
+        infoBox.innerHTML = output;
+        infoBox.style.display = 'block';
+        button.innerText = 'Hide Info';
+    })
+    .catch(err => {
+        console.error('Error fetching full employee info:', err);
+        infoBox.innerHTML = '<p class="text-danger">Сталася помилка при отриманні даних.</p>';
+        infoBox.style.display = 'block';
+        button.innerText = 'Hide Info';
+    });
+}
+
+
+
     function w3_open() {
         document.getElementById("mySidebar").style.display = "block";
         document.getElementById("main").style.marginLeft = "200px";
