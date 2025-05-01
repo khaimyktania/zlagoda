@@ -290,6 +290,7 @@ $(document).ready(function() {
     // Load products and filters when page loads
     if (isProductPage()) {
         console.log("This is a product page, loading products and filters");
+        initializeProductForm();
 
         loadProducts();
         loadCategoryFilter();
@@ -328,78 +329,7 @@ $(document).ready(function() {
             loadProducts();
         });
 
-        // Save product button handler
-        $("#saveProduct").on("click", function() {
-            var data = $("#productForm").serializeArray();
-            var requestPayload = {
-                id_product: null,
-                product_name: null,
-                category_number: null,
-                characteristics: null,
-                producer: null
-            };
 
-            // Формування об'єкта з полів форми
-            for (var i = 0; i < data.length; ++i) {
-                var element = data[i];
-                switch(element.name) {
-                    case 'id_product':
-                        requestPayload.id_product = element.value;
-                        break;
-                    case 'product_name':
-                        requestPayload.product_name = element.value;
-                        break;
-                    case 'category_number':
-                        requestPayload.category_number = element.value;
-                        break;
-                    case 'characteristics':
-                        requestPayload.characteristics = element.value;
-                        break;
-                    case 'producer':
-                        requestPayload.producer = element.value;
-                        break;
-                }
-            }
-
-            console.log("Sending product payload:", requestPayload);
-
-            // Перевірка обов'язкових полів
-            if (!requestPayload.product_name || !requestPayload.characteristics ||
-                !requestPayload.category_number || !requestPayload.producer) {
-                alert("Заповніть усі обов'язкові поля!");
-                return;
-            }
-
-            // Відправка POST-запиту
-            $.ajax({
-                type: "POST",
-                url: productSaveApiUrl,
-                data: {
-                    data: JSON.stringify(requestPayload)
-                },
-                success: function(response) {
-                    console.log("Response:", response);
-                    if(requestPayload.id_product) {
-                        alert("Product updated successfully!");
-                    } else {
-                        alert("Product saved successfully!");
-                    }
-                    productModal.modal('hide');
-                    loadProducts(null, false);
-                },
-                error: function(xhr, status, error) {
-                    console.error("Error details:", xhr.responseText);
-                    alert("Error while saving product: " + error);
-                }
-            });
-        });
-
-        // Reset form when modal is closed
-        productModal.on('hide.bs.modal', function(){
-            $("#productForm")[0].reset();
-            $("#id_product").val('');
-            productModal.find('.modal-title').text('Add New Product');
-        });
     }
 });
 
@@ -479,3 +409,261 @@ $(window).on('hashchange', function() {
         initSearchForm();
     }
 });
+
+// Функція для валідації форми продукту
+function validateProductForm() {
+    let isValid = true;
+
+    // Очищення попередніх повідомлень про помилки
+    clearFormErrors();
+
+    // Валідація product_name
+    const productName = $("#product_name").val().trim();
+    if (!productName) {
+        markFieldAsInvalid("product_name", "Product name is required");
+        isValid = false;
+    }
+
+    // Валідація category_number
+    const categoryNumber = $("#category_number").val();
+    if (!categoryNumber) {
+        markFieldAsInvalid("category_number", "Please select a category");
+        isValid = false;
+    }
+
+    // Валідація characteristics
+    const characteristics = $("#characteristics").val().trim();
+    if (!characteristics) {
+        markFieldAsInvalid("characteristics", "Product characteristics are required");
+        isValid = false;
+    }
+
+    // Валідація producer
+    const producer = $("#producer").val().trim();
+    if (!producer) {
+        markFieldAsInvalid("producer", "Producer is required");
+        isValid = false;
+    }
+
+    return isValid;
+}
+
+// Функція для позначення поля як невалідного
+function markFieldAsInvalid(fieldId, errorMessage) {
+    const field = $(`#${fieldId}`);
+    const feedbackId = `${fieldId}Feedback`;
+
+    // Перевіряємо, чи існує елемент зворотного зв'язку
+    let feedbackElement = $(`#${feedbackId}`);
+
+    // Якщо елемент зворотного зв'язку не існує, створюємо його
+    if (feedbackElement.length === 0) {
+        feedbackElement = $(`<div id="${feedbackId}" class="invalid-feedback"></div>`);
+        field.after(feedbackElement);
+    }
+
+    // Додаємо клас is-invalid та стилі програмно
+    field.addClass("is-invalid");
+    field.css({
+        'border': '2px solid #dc3545',
+        'background-color': 'rgba(220, 53, 69, 0.05)',
+        'box-shadow': '0 0 0 0.2rem rgba(220, 53, 69, 0.25)'
+    });
+
+    // Встановлюємо повідомлення про помилку та показуємо його
+
+    console.log(`Field ${fieldId} marked as invalid with message: ${errorMessage}`);
+}
+
+// Функція для додавання необхідних елементів форми, якщо їх немає
+function prepareFormValidation() {
+    // Перевіряємо наявність полів зворотного зв'язку для всіх полів форми
+    const formFields = ["product_name", "category_number", "characteristics", "producer"];
+
+    formFields.forEach(field => {
+        const feedbackId = `${field}Feedback`;
+        if ($(`#${feedbackId}`).length === 0) {
+            $(`#${field}`).after(`<div id="${feedbackId}" class="invalid-feedback" style="display: none;"></div>`);
+        }
+    });
+
+    // Додаємо стилі валідації
+    addValidationStyles();
+
+    // Налаштовуємо обробники подій для полів форми
+    setupFormValidation();
+}
+
+// Оновлений обробник для кнопки збереження
+$(document).on("click", "#saveProduct", function(e) {
+    e.preventDefault(); // Запобігаємо стандартній поведінці кнопки
+    console.log("Save button clicked, validating form");
+
+    // Перевіряємо, чи форма валідна
+    if (!validateProductForm()) {
+        console.log("Form validation failed");
+        return; // Якщо форма не пройшла валідацію, припиняємо виконання
+    }
+
+    var data = $("#productForm").serializeArray();
+    var requestPayload = {
+        id_product: null,
+        product_name: null,
+        category_number: null,
+        characteristics: null,
+        producer: null
+    };
+
+    // Формування об'єкта з полів форми
+    for (var i = 0; i < data.length; ++i) {
+        var element = data[i];
+        switch(element.name) {
+            case 'id_product':
+                requestPayload.id_product = element.value;
+                break;
+            case 'product_name':
+                requestPayload.product_name = element.value;
+                break;
+            case 'category_number':
+                requestPayload.category_number = element.value;
+                break;
+            case 'characteristics':
+                requestPayload.characteristics = element.value;
+                break;
+            case 'producer':
+                requestPayload.producer = element.value;
+                break;
+        }
+    }
+
+    console.log("Sending product payload:", requestPayload);
+
+    // Відправка POST-запиту
+    $.ajax({
+        type: "POST",
+        url: productSaveApiUrl,
+        data: {
+            data: JSON.stringify(requestPayload)
+        },
+        success: function(response) {
+            console.log("Response:", response);
+            if(requestPayload.id_product) {
+                alert("Product updated successfully!");
+            } else {
+                alert("Product saved successfully!");
+            }
+            productModal.modal('hide');
+            loadProducts(null, false);
+        },
+        error: function(xhr, status, error) {
+            console.error("Error details:", xhr.responseText);
+
+            if (xhr.status === 400) {
+                try {
+                    // Спробуємо розпарсити відповідь сервера і відобразити помилки валідації
+                    let response = JSON.parse(xhr.responseText);
+                    if (response.validation_errors) {
+                        clearFormErrors();
+
+                        // Відображаємо кожну помилку від сервера
+                        for (const field in response.validation_errors) {
+                            markFieldAsInvalid(field, response.validation_errors[field]);
+                        }
+                    } else {
+                        alert("Validation error: " + response.message || error);
+                    }
+                } catch (e) {
+                    console.error("Error parsing response:", e);
+                    alert("Error while saving product: " + error);
+                }
+            } else {
+                alert("Error while saving product: " + error);
+            }
+        }
+    });
+});
+
+// Ініціалізація форми - додаємо цей код до document.ready
+function initializeProductForm() {
+    console.log("Initializing product form");
+
+    // Підготовка елементів форми для валідації
+    prepareFormValidation();
+
+    // Обробники подій при відкритті та закритті модального вікна
+    productModal.on('show.bs.modal', function() {
+        clearFormErrors();
+        console.log("Modal showing, cleared form errors");
+    });
+
+    productModal.on('hide.bs.modal', function() {
+        $("#productForm")[0].reset();
+        $("#id_product").val('');
+        productModal.find('.modal-title').text('Add New Product');
+        clearFormErrors();
+        console.log("Modal hiding, reset form and cleared errors");
+    });
+}
+
+// Функція для динамічного додавання стилів валідації
+function addValidationStyles() {
+    // Перевіряємо, чи вже додані стилі
+    if (!$('#validation-styles').length) {
+        const styleElement = $('<style id="validation-styles">')
+            .text(`
+                input.is-invalid, select.is-invalid, textarea.is-invalid, .form-control.is-invalid {
+                    border: 2px solid #dc3545 !important;
+                    background-color: rgba(220, 53, 69, 0.05) !important;
+                    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+                }
+                .invalid-feedback {
+                    color: #dc3545 !important;
+                    display: block !important;
+                    margin-top: 0.25rem !important;
+                    font-size: 0.875em !important;
+                }
+            `);
+        $('head').append(styleElement);
+        console.log("Validation styles added programmatically");
+    }
+}
+
+// Встановлення обробників полів форми
+function setupFormValidation() {
+    // Додаємо обробники для всіх полів форми
+    $("#productForm .form-control").on("input blur", function() {
+        validateField($(this));
+    });
+}
+
+// Функція для очищення всіх помилок форми
+function clearFormErrors() {
+    const formFields = $("#productForm .form-control");
+    formFields.removeClass("is-invalid");
+    formFields.css({
+        'border': '',
+        'background-color': '',
+        'box-shadow': ''
+    });
+    $(".invalid-feedback").hide();
+    console.log("All form errors cleared");
+}
+
+// Функція для валідації окремого поля
+function validateField(field) {
+    const fieldId = field.attr('id');
+    const feedbackElement = $(`#${fieldId}Feedback`);
+
+    // Прибираємо помилку, якщо поле має значення
+    if (field.val().trim()) {
+        field.removeClass("is-invalid");
+        field.css({
+            'border': '',
+            'background-color': '',
+            'box-shadow': ''
+        });
+        feedbackElement.hide();
+        console.log(`Field ${fieldId} validated successfully`);
+    }
+}
+
