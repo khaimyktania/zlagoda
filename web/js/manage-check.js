@@ -21,8 +21,8 @@ const API_ENDPOINTS = {
     GENERATE_CHECK_NUMBER: "/generateCheckNumber",
     INSERT_CHECK: "/insertCheck",
     DELETE_CHECK: "/deleteCheck",
-    GET_CHECKS_BY_DATE_RANGE: "/getChecksByDateRange"
-
+    GET_CHECKS_BY_DATE_RANGE: "/getChecksByDateRange",
+    GET_CASHIER_TOTAL_SALES: "/getCashierTotalSales"
 };
 
 // Додайте цей код у ваш JavaScript-файл
@@ -88,7 +88,9 @@ $('#search-check').on('click', function() {
         alert('Please enter a check number');
         return;
     }
-
+if (currentUserRole.toLowerCase() === 'manager') {
+        loadCashierTotalSales('', $('#start-date').val(), $('#end-date').val());
+    }
     // Очистити список чеків
     $('#checks-list').find('.check-item').remove();
     $('#loading-indicator').show();
@@ -136,78 +138,55 @@ $('#search-check').on('click', function() {
 
 // Initialize all event handlers
 function initEventHandlers() {
-    // Statistics period buttons
     $('.btn-group [data-period]').on('click', function() {
         const period = $(this).data('period');
-        loadCheckStatistics(period);
+        if (currentUserRole.toLowerCase() === 'manager') {
+            loadCheckStatistics(period);
+        }
     });
 
-    // Date filter buttons
-    $('#apply-date-filter').on('click', function() {
-        applyDateFilter();
+    $('#apply-cashier-filter').on('click', function() {
+        applyFilters();
     });
 
     $('#reset-date-filter').on('click', function() {
         resetDateFilter();
     });
 
-    // Check search
     $('#search-check').on('click', function() {
         searchCheckByNumber();
     });
 
-    // Create new check modal - FIXED: multiple event bindings for reliability
     $('.open-create-check-modal, [data-toggle="modal"][data-target="#createCheckModal"]').on('click', function() {
         prepareCreateCheckModal();
     });
 
-    // Bind to modal show event to ensure data is loaded when modal opens
-    $('#createCheckModal').on('show.bs.modal', function (e) {
+    $('#createCheckModal').on('show.bs.modal', function(e) {
         prepareCreateCheckModal();
     });
 
-    // Add product to check
     $('#add-product').on('click', function() {
         addProductToCheck();
     });
 
-
-    // Add these new event handlers
-    $('#apply-cashier-filter').on('click', function() {
-        applyFilters();
-    });
-
-    // Add this if not already present
-    $('#cashier-select').on('change', function() {
-        // Optional: apply filter on change
-        // applyFilters();
-    });
-
-    // Save check button
     $('#save-check').on('click', function() {
         saveCheck();
     });
 
-    // Delete check button - FIXED: Added proper data-check-number attribute handling
     $(document).on('click', '#delete-check-btn', function() {
         const checkNumber = $('#detail-check-number').text();
         deleteCheck(checkNumber);
     });
 
-    // Toggle check products view
     $(document).on('click', '.toggle-products', function() {
         const checkDiv = $(this).closest('.check-item');
         const productsDiv = checkDiv.find('.check-products');
         productsDiv.toggleClass('active');
-
         const icon = $(this).find('i');
         if (productsDiv.hasClass('active')) {
             icon.removeClass('zmdi-plus').addClass('zmdi-minus');
-
-            // Load products if not already loaded
             const checkNumber = checkDiv.data('check-number');
             const productsLoaded = checkDiv.data('products-loaded');
-
             if (!productsLoaded) {
                 loadCheckProducts(checkNumber, productsDiv);
                 checkDiv.data('products-loaded', true);
@@ -217,6 +196,30 @@ function initEventHandlers() {
         }
     });
 
+    $(document).on('click', '.view-check-details', function() {
+        const checkNumber = $(this).closest('.check-item').data('check-number');
+        viewCheckDetails(checkNumber);
+    });
+
+    $('#product-select').on('change', function() {
+        updateProductPriceFromSelection();
+    });
+
+    $('#product-quantity').on('change', function() {
+        updateProductPriceFromQuantity();
+    });
+
+    $(document).on('click', '.remove-product', function() {
+        const index = $(this).data('index');
+        removeProductFromCheck(index);
+    });
+
+    $('#check-number-search').on('keypress', function(e) {
+        if (e.which === 13) {
+            searchCheckByNumber();
+        }
+    });
+}
     // View check details
     $(document).on('click', '.view-check-details', function() {
         const checkNumber = $(this).closest('.check-item').data('check-number');
@@ -238,14 +241,30 @@ function initEventHandlers() {
         const index = $(this).data('index');
         removeProductFromCheck(index);
     });
+$('#cashier-select').on('change', function() {
+        if (currentUserRole.toLowerCase() === 'manager') {
+            const cashierId = $(this).val();
+            const startDate = $('#start-date').val();
+            const endDate = $('#end-date').val();
+            loadCashierTotalSales(cashierId, startDate, endDate);
+        }
+    });
 
+    // Оновлення при зміні дат
+    $('#start-date, #end-date').on('change', function() {
+        if (currentUserRole.toLowerCase() === 'manager') {
+            const cashierId = $('#cashier-select').val();
+            const startDate = $('#start-date').val();
+            const endDate = $('#end-date').val();
+            loadCashierTotalSales(cashierId, startDate, endDate);
+        }
+    });
     // Check number search on Enter key
     $('#check-number-search').on('keypress', function(e) {
         if (e.which === 13) {
             searchCheckByNumber();
         }
     });
-}
 
 // Set default dates for the filter
 function setDefaultDates() {
@@ -260,26 +279,20 @@ function setDefaultDates() {
 
 function checkCurrentUserRole() {
     console.log("Checking current user role...");
-
     $.ajax({
         url: '/api/employee_info',
         type: 'GET',
         success: function(response) {
             currentUserRole = response.empl_role;
             currentUserId = response.id_employee;
-
-            console.log("Current user role:", currentUserRole);
-            console.log("Current user ID:", currentUserId);
-
+            console.log("Current user role:", currentUserRole, "Current user ID:", currentUserId);
             adjustUIBasedOnRole();
-
-            // Якщо користувач - касир, автоматично застосовуємо фільтр на його чеки
             if (currentUserRole.toLowerCase() === 'cashier') {
                 applyFiltersForCashier();
+                $('#total-sales-by-cashier-container').hide();
             } else {
                 loadCashierFilter();
             }
-
             loadCheckStatistics('all');
             loadRecentChecks();
         },
@@ -289,16 +302,69 @@ function checkCurrentUserRole() {
             currentUserId = '';
             alert('Error loading user information. Limited functionality available.');
             adjustUIBasedOnRole();
+            $('#total-sales-by-cashier-container').hide();
             loadCheckStatistics('all');
             loadRecentChecks();
         }
     });
 }
+//function loadTotalSalesByCashier(startDate, endDate, cashierId) {
+//    console.log("loadTotalSalesByCashier called with:", { startDate, endDate, cashierId });
+//
+//    if (currentUserRole.toLowerCase() !== 'manager') {
+//        console.log("Not a manager, hiding total-sales-by-cashier-container");
+//        $('#total-sales-by-cashier-container').hide();
+//        return;
+//    }
+//
+//    if (!cashierId) {
+//        console.log("No cashier ID provided, showing select message");
+//        $('#total-sales-by-cashier').text('Select a cashier');
+//        $('#total-sales-by-cashier-container').show();
+//        return;
+//    }
+//
+//    const params = {
+//        start_date: startDate + ' 00:00:00',
+//        end_date: endDate + ' 23:59:59',
+//        id_employee: cashierId
+//    };
+//
+//    console.log("Sending AJAX request with params:", params);
+//
+//    $.ajax({
+//        url: API_ENDPOINTS.GET_TOTAL_SALES_BY_CASHIER,
+//        type: 'GET',
+//        data: params,
+//        success: function(response) {
+//            console.log("Total sales by cashier response:", response);
+//            if (response && response.total_sales !== undefined) {
+//                const totalSales = parseFloat(response.total_sales).toFixed(2);
+//                $('#total-sales-by-cashier').text('$' + totalSales);
+//                $('#total-sales-by-cashier-container').show();
+//                console.log("Displayed total sales:", totalSales);
+//            } else {
+//                $('#total-sales-by-cashier').text('No sales data');
+//                $('#total-sales-by-cashier-container').show();
+//                console.log("No valid sales data in response");
+//            }
+//        },
+//        error: function(xhr) {
+//            console.error('Error loading total sales by cashier:', xhr.responseText);
+//            $('#total-sales-by-cashier').text('Error loading sales');
+//            $('#total-sales-by-cashier-container').show();
+//        }
+//    });
+//}
+function applyFilters() {
+    const startDate = $('#start-date').val();
+    const endDate = $('#end-date').val();
+    let cashierId = $('#cashier-select').val();
 
-function applyFiltersForCashier() {
-    // Для касирів автоматично застосовуємо фільтр за їхнім id_employee
-    const startDate = $('#start-date').val() || getDefaultStartDate();
-    const endDate = $('#end-date').val() || getDefaultEndDate();
+    if (!startDate || !endDate) {
+        alert('Please select both start and end dates');
+        return;
+    }
 
     const startDateFormatted = startDate + ' 00:00:00';
     const endDateFormatted = endDate + ' 23:59:59';
@@ -308,9 +374,17 @@ function applyFiltersForCashier() {
 
     const filterParams = {
         start_date: startDateFormatted,
-        end_date: endDateFormatted,
-        id_employee: currentUserId
+        end_date: endDateFormatted
     };
+
+    if (currentUserRole.toLowerCase() === 'cashier') {
+        filterParams.id_employee = currentUserId;
+        $('#total-sales-by-cashier-container').hide();
+    } else if (cashierId && cashierId !== '') {
+        filterParams.id_employee = cashierId;
+    }
+
+    console.log("Filter parameters:", filterParams);
 
     $.ajax({
         url: API_ENDPOINTS.GET_CHECKS_BY_DATE_RANGE,
@@ -318,21 +392,38 @@ function applyFiltersForCashier() {
         data: filterParams,
         success: function(response) {
             $('#loading-indicator').hide();
+            console.log("Filter response:", response);
+
             if (response && Array.isArray(response)) {
                 if (response.length === 0) {
-                    $('#checks-list').html('<div class="alert alert-info">No checks found for the selected period.</div>');
+                    $('#checks-list').html('<div class="alert alert-info">No checks found for the selected criteria.</div>');
                 } else {
                     renderChecksListItems(response);
                 }
             } else {
-                $('#checks-list').html('<div class="alert alert-warning">Invalid response format.</div>');
+                $('#checks-list').html('<div class="alert alert-warning">Invalid response format. Please try again.</div>');
+                console.error("Invalid response format:", response);
             }
-            $('#filter-status').text(`Showing your checks from ${startDate} to ${endDate}`).show();
+
+            let filterStatusText = `Showing checks from ${startDate} to ${endDate}`;
+            if (currentUserRole.toLowerCase() === 'cashier') {
+                filterStatusText += ' for your checks only';
+            } else if (cashierId && cashierId !== '') {
+                const cashierName = $('#cashier-select option:selected').text();
+                filterStatusText += ` for cashier: ${cashierName}`;
+            } else {
+                filterStatusText += ' for all cashiers';
+            }
+
+            $('#filter-status').text(filterStatusText).show();
+
+
         },
-        error: function(xhr) {
+        error: function(xhr, status, error) {
             $('#loading-indicator').hide();
-            console.error('Error applying filters:', xhr.responseText);
-            $('#checks-list').html('<div class="alert alert-danger">Error loading checks.</div>');
+            console.error('Error applying filters:', xhr.responseText, status, error);
+            $('#checks-list').html(`<div class="alert alert-danger">Error applying filter: ${xhr.responseText || error}</div>`);
+            $('#total-sales-by-cashier-container').hide();
         }
     });
 }
@@ -967,7 +1058,7 @@ function applyFilters() {
     let cashierId = $('#cashier-select').val();
 
     if (!startDate || !endDate) {
-        alert('Please select both start and end dates');
+        alert('Будь ласка, виберіть початкову та кінцеву дати');
         return;
     }
 
@@ -988,7 +1079,7 @@ function applyFilters() {
         filterParams.id_employee = cashierId;
     }
 
-    console.log("Filter parameters:", filterParams);
+    console.log("Параметри фільтра:", filterParams);
 
     $.ajax({
         url: API_ENDPOINTS.GET_CHECKS_BY_DATE_RANGE,
@@ -996,35 +1087,40 @@ function applyFilters() {
         data: filterParams,
         success: function(response) {
             $('#loading-indicator').hide();
-            console.log("Filter response:", response);
+            console.log("Відповідь фільтра:", response);
 
             if (response && Array.isArray(response)) {
                 if (response.length === 0) {
-                    $('#checks-list').html('<div class="alert alert-info">No checks found for the selected criteria.</div>');
+                    $('#checks-list').html('<div class="alert alert-info">Чеків за вибраними критеріями не знайдено.</div>');
                 } else {
                     renderChecksListItems(response);
                 }
             } else {
-                $('#checks-list').html('<div class="alert alert-warning">Invalid response format. Please try again.</div>');
-                console.error("Invalid response format:", response);
+                $('#checks-list').html('<div class="alert alert-warning">Невірний формат відповіді. Спробуйте ще раз.</div>');
+                console.error("Невірний формат відповіді:", response);
             }
 
-            let filterStatusText = `Showing checks from ${startDate} to ${endDate}`;
+            let filterStatusText = `Відображаються чеки з ${startDate} по ${endDate}`;
             if (currentUserRole.toLowerCase() === 'cashier') {
-                filterStatusText += ' for your checks only';
+                filterStatusText += ' лише для ваших чеків';
             } else if (cashierId && cashierId !== '') {
                 const cashierName = $('#cashier-select option:selected').text();
-                filterStatusText += ` for cashier: ${cashierName}`;
+                filterStatusText += ` для касира: ${cashierName}`;
             } else {
-                filterStatusText += ' for all cashiers';
+                filterStatusText += ' для всіх касирів';
             }
 
             $('#filter-status').text(filterStatusText).show();
+
+            // Завантажити загальну суму продажів для обраного касира
+            if (currentUserRole.toLowerCase() === 'manager') {
+                loadCashierTotalSales(cashierId, startDate, endDate);
+            }
         },
         error: function(xhr, status, error) {
             $('#loading-indicator').hide();
-            console.error('Error applying filters:', xhr.responseText, status, error);
-            $('#checks-list').html(`<div class="alert alert-danger">Error applying filter: ${xhr.responseText || error}</div>`);
+            console.error('Помилка застосування фільтрів:', xhr.responseText, status, error);
+            $('#checks-list').html(`<div class="alert alert-danger">Помилка застосування фільтра: ${xhr.responseText || error}</div>`);
         }
     });
 }
@@ -1034,6 +1130,9 @@ function resetDateFilter() {
     $('#cashier-select').val(''); // Reset cashier selection
     $('#filter-status').hide();
     loadRecentChecks();
+    if (currentUserRole.toLowerCase() === 'manager') {
+        loadCashierTotalSales('', $('#start-date').val(), $('#end-date').val());
+    }
 }
 // Search check by number
 function searchCheckByNumber() {
@@ -1086,6 +1185,45 @@ function viewCheckDetails(checkNumber) {
             console.error('Error getting check details:', xhr.responseText, status, error);
             $('#checkDetailsModal').modal('hide');
             alert('Error loading check details: ' + error);
+        }
+    });
+}
+
+function loadCashierTotalSales(cashierId, startDate, endDate) {
+    if (currentUserRole.toLowerCase() !== 'manager') {
+        $('#stats-cashier-sales').text('N/A');
+        $('#stats-selected-cashier').text('N/A');
+        return;
+    }
+
+    if (!cashierId || !startDate || !endDate) {
+        $('#stats-cashier-sales').text('$0.00');
+        $('#stats-selected-cashier').text('None');
+        return;
+    }
+
+    $.ajax({
+        url: API_ENDPOINTS.GET_CASHIER_TOTAL_SALES,
+        type: 'GET',
+        data: {
+            id_employee: cashierId,
+            start_date: startDate + ' 00:00:00',
+            end_date: endDate + ' 23:59:59'
+        },
+        success: function(response) {
+            if (response.success) {
+                $('#stats-cashier-sales').text('$' + parseFloat(response.total_sales).toFixed(2));
+                const cashierName = $('#cashier-select option:selected').text() || 'Unknown';
+                $('#stats-selected-cashier').text(cashierName);
+            } else {
+                $('#stats-cashier-sales').text('$0.00');
+                $('#stats-selected-cashier').text('None');
+            }
+        },
+        error: function(xhr) {
+            console.error('Помилка завантаження загальної суми продажів касира:', xhr.responseText);
+            $('#stats-cashier-sales').text('$0.00');
+            $('#stats-selected-cashier').text('Error');
         }
     });
 }

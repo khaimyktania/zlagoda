@@ -1102,6 +1102,52 @@ def api_get_all_store_products_sorted():
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
+@app.route('/getCashierTotalSales', methods=['GET'])
+@require_role('manager')
+def get_cashier_total_sales():
+    connection = None
+    try:
+        id_employee = request.args.get('id_employee')
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+
+        if not id_employee or not start_date or not end_date:
+            return jsonify({
+                'success': False,
+                'message': 'Потрібні ідентифікатор касира та діапазон дат'
+            }), 400
+
+        connection = get_sql_connection()
+        response = check_dao.get_cashier_total_sales(connection, id_employee, start_date, end_date)
+
+        return jsonify({
+            'success': True,
+            'total_sales': float(response['total_sales']) if response['total_sales'] else 0.0
+        })
+    except Exception as e:
+        print(f"Помилка в get_cashier_total_sales: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
+
+@app.route('/api/cashiers', methods=['GET'])
+@require_role('manager', 'cashier')  # Обмеження доступу для менеджерів і касирів
+def get_cashiers_api():
+    connection = None
+    try:
+        connection = get_sql_connection()
+        cashiers = check_dao.get_cashiers(connection)
+        response = jsonify(cashiers)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    except Exception as e:
+        print(f"Помилка в get_cashiers_api: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
+
 if __name__ == "__main__":
     print("Starting Python Flask Server For Grocery Store Management System")
     app.run(port=5000, debug=True)

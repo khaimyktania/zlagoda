@@ -4,12 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f9f0029f-da69-424e-98ae-755ef497d758" name="Changes" comment="fix add bottom">
+    <list default="true" id="f9f0029f-da69-424e-98ae-755ef497d758" name="Changes" comment="YOBANI CHECKS +++">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/check_dao.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/check_dao.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/employee_credentials.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/employee_credentials.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/server.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/web/js/manage-check.js" beforeDir="false" afterPath="$PROJECT_DIR$/web/js/manage-check.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/manage_check.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/manage_check.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -309,7 +310,15 @@
       <option name="project" value="LOCAL" />
       <updated>1746129399647</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="YOBANI CHECKS +++">
+      <option name="closed" value="true" />
+      <created>1746135698982</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1746135698982</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -344,6 +353,7 @@
     <MESSAGE value="yettiii" />
     <MESSAGE value="fix + add search for product" />
     <MESSAGE value="fix add bottom" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix add bottom" />
+    <MESSAGE value="YOBANI CHECKS +++" />
+    <option name="LAST_COMMIT_MESSAGE" value="YOBANI CHECKS +++" />
   </component>
 </project>
