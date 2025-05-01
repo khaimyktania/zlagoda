@@ -2,7 +2,8 @@ from flask import Flask, request, jsonify
 from flask import Flask, request, jsonify, session
 from functools import wraps
 from credentials_utils import load_credentials, save_credentials, auto_generate_credentials
-
+from flask import jsonify, session
+from datetime import date
 from app import category_dao
 from sql_connection import get_sql_connection
 import json
@@ -977,7 +978,7 @@ def report_store_products():
 @require_role('manager')
 def report_receipts():
     connection = get_sql_connection()
-    cursor = connection.cursor(dictionary=True)
+    cursor = connection.cursor()
     cursor.execute("SELECT check_number, print_date, sum_total, vat FROM `check` ORDER BY print_date DESC")
     result = cursor.fetchall()
     return jsonify(result)
@@ -1003,6 +1004,34 @@ def cashier_account():
 @app.route('/debug/credentials', methods=['GET'])
 def debug_credentials():
     return jsonify(load_credentials())
+
+@app.route('/api/employee_full_info', methods=['GET'])
+@require_role('manager', 'cashier')
+def get_full_employee_info():
+    id_emp = session.get('id_employee')
+    if not id_emp:
+        return jsonify({'success': False, 'message': 'Not logged in'}), 401
+
+    employee = employee_dao.get_employee_info_by_id(connection, id_emp)
+    if not employee:
+        return jsonify({'success': False, 'message': 'Employee not found'}), 404
+
+    # Прямо тут обробляємо значення для JSON
+    return jsonify({
+        'success': True,
+        'id_employee': employee['id_employee'],
+        'empl_surname': employee['empl_surname'],
+        'empl_name': employee['empl_name'],
+        'empl_patronymic': employee['empl_patronymic'],
+        'empl_role': employee['empl_role'],
+        'salary': float(employee['salary']),  # Decimal → float
+        'date_of_birth': employee['date_of_birth'].isoformat(),  # date → str
+        'date_of_start': employee['date_of_start'].isoformat(),  # date → str
+        'phone_number': employee['phone_number'].strip(),  # прибираємо \t або пробіли
+        'city': employee['city'],
+        'street': employee['street'],
+        'zip_code': employee['zip_code']
+    })
 
 if __name__ == "__main__":
     print("Starting Python Flask Server For Grocery Store Management System")
