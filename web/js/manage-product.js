@@ -160,13 +160,14 @@ $(document).ready(function() {
         loadProducts();
         loadCategoryFilter();
 
-        // Setup event handlers for buttons
+        // Setup event handlers for buttons - FIXED by removing data-toggle from HTML
         $('#addProductBtn').on('click', function() {
+            console.log("Add Product button clicked");
             productModal.find('.modal-title').text('Add New Product');
             $("#productForm")[0].reset();
             $("#id_product").val('');
             loadCategories();
-            productModal.modal('show');
+            productModal.modal('show'); // Make sure this line executes
         });
 
         // Додати обробники подій для кнопок сортування

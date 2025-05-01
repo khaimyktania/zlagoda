@@ -129,7 +129,8 @@
                                                     </button>
                                                 </div>
                                                 <div class="col-sm-6 text-right">
-                                                    <button type="button" class="btn btn-sm btn-primary pull-right" id="addProductBtn" data-toggle="modal" data-target="#productModal">
+                                                    <!-- Removed data-toggle and data-target attributes -->
+                                                    <button type="button" class="btn btn-sm btn-primary pull-right" id="addProductBtn">
                                                         Add New Product
                                                     </button>
                                                 </div>
@@ -293,6 +294,9 @@
             document.getElementById('main').style.marginLeft = '0';
             document.getElementById('openNav').style.display = 'inline-block';
         }
+
+        // Add this event listener to ensure openNav works on mobile
+        document.getElementById('openNav').addEventListener('click', w3_open);
     </script>
 </body>
 </html>
