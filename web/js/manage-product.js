@@ -9,6 +9,7 @@ $.ajaxSetup({
 });
 
 var productModal = $("#productModal");
+var currentRole = null; // Зберігатиме роль користувача ('manager' або 'cashier')
 
 // API endpoints
 var productSaveApiUrl = '/insertProduct';
@@ -42,65 +43,34 @@ function loadProducts(category_number = null, sorted = false) {
         console.log("Products API response:", response);
 
         if (response && Array.isArray(response)) {
-            let table = '';
-
             // Перевіряємо, чи є дані в масиві
             if (response.length === 0) {
                 console.log("No products found in the response");
-                $("#productsTable").find('tbody').html('<tr><td colspan="5">Немає доступних продуктів</td></tr>');
+                $("#mainProductsContainer").html('<table class="table table-bordered" id="productsTable"><tbody><tr><td colspan="' + (currentRole === 'manager' ? 5 : 4) + '">Немає доступних продуктів</td></tr></tbody></table>');
                 return;
             }
 
-            $.each(response, function (index, product) {
-                // Захист від undefined полів
-                const productName = product.product_name || '';
-                const categoryNumber = product.category_number || '';
-                const characteristics = product.characteristics || '';
-                const producer = product.producer || '';
-
-                table += '<tr data-id="'+ (product.id_product || '') +'" data-name="'+ productName +'" data-category="'+ categoryNumber +'" data-char="'+ characteristics +'" data-producer="'+ producer +'">' +
-                    '<td>'+ productName +'</td>'+
-                    '<td>'+ categoryNumber +'</td>'+
-                    '<td>'+ characteristics +'</td>'+
-                    '<td>'+ producer +'</td>'+
-                    '<td><span class="btn btn-xs btn-primary edit-product">Edit</span> <span class="btn btn-xs btn-danger delete-product">Delete</span></td></tr>';
-            });
-
-            // Перевіряємо, чи існує таблиця
-            const $productsTable = $("#productsTable");
-            if ($productsTable.length === 0) {
-                console.error("Product table with ID 'productsTable' not found in the DOM");
-                alert("Error: Product table not found. Please check HTML structure.");
-                return;
-            }
-
-            const $tbody = $productsTable.find('tbody');
-            if ($tbody.length === 0) {
-                console.error("Table body not found within #productsTable");
-                $productsTable.append('<tbody>' + table + '</tbody>');
-            } else {
-                $tbody.empty().html(table);
-            }
+            // Викликаємо updateProductsTable для відображення продуктів
+            updateProductsTable(response);
 
             console.log("Products table updated with " + response.length + " rows");
         } else {
             console.error("Invalid response format:", response);
-            $("#productsTable").find('tbody').html('<tr><td colspan="5">Помилка завантаження даних</td></tr>');
+            $("#mainProductsContainer").html('<table class="table table-bordered" id="productsTable"><tbody><tr><td colspan="' + (currentRole === 'manager' ? 5 : 4) + '">Помилка завантаження даних</td></tr></tbody></table>');
         }
     }).fail(function(xhr, status, error) {
         console.error("Error loading products:", error);
         console.error("Status:", status);
         console.error("Server response:", xhr.responseText);
-        $("#productsTable").find('tbody').html('<tr><td colspan="5">Помилка: ' + error + '</td></tr>');
+        $("#mainProductsContainer").html('<table class="table table-bordered" id="productsTable"><tbody><tr><td colspan="' + (currentRole === 'manager' ? 5 : 4) + '">Помилка: ' + error + '</td></tr></tbody></table>');
         alert("Error loading products: " + error);
     });
 }
 
 // Оновлена функція пошуку продуктів за назвою
-// Modified updateSearchUI function to avoid duplicate display
 function searchProductsByName(productName) {
     // Показуємо індикатор завантаження
-    $("#productsTable").find('tbody').html('<tr><td colspan="5"><div class="text-center"><i class="zmdi zmdi-spinner zmdi-hc-spin"></i> Пошук...</div></td></tr>');
+    $("#mainProductsContainer").html('<table class="table table-bordered" id="productsTable"><tbody><tr><td colspan="' + (currentRole === 'manager' ? 5 : 4) + '"><div class="text-center"><i class="zmdi zmdi-spinner zmdi-hc-spin"></i> Пошук...</div></td></tr></tbody></table>');
 
     // Скидаємо попередні результати
     resetSearchUI();
@@ -116,7 +86,7 @@ function searchProductsByName(productName) {
             if (response && Array.isArray(response)) {
                 // Якщо результати пошуку порожні
                 if (response.length === 0) {
-                    $("#productsTable").find('tbody').html('<tr><td colspan="5">За вашим запитом "' + productName + '" продукти не знайдено</td></tr>');
+                    $("#mainProductsContainer").html('<table class="table table-bordered" id="productsTable"><tbody><tr><td colspan="' + (currentRole === 'manager' ? 5 : 4) + '">За вашим запитом "' + productName + '" продукти не знайдено</td></tr></tbody></table>');
                     $("#noResultsMessage").show();
                     return;
                 }
@@ -132,17 +102,187 @@ function searchProductsByName(productName) {
                 console.log("Products table updated with " + response.length + " search results");
             } else {
                 console.error("Invalid response format:", response);
-                $("#productsTable").find('tbody').html('<tr><td colspan="5">Помилка при пошуку</td></tr>');
+                $("#mainProductsContainer").html('<table class="table table-bordered" id="productsTable"><tbody><tr><td colspan="' + (currentRole === 'manager' ? 5 : 4) + '">Помилка при пошуку</td></tr></tbody></table>');
             }
         },
         error: function(xhr, status, error) {
             console.error("Error searching products:", error);
-            $("#productsTable").find('tbody').html('<tr><td colspan="5">Помилка при пошуку: ' + error + '</td></tr>');
+            $("#mainProductsContainer").html('<table class="table table-bordered" id="productsTable"><tbody><tr><td colspan="' + (currentRole === 'manager' ? 5 : 4) + '">Помилка при пошуку: ' + error + '</td></tr></tbody></table>');
             alert('Error searching products: ' + xhr.responseText);
         }
     });
 }
 
+// Оновлення основної таблиці продуктів з результатами пошуку
+function updateProductsTable(products) {
+    let tableContent = '<table class="table table-bordered" id="productsTable"><thead><tr>' +
+        '<th>Name</th>' +
+        '<th>Category</th>' +
+        '<th>Characteristics</th>' +
+        '<th>Producer</th>';
+
+    // Додаємо колонку "Actions" лише для ролі manager
+    if (currentRole === 'manager') {
+        tableContent += '<th style="width: 150px" class="role-manager">Action</th>';
+    }
+
+    tableContent += '</tr></thead><tbody>';
+
+    $.each(products, function(index, product) {
+        // Захист від undefined полів
+        const productName = product.product_name || '';
+        const categoryNumber = product.category_number || '';
+        const characteristics = product.characteristics || '';
+        const producer = product.producer || '';
+
+        tableContent += '<tr data-id="' + (product.id_product || '') + '" data-name="' + productName + '" data-category="' + categoryNumber + '" data-char="' + characteristics + '" data-producer="' + producer + '">' +
+            '<td>' + productName + '</td>' +
+            '<td>' + categoryNumber + '</td>' +
+            '<td>' + characteristics + '</td>' +
+            '<td>' + producer + '</td>';
+
+        // Додаємо кнопки "Edit" і "Delete" лише для ролі manager
+        if (currentRole === 'manager') {
+            tableContent += '<td class="role-manager"><span class="btn btn-xs btn-primary edit-product role-manager">Edit</span> <span class="btn btn-xs btn-danger delete-product role-manager">Delete</span></td>';
+        }
+
+        tableContent += '</tr>';
+    });
+
+    tableContent += '</tbody></table>';
+
+    $("#mainProductsContainer").html(tableContent);
+}
+
+// Оновлення таблиці результатів пошуку (якщо використовується)
+function updateSearchResultsTable(products) {
+    let tableContent = '<table class="table table-bordered" id="searchResultsTable"><thead><tr>' +
+        '<th>Name</th>' +
+        '<th>Category</th>' +
+        '<th>Characteristics</th>' +
+        '<th>Producer</th>';
+
+    // Додаємо колонку "Actions" лише для ролі manager
+    if (currentRole === 'manager') {
+        tableContent += '<th style="width: 150px" class="role-manager">Action</th>';
+    }
+
+    tableContent += '</tr></thead><tbody>';
+
+    $.each(products, function(index, product) {
+        // Захист від undefined полів
+        const productName = product.product_name || '';
+        const categoryNumber = product.category_number || '';
+        const characteristics = product.characteristics || '';
+        const producer = product.producer || '';
+
+        tableContent += '<tr data-id="' + (product.id_product || '') + '" data-name="' + productName + '" data-category="' + categoryNumber + '" data-char="' + characteristics + '" data-producer="' + producer + '">' +
+            '<td>' + productName + '</td>' +
+            '<td>' + categoryNumber + '</td>' +
+            '<td>' + characteristics + '</td>' +
+            '<td>' + producer + '</td>';
+
+        // Додаємо кнопки "Edit" і "Delete" лише для ролі manager
+        if (currentRole === 'manager') {
+            tableContent += '<td class="role-manager"><span class="btn btn-xs btn-primary edit-product role-manager">Edit</span> <span class="btn btn-xs btn-danger delete-product role-manager">Delete</span></td>';
+        }
+
+        tableContent += '</tr>';
+    });
+
+    tableContent += '</tbody></table>';
+
+    $("#searchResultsTable").find('tbody').html(tableContent);
+}
+
+// Оновлення статистики пошуку
+function updateSearchStatistics(products) {
+    const totalResults = products.length;
+
+    // Підрахунок унікальних категорій та виробників
+    const uniqueCategories = new Set();
+    const uniqueProducers = new Set();
+
+    $.each(products, function(index, product) {
+        if (product.category_number) uniqueCategories.add(product.category_number);
+        if (product.producer) uniqueProducers.add(product.producer);
+    });
+
+    // Оновлення елементів UI з підрахунками
+    $("#searchResultsCount, #totalResultsCount").text(totalResults);
+    $("#categoriesFoundCount").text(uniqueCategories.size);
+    $("#producersFoundCount").text(uniqueProducers.size);
+}
+
+// Скидання елементів UI пошуку
+function resetSearchUI() {
+    $("#searchResults, #noResultsMessage").hide();
+    $("#searchResultsTable").find('tbody').empty();
+    $("#totalResultsCount, #categoriesFoundCount, #producersFoundCount").text("0");
+}
+
+// Завантаження категорій для форми
+function loadCategories() {
+    $.get('/getCategories', function(categories) {
+        const $dropdown = $('#category_number');
+        $dropdown.empty();
+        $dropdown.append('<option value="">Select category</option>');
+
+        categories.forEach(function(category) {
+            $dropdown.append(
+                $('<option></option>')
+                    .attr('value', category.category_number)
+                    .text(category.name)
+            );
+        });
+    });
+}
+
+// Завантаження категорій для фільтру
+function loadCategoryFilter() {
+    // Перевірка чи це сторінка продуктів
+    if (!isProductPage()) return;
+
+    $.get('/getCategories', function(categories) {
+        const $filter = $('#categoryFilter');
+        if (!$filter.length) {
+            console.error("Category filter with ID 'categoryFilter' not found");
+            return;
+        }
+
+        $filter.empty().append('<option value="">All Categories</option>');
+        categories.forEach(function(category) {
+            $filter.append(
+                $('<option></option>')
+                    .attr('value', category.category_number)
+                    .text(category.name)
+            );
+        });
+    });
+}
+
+// Ініціалізація форми пошуку
+function initSearchForm() {
+    // Search form submission
+    $("#searchForm").on("submit", function(e) {
+        e.preventDefault();
+        const searchTerm = $("#searchInput").val().trim();
+
+        if (searchTerm === "") {
+            alert("Please enter a product name to search");
+            return;
+        }
+
+        searchProductsByName(searchTerm);
+    });
+
+    // Clear search button
+    $("#clearSearchBtn").on("click", function() {
+        $("#searchInput").val("");
+        resetSearchUI();
+        loadProducts();
+    });
+}
 
 // Оновлена document.ready функція
 $(document).ready(function() {
@@ -151,23 +291,17 @@ $(document).ready(function() {
     if (isProductPage()) {
         console.log("This is a product page, loading products and filters");
 
-        // Перевірка наявності таблиці
-        if ($("#productsTable").length === 0) {
-            console.error("Product table with ID 'productsTable' not found in the DOM");
-            alert("Error: Product table not found. Please check HTML structure.");
-        }
-
         loadProducts();
         loadCategoryFilter();
 
-        // Setup event handlers for buttons - FIXED by removing data-toggle from HTML
+        // Setup event handlers for buttons
         $('#addProductBtn').on('click', function() {
             console.log("Add Product button clicked");
             productModal.find('.modal-title').text('Add New Product');
             $("#productForm")[0].reset();
             $("#id_product").val('');
             loadCategories();
-            productModal.modal('show'); // Make sure this line executes
+            productModal.modal('show');
         });
 
         // Додати обробники подій для кнопок сортування
@@ -337,139 +471,6 @@ $(document).on("click", ".delete-product", function () {
         });
     }
 });
-
-// Завантаження категорій для форми
-function loadCategories() {
-    $.get('/getCategories', function(categories) {
-        const $dropdown = $('#category_number');
-        $dropdown.empty();
-        $dropdown.append('<option value="">Select category</option>');
-
-        categories.forEach(function(category) {
-            $dropdown.append(
-                $('<option></option>')
-                    .attr('value', category.category_number)
-                    .text(category.name)
-            );
-        });
-    });
-}
-
-// Завантаження категорій для фільтру
-function loadCategoryFilter() {
-    // Перевірка чи це сторінка продуктів
-    if (!isProductPage()) return;
-
-    $.get('/getCategories', function(categories) {
-        const $filter = $('#categoryFilter');
-        if (!$filter.length) {
-            console.error("Category filter with ID 'categoryFilter' not found");
-            return;
-        }
-
-        $filter.empty().append('<option value="">All Categories</option>');
-        categories.forEach(function(category) {
-            $filter.append(
-                $('<option></option>')
-                    .attr('value', category.category_number)
-                    .text(category.name)
-            );
-        });
-    });
-}
-
-// Ініціалізація форми пошуку
-function initSearchForm() {
-    // Search form submission
-    $("#searchForm").on("submit", function(e) {
-        e.preventDefault();
-        const searchTerm = $("#searchInput").val().trim();
-
-        if (searchTerm === "") {
-            alert("Please enter a product name to search");
-            return;
-        }
-
-        searchProductsByName(searchTerm);
-    });
-
-    // Clear search button
-    $("#clearSearchBtn").on("click", function() {
-        $("#searchInput").val("");
-        resetSearchUI();
-        loadProducts();
-    });
-}
-
-// Оновлення основної таблиці продуктів з результатами пошуку
-function updateProductsTable(products) {
-    let tableContent = '';
-
-    $.each(products, function(index, product) {
-        // Захист від undefined полів
-        const productName = product.product_name || '';
-        const categoryNumber = product.category_number || '';
-        const characteristics = product.characteristics || '';
-        const producer = product.producer || '';
-
-        tableContent += '<tr data-id="' + (product.id_product || '') + '" data-name="' + productName + '" data-category="' + categoryNumber + '" data-char="' + characteristics + '" data-producer="' + producer + '">' +
-            '<td>' + productName + '</td>' +
-            '<td>' + categoryNumber + '</td>' +
-            '<td>' + characteristics + '</td>' +
-            '<td>' + producer + '</td>' +
-            '<td><span class="btn btn-xs btn-primary edit-product">Edit</span> <span class="btn btn-xs btn-danger delete-product">Delete</span></td></tr>';
-    });
-
-    $("#productsTable").find('tbody').html(tableContent);
-}
-
-// Оновлення таблиці результатів пошуку
-function updateSearchResultsTable(products) {
-    let tableContent = '';
-
-    $.each(products, function(index, product) {
-        // Захист від undefined полів
-        const productName = product.product_name || '';
-        const categoryNumber = product.category_number || '';
-        const characteristics = product.characteristics || '';
-        const producer = product.producer || '';
-
-        tableContent += '<tr data-id="' + (product.id_product || '') + '" data-name="' + productName + '" data-category="' + categoryNumber + '" data-char="' + characteristics + '" data-producer="' + producer + '">' +
-            '<td>' + productName + '</td>' +
-            '<td>' + categoryNumber + '</td>' +
-            '<td>' + characteristics + '</td>' +
-            '<td>' + producer + '</td>' +
-            '<td><span class="btn btn-xs btn-primary edit-product">Edit</span> <span class="btn btn-xs btn-danger delete-product">Delete</span></td></tr>';
-    });
-
-    $("#searchResultsTable").find('tbody').html(tableContent);
-}
-
-// Оновлення статистики пошуку
-function updateSearchStatistics(products) {
-    const totalResults = products.length;
-
-    // Підрахунок унікальних категорій та виробників
-    const uniqueCategories = new Set();
-    const uniqueProducers = new Set();
-
-    $.each(products, function(index, product) {
-        if (product.category_number) uniqueCategories.add(product.category_number);
-        if (product.producer) uniqueProducers.add(product.producer);
-    });
-
-    // Оновлення елементів UI з підрахунками
-    $("#searchResultsCount, #totalResultsCount").text(totalResults);
-    $("#categoriesFoundCount").text(uniqueCategories.size);
-    $("#producersFoundCount").text(uniqueProducers.size);
-}
-
-// Скидання елементів UI пошуку
-function resetSearchUI() {
-    $("#searchResults, #noResultsMessage").hide();
-    $("#searchResultsTable").find('tbody').empty();
-    $("#totalResultsCount, #categoriesFoundCount, #producersFoundCount").text("0");
-}
 
 // Ця функція забезпечує правильну ініціалізацію пошуку
 // при навігації на сторінку після первинного завантаження

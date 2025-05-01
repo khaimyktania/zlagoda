@@ -175,6 +175,33 @@ function initEventHandlers() {
         viewProductDetails(upc);
     });
 
+    // Filter all store products by name
+$('#getAllStoreProductsSorted').on('click', function () {
+    $.get("/getAllStoreProductsSorted", function (data) {
+        let tableContent = '';
+        if (Array.isArray(data)) {
+            data.forEach(product => {
+    const promoClass = product.promotional_product ? 'promotional-product' : '';
+    tableContent += `<tr class="${promoClass}">
+        <td>${product.UPC}</td>
+        <td>${product.UPC_prom || '-'}</td>
+        <td>${product.product_name}</td>
+        <td>${product.selling_price}</td>
+        <td>${product.products_number}</td>
+        <td>${product.promotional_product ? 'Yes' : 'No'}</td>
+        <td><span class="btn btn-xs btn-info view-store-product" data-upc="${product.UPC}">View</span></td>
+    </tr>`;
+});
+
+        } else {
+            tableContent = '<tr><td colspan="7">Error loading data</td></tr>';
+        }
+        $("table tbody").html(tableContent);
+        $("#filterStatus").text("All store products sorted by name");
+    });
+});
+
+
     // Delete store product
     $(document).on('click', '.delete-store-product', function() {
         var tr = $(this).closest('tr');

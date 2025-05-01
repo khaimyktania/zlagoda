@@ -62,7 +62,7 @@
     <div id="main">
         <!-- Header -->
         <div class="header content rows-content-header">
-            <button id="openNav" class="w3-button w3-teal w3-xlarge">&#9776;</button>
+            <button id="openNav" class="w3-button w3-teal w3-xlarge">☰</button>
             <div class="navbar navbar-default" role="navigation">
                 <div class="container">
                     <div class="navbar-collapse collapse">
@@ -72,7 +72,7 @@
                                     <i class="zmdi zmdi-view-dashboard zmdi-hc-fw" title="Orders"></i>
                                 </a>
                                 <a href="manage-product.html">
-                                    <i class="zmdi zmdi-assignment zmdi-hc-fw" title="Products"></i>
+                                    <i class="zmdi zmdi-assignment zmdi-hc-fwtoolbar-menu zmdi-hc-fw" title="Products"></i>
                                 </a>
                             </ul>
                         </ul>
@@ -129,8 +129,7 @@
                                                     </button>
                                                 </div>
                                                 <div class="col-sm-6 text-right">
-                                                    <!-- Removed data-toggle and data-target attributes -->
-                                                    <button type="button" class="btn btn-sm btn-primary pull-right" id="addProductBtn">
+                                                    <button type="button" class="btn btn-sm btn-primary pull-right role-manager" id="addProductBtn">
                                                         Add New Product
                                                     </button>
                                                 </div>
@@ -138,20 +137,7 @@
 
                                             <!-- Main Products Table Container -->
                                             <div id="mainProductsContainer">
-                                                <table class="table table-bordered" id="productsTable">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Name</th>
-                                                            <th>Category</th>
-                                                            <th>Characteristics</th>
-                                                            <th>Producer</th>
-                                                            <th style="width: 150px">Action</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <!-- Product rows will be loaded dynamically -->
-                                                    </tbody>
-                                                </table>
+                                                <!-- Таблиця буде генеруватися динамічно -->
                                             </div>
 
                                             <!-- Search Results Area -->
@@ -265,14 +251,15 @@
             return res.json();
         })
         .then(data => {
-            const role = data.empl_role.toLowerCase();
+            currentRole = data.empl_role.toLowerCase(); // Зберігаємо роль
+            console.log("User role:", currentRole); // Для дебагу
 
             // Hide all tabs initially
             document.querySelectorAll('.role-manager, .role-cashier')
                 .forEach(el => el.style.display = 'none');
 
             // Show only tabs for the current role
-            document.querySelectorAll(`.role-${role}`)
+            document.querySelectorAll(`.role-${currentRole}`)
                 .forEach(el => el.style.display = 'block');
 
             // Show the sidebar

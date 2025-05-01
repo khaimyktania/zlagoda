@@ -299,3 +299,21 @@ def recalculate_vat(connection, upc):
     except Exception as e:
         print(f"Error calculating VAT: {e}")
         return {"success": False, "message": str(e)}
+
+def get_all_store_products_sorted(connection):
+        """
+        Отримати усі товари у магазині, відсортовані за назвою продукту
+        """
+        query = """
+            SELECT sp.UPC, sp.UPC_prom, p.product_name, sp.selling_price,
+                   sp.products_number, sp.promotional_product
+            FROM store_products sp
+            JOIN products p ON sp.id_product = p.id_product
+            ORDER BY p.product_name ASC;
+        """
+        try:
+            result = execute_query(connection, query)
+            return result
+        except Exception as e:
+            print(f"Помилка в get_all_store_products_sorted: {e}")
+            raise

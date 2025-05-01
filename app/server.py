@@ -12,6 +12,9 @@ import product_dao
 import customer_dao
 import store_product_dao
 import check_dao
+from store_product_dao import get_all_store_products_sorted
+from sql_connection import get_sql_connection
+
 
 
 
@@ -1057,6 +1060,17 @@ def logout():
     session.clear()
     return redirect('/')  # ⬅️ Переходить до /
 
+@app.route('/getAllStoreProductsSorted', methods=['GET'])
+def api_get_all_store_products_sorted():
+    try:
+        connection = get_sql_connection()
+        result = store_product_dao.get_all_store_products_sorted(connection)
+        return jsonify(result)
+    except Exception as e:
+        print("Помилка в /getAllStoreProductsSorted:", e)
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     print("Starting Python Flask Server For Grocery Store Management System")

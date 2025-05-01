@@ -136,3 +136,4 @@ def search_products_by_name(connection, name):
     except Exception as e:
         print(f"Помилка в search_products_by_name: {e}")
         raise
+
