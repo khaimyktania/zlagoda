@@ -347,3 +347,20 @@ def get_cashiers(connection):
     except Exception as e:
         print(f"Error in get_cashiers: {e}")
         raise
+
+def get_cashier_total_sales(connection, id_employee, start_date, end_date):
+    """
+    Обчислення загальної суми продажів для певного касира за період
+    """
+    query = """
+    SELECT SUM(c.sum_total) as total_sales
+    FROM `check` c
+    WHERE c.id_employee = %s
+    AND c.print_date BETWEEN %s AND %s;
+    """
+    try:
+        result = execute_query(connection, query, (id_employee, start_date, end_date))
+        return result[0] if result else {'total_sales': 0}
+    except Exception as e:
+        print(f"Помилка в get_cashier_total_sales: {e}")
+        raise

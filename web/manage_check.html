@@ -18,10 +18,10 @@
 
     <style>
         .logout-btn-fixed {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    }
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
         /* Always visible sidebar on desktop */
         @media (min-width: 992px) {
             #mySidebar {
@@ -140,66 +140,36 @@
             max-height: 400px;
             overflow-y: auto;
         }
-    </style>
 
+        .cashier-filter { margin-bottom: 20px; }
+        #filter-status { margin-top: 10px; }
+        #loading-indicator { display: none; }
+        #total-sales {
+            font-weight: bold;
+            color: #007bff;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body class="tooltips">
 
 <!-- Sidebar -->
-<!-- Sidebar -->
-<!-- Sidebar -->
-<!-- Sidebar -->
-<div id="mySidebar"
-     class="w3-sidebar w3-bar-block w3-card w3-animate-left w3-light-grey"
-     style="display: none;">
-  <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">✕ Close</button>
-
-  <!-- Workers (тільки менеджер) -->
-  <a href="/manage-employee" class="w3-bar-item w3-button role-manager">Workers</a>
-
-  <!-- Manage Products (і менеджер, і касир) -->
-  <a href="/manage_product"
-     class="w3-bar-item w3-button role-manager role-cashier">
-    Manage Products
-  </a>
-
-  <!-- Store Products (і менеджер, і касир) -->
-  <a href="/manage_store_product"
-     class="w3-bar-item w3-button role-manager role-cashier">
-    Store Products
-  </a>
-
-  <!-- Categories (тільки менеджер) -->
-  <a href="/manage_category" class="w3-bar-item w3-button role-manager">
-    Categories
-  </a>
-
-  <!-- Customers (і менеджер, і касир) -->
-  <a href="/manage_customer"
-     class="w3-bar-item w3-button role-manager role-cashier">
-    Customers
-  </a>
-
-  <!-- Checks (і менеджер, і касир) -->
-  <a href="/manage_check"
-     class="w3-bar-item w3-button role-manager role-cashier">
-    Checks
-  </a>
-
-  <!-- Reports (тільки менеджер) -->
-  <a href="/reports" class="w3-bar-item w3-button role-manager">Reports</a>
-
+<div id="mySidebar" class="w3-sidebar w3-bar-block w3-card w3-animate-left w3-light-grey" style="display: none;">
+    <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">✕ Close</button>
+    <a href="/manage-employee" class="w3-bar-item w3-button role-manager">Workers</a>
+    <a href="/manage_product" class="w3-bar-item w3-button role-manager role-cashier">Manage Products</a>
+    <a href="/manage_store_product" class="w3-bar-item w3-button role-manager role-cashier">Store Products</a>
+    <a href="/manage_category" class="w3-bar-item w3-button role-manager">Categories</a>
+    <a href="/manage_customer" class="w3-bar-item w3-button role-manager role-cashier">Customers</a>
+    <a href="/manage_check" class="w3-bar-item w3-button role-manager role-cashier">Checks</a>
+    <a href="/reports" class="w3-bar-item w3-button role-manager">Reports</a>
     <a href="/manager_account.html" class="w3-bar-item w3-button role-manager">My Account</a>
-<a href="/cashier_account.html" class="w3-bar-item w3-button role-cashier">My Account</a>
-<a href="/logout" class="w3-bar-item w3-button logout-btn-fixed">Log Out</a>
-
+    <a href="/cashier_account.html" class="w3-bar-item w3-button role-cashier">My Account</a>
+    <a href="/logout" class="w3-bar-item w3-button logout-btn-fixed">Log Out</a>
 </div>
-
-
 
 <!-- Main -->
 <div id="main">
-
     <!-- Header -->
     <div class="header content rows-content-header">
         <button id="openNav" class="w3-button w3-teal w3-xlarge">&#9776;</button>
@@ -228,89 +198,91 @@
                 <div class="box-info full" id="taskFormContainer">
                     <h2>Check Management</h2>
 
-                    <!-- Statistics Section -->
-                    <div class="statistics-section">
-                        <h4>Check Statistics</h4>
+                   <!-- Statistics Section -->
+<div class="statistics-section">
+    <h4>Check Statistics</h4>
+    <div class="row">
+        <div class="col-md-3">
+            <p><strong>Total Checks:</strong> <span id="stats-total-checks">0</span></p>
+            <p><strong>Total Sales:</strong> <span id="stats-total-sales">$0.00</span></p>
+           <div class="col-md-3">
+    <p><strong>Total Sales by Cashier:</strong> <span id="stats-cashier-sales">$0.00</span></p>
+    <p><strong>Selected Cashier:</strong> <span id="stats-selected-cashier">None</span></p>
+</div>
+        </div>
+        <div class="col-md-3">
+            <p><strong>Total VAT:</strong> <span id="stats-total-vat">$0.00</span></p>
+            <p><strong>Average Check:</strong> <span id="stats-average-check">$0.00</span></p>
+        </div>
+        <div class="col-md-3">
+            <p><strong>Period:</strong> <span id="stats-period">All time</span></p>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-period="today">Today</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-period="week">Week</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-period="month">Month</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-period="year">Year</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-period="all">All</button>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <p><strong>Date Range:</strong> <span id="stats-date-range">N/A</span></p>
+        </div>
+    </div>
+</div>
+
+                    <!-- Filter Controls -->
+                    <div class="filter-controls">
                         <div class="row">
-                            <div class="col-md-3">
-                                <p><strong>Total Checks:</strong> <span id="stats-total-checks">0</span></p>
-                                <p><strong>Total Sales:</strong> <span id="stats-total-sales">$0.00</span></p>
-                            </div>
-                            <div class="col-md-3">
-                                <p><strong>Total VAT:</strong> <span id="stats-total-vat">$0.00</span></p>
-                                <p><strong>Average Check:</strong> <span id="stats-average-check">$0.00</span></p>
-                            </div>
-                            <div class="col-md-3">
-                                <p><strong>Period:</strong> <span id="stats-period">All time</span></p>
-                                <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-period="today">Today</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-period="week">Week</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-period="month">Month</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-period="year">Year</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-period="all">All</button>
+                            <div class="col-md-12">
+                                <h4>Filter Checks</h4>
+                                <!-- Date Filter Section -->
+                                <div class="filter-section">
+                                    <label>Date Range:</label>
+                                    <div class="date-filter">
+                                        <div class="form-group">
+                                            <label for="start-date">From</label>
+                                            <input type="date" class="form-control" id="start-date">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="end-date">To</label>
+                                            <input type="date" class="form-control" id="end-date">
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-3">
-                                <p><strong>Date Range:</strong> <span id="stats-date-range">N/A</span></p>
+
+                                <!-- Cashier Filter Section -->
+                                <div class="filter-section cashier-filter">
+                                    <label>Cashier:</label>
+                                    <div class="form-group">
+                                        <select class="form-control" id="cashier-select">
+                                            <option value="">All Cashiers</option>
+                                            <!-- Cashier options will be populated dynamically -->
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Filter Actions -->
+                                <div class="filter-actions mt-3">
+                                    <button class="btn btn-primary" id="apply-cashier-filter">Apply Filters</button>
+                                    <button class="btn btn-outline-secondary" id="reset-date-filter">Reset All</button>
+                                </div>
+
+                                <!-- Filter Status Display -->
+                                <div class="alert alert-info mt-3" id="filter-status" style="display: none;"></div>
+
+                                <!-- Check Number Search -->
+                                <div class="search-section mt-3">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="check-number-search" placeholder="Enter check number">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-outline-secondary" type="button" id="search-check">Search</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                     <!-- Filter Controls -->
-                   <!-- Replace the existing filter-controls div with this updated version -->
-<div class="filter-controls">
-    <div class="row">
-        <div class="col-md-12">
-            <h4>Filter Checks</h4>
-            <!-- Date Filter Section -->
-            <div class="filter-section">
-                <label>Date Range:</label>
-                <div class="date-filter">
-                    <div class="form-group">
-                        <label for="start-date">From</label>
-                        <input type="date" class="form-control" id="start-date">
-                    </div>
-                    <div class="form-group">
-                        <label for="end-date">To</label>
-                        <input type="date" class="form-control" id="end-date">
-                    </div>
-                </div>
-            </div>
-
-            <!-- NEW: Cashier Filter Section -->
-            <div class="filter-section">
-                <label>Cashier:</label>
-                <div class="cashier-filter">
-                    <div class="form-group">
-                        <select class="form-control" id="cashier-select">
-                            <option value="">All Cashiers</option>
-                            <!-- Cashier options will be populated dynamically -->
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Filter Actions -->
-            <div class="filter-actions mt-3">
-                <button class="btn btn-primary" id="apply-cashier-filter">Apply Filters</button>
-                <button class="btn btn-outline-secondary" id="reset-date-filter">Reset All</button>
-            </div>
-
-            <!-- Filter Status Display -->
-            <div class="alert alert-info mt-3" id="filter-status" style="display: none;"></div>
-
-            <!-- Check Number Search -->
-            <div class="search-section mt-3">
-                <div class="input-group">
-                    <input type="text" class="form-control" id="check-number-search" placeholder="Enter check number">
-                    <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" type="button" id="search-check">Search</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
                     <!-- Action Buttons -->
                     <div class="row mb-4">
                         <div class="col-sm-12">
@@ -322,7 +294,7 @@
 
                     <!-- Checks List -->
                     <div id="checks-list">
-                        <!-- Check items will be loaded here dynamically -->
+                        <h3 id="checks-heading">All Checks</h3>
                         <div class="text-center" id="loading-indicator">
                             <p>Loading checks...</p>
                         </div>
@@ -405,7 +377,6 @@
                             <div class="col-md-12">
                                 <h5>Products in Check</h5>
                                 <div id="check-products-container">
-                                    <!-- Products will be added here -->
                                     <div class="text-center" id="no-products-message">
                                         <p>No products added yet</p>
                                     </div>
@@ -490,48 +461,40 @@
     <script src="/web/js/common.js"></script>
     <script src="/web/js/manage-check.js"></script>
     <script src="/web/js/package/bootstrap.min.js"></script>
-<script>
-  fetch('/api/employee_info', {
-  method: 'GET',
-  credentials: 'include'
-})
-.then(res => {
-  if (!res.ok) {
-    if (res.status === 401) window.location.href = '/login.html';
-    throw new Error('Not authorized');
-  }
-  return res.json();
-})
-.then(data => {
-  const role = data.empl_role.toLowerCase();
+    <script>
+        fetch('/api/employee_info', {
+            method: 'GET',
+            credentials: 'include'
+        })
+        .then(res => {
+            if (!res.ok) {
+                if (res.status === 401) window.location.href = '/login.html';
+                throw new Error('Not authorized');
+            }
+            return res.json();
+        })
+        .then(data => {
+            const role = data.empl_role.toLowerCase();
+            document.querySelectorAll('.role-manager, .role-cashier')
+                .forEach(el => el.style.display = 'none');
+            document.querySelectorAll(`.role-${role}`)
+                .forEach(el => el.style.display = 'block');
+            document.getElementById('mySidebar').style.display = 'block';
+        })
+        .catch(err => {
+            console.error('Role fetch error:', err);
+        });
 
-  // Сховати всі вкладки спочатку
-  document.querySelectorAll('.role-manager, .role-cashier')
-    .forEach(el => el.style.display = 'none');
-
-  // Показати лише ті, що відповідають ролі
-  document.querySelectorAll(`.role-${role}`)
-    .forEach(el => el.style.display = 'block');
-
-  // Показати сам сайдбар
-  document.getElementById('mySidebar').style.display = 'block';
-})
-.catch(err => {
-  console.error('Role fetch error:', err);
-});
-
-
-  function w3_open() {
-    document.getElementById('mySidebar').style.display = 'block';
-    document.getElementById('main').style.marginLeft = '250px';
-    document.getElementById('openNav').style.display = 'none';
-  }
-  function w3_close() {
-    document.getElementById('mySidebar').style.display = 'none';
-    document.getElementById('main').style.marginLeft = '0';
-    document.getElementById('openNav').style.display = 'inline-block';
-  }
-</script>
-
-    </body>
+        function w3_open() {
+            document.getElementById('mySidebar').style.display = 'block';
+            document.getElementById('main').style.marginLeft = '250px';
+            document.getElementById('openNav').style.display = 'none';
+        }
+        function w3_close() {
+            document.getElementById('mySidebar').style.display = 'none';
+            document.getElementById('main').style.marginLeft = '0';
+            document.getElementById('openNav').style.display = 'inline-block';
+        }
+    </script>
+</body>
 </html>
