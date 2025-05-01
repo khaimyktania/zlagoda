@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from flask import Flask, request, jsonify, session
+from flask import Flask, request, jsonify, session, redirect
 from functools import wraps
 from credentials_utils import load_credentials, save_credentials, auto_generate_credentials
 from flask import jsonify, session
@@ -990,10 +990,7 @@ def report_receipts():
     result = cursor.fetchall()
     return jsonify(result)
 
-@app.route('/logout', methods=['POST'])
-def logout():
-    session.pop('role', None)
-    return jsonify({'success': True, 'message': 'Logged out'})
+
 @app.route('/login.html')
 def login_page():
     return app.send_static_file('login.html')
@@ -1039,6 +1036,13 @@ def get_full_employee_info():
         'street': employee['street'],
         'zip_code': employee['zip_code']
     })
+
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect('/')  # ⬅️ Переходить до /
+
 
 if __name__ == "__main__":
     print("Starting Python Flask Server For Grocery Store Management System")
