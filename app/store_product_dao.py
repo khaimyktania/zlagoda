@@ -239,7 +239,7 @@ def make_product_promotional(connection, upc, promotional=True):
             upc_prom = product.get('UPC_prom')
             if not upc_prom:
                 # Simple approach: append 'P' to original UPC
-                upc_prom = f"P{upc}"
+                upc_prom = f"P{upc[-11:]}"
 
             update_data = {
                 "UPC": upc,

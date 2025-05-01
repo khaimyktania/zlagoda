@@ -552,7 +552,8 @@ def get_store_product_by_upc():
         return jsonify({"success": False, "message": "UPC is required"}), 400
     connection = get_sql_connection()
     try:
-        response = store_product_dao.get_store_product_by_upc(connection, upc)
+        # Змінено: використовуємо get_store_product_detail_by_upc замість get_store_product_by_upc
+        response = store_product_dao.get_store_product_detail_by_upc(connection, upc)
         if response:
             return jsonify(response)
         else:
@@ -893,12 +894,17 @@ def get_checks_by_date_range():
     try:
         start_date = request.args.get('start_date')
         end_date = request.args.get('end_date')
+        id_employee = request.args.get('id_employee')  # Може бути None або порожнім
 
         if not start_date or not end_date:
             return jsonify({'success': False, 'message': 'Start and end dates are required'}), 400
 
         connection = get_sql_connection()
-        response = check_dao.find_checks_by_date_range(connection, start_date, end_date)
+
+        # Передаємо id_employee як None, якщо воно порожнє
+        employee_id = id_employee if id_employee and id_employee.strip() else None
+        response = check_dao.find_checks_by_date_range(connection, start_date, end_date, employee_id)
+
         return jsonify(response)
     except Exception as e:
         print(f"Error in get_checks_by_date_range: {str(e)}")
@@ -906,7 +912,6 @@ def get_checks_by_date_range():
     finally:
         if connection:
             connection.close()
-
 
 @app.route('/getAllEmployees', methods=['GET'])
 @require_role('manager')

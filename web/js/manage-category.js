@@ -6,6 +6,7 @@ var categoryDeleteApiUrl = 'http://127.0.0.1:5000/deleteCategory';
 // DOM elements
 var categoryModal = $("#categoryModal");
 var categoryForm = $("#categoryForm");
+var sortDirection = 'asc'; // Default sort direction
 
 // Додайте цей код у ваш JavaScript-файл
 function clearPageData() {
@@ -29,6 +30,7 @@ $(document).ready(function() {
     // Setup event handlers
     $("#addCategoryBtn").click(openAddCategoryModal);
     $("#saveCategory").click(saveCategory);
+    $("#sortCategoriesBtn").click(sortCategories);
 
     // Event delegation for dynamic buttons
     $(document).on('click', '.edit-category', editCategory);
@@ -41,25 +43,55 @@ $(document).ready(function() {
 // Load all categories into the table
 function loadCategories() {
     $.get(categoryListApiUrl, function(categories) {
-        var tbody = $("#categoryTableBody");
-        tbody.empty();
-
-        categories.forEach(function(category) {
-            var row = `
-                <tr data-number="${category.category_number}" data-name="${category.name}">
-                    <td>${category.category_number}</td>
-                    <td>${category.name}</td>
-                    <td>
-                        <span class="btn btn-xs btn-primary edit-category">Edit</span>
-                        <span class="btn btn-xs btn-danger delete-category">Delete</span>
-                    </td>
-                </tr>
-            `;
-            tbody.append(row);
-        });
+        displayCategories(categories);
     }).fail(function(error) {
         console.error("Error loading categories:", error);
         alert("Error loading categories. Please check the console for details.");
+    });
+}
+
+// Display categories in the table
+function displayCategories(categories) {
+    var tbody = $("#categoryTableBody");
+    tbody.empty();
+
+    categories.forEach(function(category) {
+        var row = `
+            <tr data-number="${category.category_number}" data-name="${category.name}">
+                <td>${category.category_number}</td>
+                <td>${category.name}</td>
+                <td>
+                    <span class="btn btn-xs btn-primary edit-category">Edit</span>
+                    <span class="btn btn-xs btn-danger delete-category">Delete</span>
+                </td>
+            </tr>
+        `;
+        tbody.append(row);
+    });
+}
+
+// Sort categories by name
+function sortCategories() {
+    $.get(categoryListApiUrl, function(categories) {
+        categories.sort(function(a, b) {
+            if (sortDirection === 'asc') {
+                return a.name.localeCompare(b.name);
+            } else {
+                return b.name.localeCompare(a.name);
+            }
+        });
+
+        // Toggle sort direction for next click
+        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+
+        // Update the button text with arrow indicators
+        var buttonText = sortDirection === 'asc' ? 'Sort by Name ▼' : 'Sort by Name ▲';
+        $("#sortCategoriesBtn").text(buttonText);
+
+        displayCategories(categories);
+    }).fail(function(error) {
+        console.error("Error loading categories for sorting:", error);
+        alert("Error loading categories for sorting. Please check the console for details.");
     });
 }
 

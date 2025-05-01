@@ -290,6 +290,7 @@ function updateFilterStatus(statusText) {
 }
 
 // View product details by UPC
+// View product details by UPC
 function viewProductDetails(upc) {
     $.ajax({
         url: getProductDetailByUpcApiUrl,
@@ -311,8 +312,13 @@ function viewProductDetails(upc) {
                 $('#detailPriceNoVAT').text(priceWithoutVAT);
                 $('#detailQuantity').text(response.products_number);
                 $('#detailPromotional').text(response.promotional_product == 1 ? 'Yes' : 'No');
+
+                // Цей рядок був проблемою - виправляємо його
                 $('#detailCharacteristics').text(response.characteristics || 'N/A');
                 $('#detailCategory').text(response.category_number || 'N/A');
+
+                // Для відлагодження - виведіть вміст response в консоль
+                console.log('Product details response:', response);
 
                 // Show the modal
                 productDetailModal.modal('show');
@@ -325,7 +331,6 @@ function viewProductDetails(upc) {
         }
     });
 }
-
 // Open the store product modal for editing
 function openEditStoreProductModal(tr) {
     // Get data from the row

@@ -709,7 +709,6 @@ function renderChecksListItems(checks) {
         $('#checks-list').html('<div class="alert alert-info">No checks found.</div>');
     }
 }
-
 // Load products for a specific check
 function loadCheckProducts(checkNumber, productsContainer) {
     $.ajax({
@@ -830,7 +829,7 @@ function applyFilters() {
         }
     });
 }
-// Reset date filter
+
 function resetDateFilter() {
     setDefaultDates();
     $('#cashier-select').val(''); // Reset cashier selection
