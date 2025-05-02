@@ -27,9 +27,9 @@
             top: 0;
             left: 0;
             display: flex;
-            align-items: flex-start; /* Змінено з center на flex-start, щоб текст вирівнювався зверху */
+            align-items: flex-start;
             z-index: 1000;
-            max-width: 100%; /* Обмежуємо ширину контейнера помилки шириною поля */
+            max-width: 100%;
         }
 
         .error-icon {
@@ -43,7 +43,7 @@
             border-radius: 3px;
             font-size: 12px;
             margin-right: 5px;
-            flex-shrink: 0; /* Іконка не стискається */
+            flex-shrink: 0;
         }
 
         .error-text {
@@ -55,22 +55,21 @@
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             font-size: 12px;
-            white-space: normal; /* Дозволяємо перенос тексту */
-            word-wrap: break-word; /* Переносимо слова на новий рядок */
-            max-width: calc(100% - 25px); /* Обмежуємо ширину тексту, враховуючи ширину іконки та відступ */
+            white-space: normal;
+            word-wrap: break-word;
+            max-width: calc(100% - 25px);
         }
 
-        /* Динамічне прив'язування до ширини поля вводу */
         .form-group .error-message {
-            max-width: 100%; /* Забезпечуємо, щоб контейнер помилки не виходив за межі поля */
+            max-width: 100%;
         }
 
         @media (min-width: 768px) {
             .col-md-4 .error-message {
-                max-width: 100%; /* Для колонок шириною 4 */
+                max-width: 100%;
             }
             .col-md-6 .error-message {
-                max-width: 100%; /* Для колонок шириною 6 */
+                max-width: 100%;
             }
         }
 
@@ -80,7 +79,6 @@
             width: 100%;
         }
 
-        /* Always visible sidebar on desktop */
         @media (min-width: 992px) {
             #mySidebar {
                 display: block !important;
@@ -97,14 +95,12 @@
             }
         }
 
-        /* Content margin reset on small screens */
         @media (max-width: 991px) {
             #main {
                 margin-left: 0;
             }
         }
 
-        /* Стилі для підсвічування червоним */
         .is-invalid {
             border: 2px solid #dc3545 !important;
             background-color: rgba(220, 53, 69, 0.05) !important;
@@ -171,10 +167,9 @@
                         <div id="contactInfoResult" class="alert alert-secondary" style="display: none;"></div>
                         <div class="row mt-3 mb-3">
                             <div class="col-md-12">
-                                <button class="btn btn-sm btn-warning" id="findEmployeesNeverSoldPromotional">Find Employees (Never Sold Promotional to Non-Card Holders)</button>
+                                <button class="btn btn-sm btn-warning" id="findEmployeesNeverSoldPromotional" data-toggle="modal" data-target="#neverSoldPromotionalModal">Find Employees (Never Sold Promotional to Non-Card Holders)</button>
                             </div>
                         </div>
-                        <div id="neverSoldPromotionalResult" class="alert alert-secondary" style="display: none;"></div>
                         <div class="row mb-4">
                             <div class="col-sm-12">
                                 <select id="sortSelect" class="form-control" style="width: auto; display: inline-block;">
@@ -207,7 +202,7 @@
         </div>
     </div>
 
-    <!-- Modal -->
+    <!-- Modal for Employee Form -->
     <div class="modal fade-scale" id="employeeModal" role="dialog" data-backdrop="static">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -372,6 +367,39 @@
         </div>
     </div>
 
+    <!-- Modal for Never Sold Promotional Employees -->
+    <div class="modal fade-scale" id="neverSoldPromotionalModal" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Employees Who Never Sold Promotional to Non-Card Holders</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered" id="neverSoldPromotionalTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Surname</th>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Phone</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Employee rows will be populated dynamically -->
+                        </tbody>
+                    </table>
+                    <div id="noResultsMessage" style="display: none;" class="alert alert-secondary">
+                        No employees found matching the criteria.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="/web/js/package/jquery.min.js"></script>
     <script src="/web/js/common.js"></script>
@@ -425,7 +453,5 @@
             });
         });
     </script>
-
-    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'939a3badeabdbcaa',t:'MTc0NjIxNzM3MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>

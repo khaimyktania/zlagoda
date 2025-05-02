@@ -1,18 +1,16 @@
 var employeeModal = $("#employeeModal");
+var neverSoldPromotionalModal = $("#neverSoldPromotionalModal");
 
 $(function () {
     loadEmployees();
 });
 
-// Додайте цей код у ваш JavaScript-файл
+// Clear page data when switching tabs
 function clearPageData() {
-    // Очистити всі відображувані дані
     document.getElementById('dataContainer').innerHTML = '';
-    // Скинути всі форми
     document.querySelectorAll('form').forEach(form => form.reset());
 }
 
-// Викликайте цю функцію при переході між вкладками
 document.querySelectorAll('.tab-link').forEach(link => {
     link.addEventListener('click', clearPageData);
 });
@@ -39,28 +37,26 @@ function loadEmployees() {
 $('#addEmployeeBtn').on('click', function() {
     employeeModal.find('.modal-title').text('Add New Employee');
     $("#employeeForm")[0].reset();
-    $("#id_employee").val(''); // Ensure ID is empty for new employee
-    $('.error-message').hide().find('.error-text').text(''); // Очищаємо повідомлення про помилки при відкритті
-    $('.form-control').removeClass('is-invalid'); // Очищаємо підсвічування при відкритті
+    $("#id_employee").val('');
+    $('.error-message').hide().find('.error-text').text('');
+    $('.form-control').removeClass('is-invalid');
     employeeModal.modal('show');
 });
 
-// Edit employee - add event handler for the dynamic edit button
+// Edit employee
 $(document).on('click', '.edit-employee', function() {
     var row = $(this).closest('tr');
     var employeeId = row.data('id');
 
-    // Fetch the full employee data by ID
     $.get('/getEmployees', function(employees) {
         var employee = employees.find(e => e.id_employee == employeeId);
 
         if(employee) {
-            // Fill the form with employee data
             $("#id_employee").val(employee.id_employee);
             $("#empl_surname").val(employee.empl_surname);
             $("#empl_name").val(employee.empl_name);
             $("#empl_patronymic").val(employee.empl_patronymic);
-            $("#empl_role").val(employee.empl_role); // This will now select the option in the dropdown
+            $("#empl_role").val(employee.empl_role);
             $("#salary").val(employee.salary);
             $("#date_of_birth").val(employee.date_of_birth);
             $("#date_of_start").val(employee.date_of_start);
@@ -69,10 +65,9 @@ $(document).on('click', '.edit-employee', function() {
             $("#street").val(employee.street);
             $("#zip_code").val(employee.zip_code);
 
-            // Update modal title and show
             employeeModal.find('.modal-title').text('Edit Employee');
-            $('.error-message').hide().find('.error-text').text(''); // Очищаємо повідомлення про помилки при відкритті
-            $('.form-control').removeClass('is-invalid'); // Очищаємо підсвічування при відкритті
+            $('.error-message').hide().find('.error-text').text('');
+            $('.form-control').removeClass('is-invalid');
             employeeModal.modal('show');
         }
     });
@@ -96,7 +91,7 @@ $("#saveEmployee").on("click", function () {
             street: null,
             zip_code: null
         };
-        // Build object from form fields
+
         for (var i = 0; i < data.length; ++i) {
             var element = data[i];
             switch(element.name) {
@@ -139,9 +134,8 @@ $("#saveEmployee").on("click", function () {
             }
         }
 
-        console.log("Sending payload:", requestPayload); // Debug logging
+        console.log("Sending payload:", requestPayload);
 
-        // Send POST request
         $.ajax({
             type: "POST",
             url: '/insertEmployee',
@@ -149,26 +143,26 @@ $("#saveEmployee").on("click", function () {
                 data: JSON.stringify(requestPayload)
             },
             success: function(response) {
-                console.log("Response:", response); // Debug logging
+                console.log("Response:", response);
                 if(requestPayload.id_employee) {
                     alert("Employee updated successfully!");
                 } else {
                     alert("Employee added successfully!");
                 }
                 employeeModal.modal('hide');
-                loadEmployees(); // refresh table
-                $('.error-message').hide().find('.error-text').text(''); // Очищаємо повідомлення після успіху
-                $('.form-control').removeClass('is-invalid'); // Очищаємо підсвічування після успіху
+                loadEmployees();
+                $('.error-message').hide().find('.error-text').text('');
+                $('.form-control').removeClass('is-invalid');
             },
             error: function(xhr, status, error) {
-                console.error("Error details:", xhr.responseText); // Debug logging
+                console.error("Error details:", xhr.responseText);
                 alert("Error while saving employee: " + error);
             }
         });
     }
 });
 
-// Об'єднаний обробник для очищення форми та повідомлень про помилки при закритті модального вікна
+// Clear form and errors on modal close
 employeeModal.on('hide.bs.modal', function(){
     $("#employeeForm")[0].reset();
     $('.error-message').hide().find('.error-text').text('');
@@ -192,7 +186,7 @@ $(document).on("click", ".delete-employee", function () {
         $.post('/deleteEmployee', data, function(response){
             if(response.success) {
                 alert("Employee deleted successfully.");
-                loadEmployees(); // refresh table
+                loadEmployees();
             } else {
                 alert("Error: Could not delete employee.");
             }
@@ -202,6 +196,7 @@ $(document).on("click", ".delete-employee", function () {
     }
 });
 
+// Sort employees
 $("#sortSelect").on("change", function () {
     var selectedOption = $(this).val();
     var url = '';
@@ -234,6 +229,7 @@ $("#sortSelect").on("change", function () {
     });
 });
 
+// Search by surname
 $("#searchBySurname").on("click", function () {
     var surname = $("#searchSurname").val().trim();
 
@@ -256,32 +252,44 @@ $("#searchBySurname").on("click", function () {
     });
 });
 
+// Find employees who never sold promotional products to non-card holders
 $("#findEmployeesNeverSoldPromotional").on("click", function () {
     $.get('/getEmployeesNeverSoldPromotionalToNonCardHolders', function (response) {
+        var tableBody = $("#neverSoldPromotionalTable").find('tbody');
+        tableBody.empty();
+        $("#noResultsMessage").hide();
+
         if (response && response.length > 0) {
-            let resultHtml = "<h4>Employees who never sold promotional products to non-card holders:</h4><ul>";
+            var table = '';
             $.each(response, function(index, employee) {
-                resultHtml += `<li>${employee.empl_surname} ${employee.empl_name} (ID: ${employee.id_employee})</li>`;
+                table += '<tr>' +
+                    '<td>' + employee.id_employee + '</td>' +
+                    '<td>' + employee.empl_surname + '</td>' +
+                    '<td>' + employee.empl_name + '</td>' +
+                    '<td>' + employee.empl_role + '</td>' +
+                    '<td>' + employee.phone_number + '</td>' +
+                    '</tr>';
             });
-            resultHtml += "</ul>";
-            $("#neverSoldPromotionalResult").html(resultHtml).show();
+            tableBody.html(table);
+            neverSoldPromotionalModal.modal('show');
         } else {
-            $("#neverSoldPromotionalResult").html("No employees found matching the criteria.").show();
+            $("#noResultsMessage").show();
+            neverSoldPromotionalModal.modal('show');
         }
     }).fail(function () {
-        $("#neverSoldPromotionalResult").html("Error while fetching employees.").show();
+        $("#noResultsMessage").html("Error while fetching employees.").show();
+        neverSoldPromotionalModal.modal('show');
     });
 });
 
+// Validate employee form
 function validateEmployeeForm() {
     let isValid = true;
     const errors = {};
 
-    // Скидання попередніх повідомлень про помилки
     $('.error-message').hide().find('.error-text').text('');
-    $('.is-invalid').removeClass('is-invalid'); // Видаляємо клас is-invalid з усіх полів вводу
+    $('.is-invalid').removeClass('is-invalid');
 
-    // Валідація Surname
     const surname = $('#empl_surname').val().trim();
     if (!surname) {
         errors.empl_surname = 'Заповніть це поле. Приклад: Smith';
@@ -294,7 +302,6 @@ function validateEmployeeForm() {
         isValid = false;
     }
 
-    // Валідація Name
     const name = $('#empl_name').val().trim();
     if (!name) {
         errors.empl_name = 'Заповніть це поле. Приклад: Tom';
@@ -307,7 +314,6 @@ function validateEmployeeForm() {
         isValid = false;
     }
 
-    // Валідація Patronymic
     const patronymic = $('#empl_patronymic').val().trim();
     if (patronymic && patronymic.length > 50) {
         errors.empl_patronymic = 'По батькові не може перевищувати 50 символів.';
@@ -317,14 +323,12 @@ function validateEmployeeForm() {
         isValid = false;
     }
 
-    // Валідація Role
     const role = $('#empl_role').val();
     if (!role) {
         errors.empl_role = 'Оберіть роль (Cashier або Manager).';
         isValid = false;
     }
 
-    // Валідація Salary
     const salary = $('#salary').val().trim();
     if (!salary) {
         errors.salary = 'Заповніть це поле. Приклад: 500.00';
@@ -337,7 +341,6 @@ function validateEmployeeForm() {
         }
     }
 
-    // Валідація Date of Birth
     const birthDate = $('#date_of_birth').val();
     if (!birthDate) {
         errors.date_of_birth = 'Заповніть це поле. Формат: РРРР-ММ-ДД';
@@ -355,7 +358,6 @@ function validateEmployeeForm() {
         }
     }
 
-    // Валідація Date of Start
     const startDate = $('#date_of_start').val();
     if (!startDate) {
         errors.date_of_start = 'Заповніть це поле. Формат: РРРР-ММ-ДД';
@@ -365,14 +367,12 @@ function validateEmployeeForm() {
         isValid = false;
     }
 
-    // Валідація Phone Number
     const phone = $('#phone_number').val().trim();
     if (!/^\+\d{12}$/.test(phone)) {
         errors.phone_number = 'Номер телефону має бути у форматі +XXXXXXXXXXXX (12 цифр). Приклад: +380123456789';
         isValid = false;
     }
 
-    // Валідація City
     const city = $('#city').val().trim();
     if (!city) {
         errors.city = 'Заповніть це поле. Приклад: Kyiv';
@@ -385,7 +385,6 @@ function validateEmployeeForm() {
         isValid = false;
     }
 
-    // Валідація Street
     const street = $('#street').val().trim();
     if (!street) {
         errors.street = 'Заповніть це поле. Приклад: Main-Street, 123';
@@ -395,7 +394,6 @@ function validateEmployeeForm() {
         isValid = false;
     }
 
-    // Валідація ZIP Code
     const zipCode = $('#zip_code').val().trim();
     if (!zipCode) {
         errors.zip_code = 'Заповніть це поле. Приклад: 12345';
@@ -405,7 +403,6 @@ function validateEmployeeForm() {
         isValid = false;
     }
 
-    // Відображення помилок
     for (let field in errors) {
         $(`#${field}_error`).find('.error-text').text(errors[field]);
         $(`#${field}_error`).show();
