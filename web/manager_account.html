@@ -16,12 +16,36 @@
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
 
     <style>
+        /* Minimalistic Blue Theme */
+        :root {
+            --primary-blue: #4A90E2;
+            --light-blue: #E6F0FA;
+            --dark-blue: #2E5A87;
+            --text-color: #333;
+        }
+
+        body {
+            background: #F9FAFB;
+            font-family: 'Roboto', sans-serif;
+            color: var(--text-color);
+        }
+
         .logout-btn-fixed {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    }
-        /* Always visible sidebar on desktop */
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: none;
+            color: var(--primary-blue);
+            border: none;
+            padding: 15px;
+            text-align: center;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+        .logout-btn-fixed:hover {
+            background: var(--light-blue);
+        }
+
         @media (min-width: 992px) {
             #mySidebar {
                 display: block !important;
@@ -29,20 +53,77 @@
                 position: fixed;
                 height: 100%;
                 z-index: 1000;
+                background: white;
+                border-right: 1px solid #E5E7EB;
             }
             #main {
-                margin-left: 250px;
+                margin-left: 200px;
             }
             #openNav {
                 display: none !important;
             }
         }
 
-        /* Content margin reset on small screens */
         @media (max-width: 991px) {
             #main {
                 margin-left: 0;
             }
+        }
+
+        #mySidebar .w3-bar-item {
+            color: var(--text-color);
+            padding: 12px 16px;
+            font-weight: 400;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        #mySidebar .w3-bar-item:hover {
+            background: var(--light-blue);
+            color: var(--primary-blue);
+        }
+
+        #main {
+            padding: 20px;
+        }
+
+        h2 {
+            color: var(--dark-blue);
+            font-weight: 500;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            margin: 5px 0;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background: var(--dark-blue);
+        }
+
+        #infoOutput {
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        #infoOutput p {
+            margin-bottom: 8px;
+        }
+        #infoOutput .text-danger {
+            color: #DC3545;
         }
     </style>
 
@@ -60,9 +141,8 @@
     <a href="/manage_check" class="w3-bar-item w3-button role-manager">Checks</a>
     <a href="/reports" class="w3-bar-item w3-button role-manager">Reports</a>
     <a href="/manager_account.html" class="w3-bar-item w3-button role-manager">My Account</a>
-<a href="/cashier_account.html" class="w3-bar-item w3-button role-cashier">My Account</a>
-<a href="/logout" class="w3-bar-item w3-button logout-btn-fixed">Log Out</a>
-
+    <a href="/cashier_account.html" class="w3-bar-item w3-button role-cashier">My Account</a>
+    <a href="/logout" class="w3-bar-item w3-button logout-btn-fixed">Log Out</a>
 </div>
 
 <!-- Main Content -->
@@ -109,7 +189,6 @@ function viewFullInfo() {
             output = `<p class="text-danger">${data.message || 'Помилка отримання інформації.'}</p>`;
         } else {
             const fields = [
-
                 ['ID', data.id_employee],
                 ['Name', data.empl_name],
                 ['Surname', data.empl_surname],
@@ -139,7 +218,6 @@ function viewFullInfo() {
         button.innerText = 'Hide Info';
     });
 }
-
 
 function w3_open() {
     document.getElementById("mySidebar").style.display = "block";

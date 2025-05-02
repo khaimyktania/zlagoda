@@ -14,39 +14,135 @@
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
 
   <style>
+    /* Minimalistic Blue Theme */
+    :root {
+      --primary-blue: #4A90E2;
+      --light-blue: #E6F0FA;
+      --dark-blue: #2E5A87;
+      --text-color: #333;
+    }
+
+    body {
+      background: #F9FAFB;
+      font-family: 'Roboto', sans-serif;
+      color: var(--text-color);
+    }
+
     .logout-btn-fixed {
       position: absolute;
       bottom: 0;
       width: 100%;
+      background: none;
+      color: var(--primary-blue);
+      border: none;
+      padding: 15px;
+      text-align: center;
+      font-weight: 500;
+      transition: background 0.3s ease;
     }
+    .logout-btn-fixed:hover {
+      background: var(--light-blue);
+    }
+
     @media (min-width: 992px) {
-      #mySidebar { display: block !important; width: 200px; position: fixed; height: 100%; z-index: 1000; }
-      #main { margin-left: 250px; }
-      #openNav { display: none !important; }
+      #mySidebar {
+        display: block !important;
+        width: 200px;
+        position: fixed;
+        height: 100%;
+        z-index: 1000;
+        background: white;
+        border-right: 1px solid #E5E7EB;
+      }
+      #main {
+        margin-left: 200px;
+      }
+      #openNav {
+        display: none !important;
+      }
     }
     @media (max-width: 991px) {
-      #main { margin-left: 0; }
+      #main {
+        margin-left: 0;
+      }
+    }
+
+    #mySidebar .w3-bar-item {
+      color: var(--text-color);
+      padding: 12px 16px;
+      font-weight: 400;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    #mySidebar .w3-bar-item:hover {
+      background: var(--light-blue);
+      color: var(--primary-blue);
     }
 
     #report-output {
-      width: 100%;
-      overflow-x: auto;
-      padding: 0 10px;
-    }
+  width: 100%;
+  overflow-x: auto;
+  padding: 0 10px 30px 10px; /* ← додано нижній padding */
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #E5E7EB;
+  margin-top: 20px;
+}
+
+
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
+
     }
     th, td {
-      border: 1px solid #333;
-      padding: 8px;
+      border-bottom: 1px solid #E5E7EB;
+      padding: 12px;
       text-align: left;
-      word-wrap: break-word;
+      font-size: 14px;
     }
     th {
-      background-color: #eee;
-      font-weight: bold;
+      background: var(--light-blue);
+      color: var(--dark-blue);
+      font-weight: 500;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    button {
+      background: var(--primary-blue);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 5px;
+      margin: 5px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: var(--dark-blue);
+    }
+
+    h2, h3 {
+      color: var(--dark-blue);
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+    h2 {
+      font-size: 24px;
+    }
+    h3 {
+      font-size: 18px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
     }
 
     @media print {
@@ -113,7 +209,7 @@
   <a href="/manage_category" class="w3-bar-item w3-button role-manager">Categories</a>
   <a href="/manage_customer" class="w3-bar-item w3-button role-manager role-cashier">Customers</a>
   <a href="/manage_check" class="w3-bar-item w3-button role-manager role-cashier">Checks</a>
-  <a href="/reports" class="w3-bar-item w3-button role-manager">Reports</a>
+  <a href="/manage_reports" class="w3-bar-item w3-button role-manager">Reports</a>
   <a href="/manager_account.html" class="w3-bar-item w3-button role-manager">My Account</a>
   <a href="/cashier_account.html" class="w3-bar-item w3-button role-cashier">My Account</a>
   <a href="/logout" class="w3-bar-item w3-button logout-btn-fixed">Log Out</a>
@@ -208,7 +304,7 @@
   function w3_open() {
     console.log('Opening sidebar');
     document.getElementById('mySidebar').style.display = 'block';
-    document.getElementById('main').style.marginLeft = '250px';
+    document.getElementById('main').style.marginLeft = '200px';
     document.getElementById('openNav').style.display = 'none';
   }
 

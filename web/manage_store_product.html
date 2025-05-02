@@ -17,20 +17,46 @@
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
 
     <style>
+        /* Minimalistic Blue Theme */
+        :root {
+            --primary-blue: #4A90E2;
+            --light-blue: #E6F0FA;
+            --dark-blue: #2E5A87;
+            --text-color: #333;
+        }
+
+        body {
+            background: #F9FAFB;
+            font-family: 'Roboto', sans-serif;
+            color: var(--text-color);
+        }
+
         .logout-btn-fixed {
             position: absolute;
             bottom: 0;
             width: 100%;
+            background: none;
+            color: var(--primary-blue);
+            border: none;
+            padding: 15px;
+            text-align: center;
+            font-weight: 500;
+            transition: background 0.3s ease;
         }
+        .logout-btn-fixed:hover {
+            background: var(--light-blue);
+        }
+
         .reprice-store-product {
-            background-color: #ff9800;
-            border-color: #ff9800;
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
             color: white;
         }
         .reprice-store-product:hover {
-            background-color: #fb8c00;
-            border-color: #fb8c00;
+            background-color: var(--dark-blue);
+            border-color: var(--dark-blue);
         }
+
         /* Always visible sidebar on desktop */
         @media (min-width: 992px) {
             #mySidebar {
@@ -39,9 +65,11 @@
                 position: fixed;
                 height: 100%;
                 z-index: 1000;
+                background: white;
+                border-right: 1px solid #E5E7EB;
             }
             #main {
-                margin-left: 250px;
+                margin-left: 200px;
             }
             #openNav {
                 display: none !important;
@@ -56,12 +84,12 @@
         }
 
         .promotional-product {
-            background-color: rgba(255, 255, 0, 0.2); /* Light yellow background */
+            background-color: var(--light-blue);
         }
 
         .price-with-vat {
             font-weight: bold;
-            color: #28a745;
+            color: var(--dark-blue);
         }
 
         .price-without-vat {
@@ -70,11 +98,11 @@
         }
 
         .filter-controls {
-            background-color: #f8f9fa;
+            background-color: white;
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 20px;
-            border: 1px solid #ddd;
+            border: 1px solid #E5E7EB;
         }
 
         .filter-section {
@@ -82,7 +110,7 @@
         }
 
         .search-section {
-            border-top: 1px solid #ddd;
+            border-top: 1px solid #E5E7EB;
             padding-top: 15px;
             margin-top: 10px;
         }
@@ -141,6 +169,93 @@
             background-color: rgba(220, 53, 69, 0.05) !important;
             box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
         }
+
+        h2 {
+            color: var(--dark-blue);
+            font-weight: 500;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            margin: 5px 0;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background: var(--dark-blue);
+        }
+
+        .btn-outline-primary {
+    background-color: var(--light-blue);
+    color: var(--dark-blue);
+    border: 1px solid var(--primary-blue);
+}
+.btn-outline-primary:hover {
+    background-color: var(--primary-blue);
+    color: white;
+    border-color: var(--dark-blue);
+}
+
+
+        .btn-outline-success {
+            color: var(--dark-blue);
+            border-color: var(--dark-blue);
+        }
+        .btn-outline-success:hover {
+            background-color: var(--light-blue);
+            color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+
+        .btn-outline-secondary {
+            color: dark gray;
+            border-color: #6c757d;
+        }
+        .btn-outline-secondary:hover {
+            background-color: var(--light-blue);
+            color: var(--text-color);
+            border-color: var(--text-color);
+        }
+
+        .modal-content {
+            border-radius: 8px;
+            border: 1px solid #E5E7EB;
+        }
+
+        .modal-header h4 {
+            color: var(--dark-blue);
+            font-weight: 500;
+        }
+
+        .modal-body .form-group {
+            margin-bottom: 15px;
+        }
+
+        .modal-footer button {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+        .modal-footer button:hover {
+            background: var(--dark-blue);
+        }
+
+        .modal-footer .btn-secondary {
+            background: #6c757d;
+        }
+        .modal-footer .btn-secondary:hover {
+            background: #5a6268;
+        }
     </style>
 </head>
 <body class="tooltips">
@@ -164,7 +279,7 @@
 <div id="main">
     <!-- Header -->
     <div class="header content rows-content-header">
-        <button id="openNav" class="w3-button w3-teal w3-xlarge">&#9776;</button>
+        <button id="openNav" class="w3-button w3-teal w3-xlarge">☰</button>
         <div class="navbar navbar-default" role="navigation">
             <div class="container">
                 <div class="navbar-collapse collapse">
@@ -214,9 +329,10 @@
                                         <button type="button" class="btn btn-sm btn-outline-primary role-manager" id="filterAllByQuantity">
                                             All Products by Quantity
                                         </button>
-                                        <button type="button" class="btn btn-sm btn-outline-success" id="getAllStoreProductsSorted">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="getAllStoreProductsSorted">
                                             All Store Products by Name
                                         </button>
+
                                         <button type="button" class="btn btn-sm btn-outline-secondary" id="resetFilters">
                                             Reset Filters
                                         </button>
