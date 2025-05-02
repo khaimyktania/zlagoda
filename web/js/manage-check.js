@@ -564,14 +564,16 @@ function adjustUIBasedOnRole() {
     if (currentUserRole.toLowerCase() === 'cashier') {
         $('.cashier-filter').hide();
         $('.admin-only').hide();
-        $('.product-sales-filter').hide(); // Приховуємо для касирів
+        $('.product-sales-filter').hide(); // Приховуємо секцію продажів для касирів
         $('#checks-heading').text('My Checks');
+        $('button[data-target="#createCheckModal"]').show(); // Показуємо кнопку для касирів
     } else {
         $('.cashier-filter').show();
         $('.admin-only').show();
-        $('.product-sales-filter').show(); // Показуємо для менеджерів
+        $('.product-sales-filter').show(); // Показуємо секцію продажів для менеджерів
         $('#checks-heading').text('All Checks');
         $('#cashier-select').prop('disabled', false);
+        $('button[data-target="#createCheckModal"]').hide(); // Приховуємо кнопку для менеджерів
     }
 }
 // Add this function to adjust UI for cashier role
