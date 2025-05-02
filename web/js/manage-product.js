@@ -399,19 +399,43 @@ $('#productModal').on('show.bs.modal', function () {
 // Видалення продукту
 $(document).on("click", ".delete-product", function () {
     var tr = $(this).closest('tr');
-    var data = {
-        product_id : tr.data('id')
-    };
-    var isDelete = confirm("Are you sure to delete " + tr.data('name') + "?");
-    if (isDelete) {
-        $.post(productDeleteApiUrl, data, function(response){
-            alert("Product deleted.");
-            loadProducts(null, false);
-        }).fail(function(xhr){
-            console.error("Error details:", xhr.responseText);
-            alert("Error while deleting product.");
-        });
-    }
+    var productId = tr.data('id');
+    var productName = tr.data('name');
+
+    // Check if the product is in store products by querying /getStoreProducts
+    $.ajax({
+        url: '/getStoreProducts',
+        type: 'GET',
+        success: function(response) {
+            // Filter store products to find those with matching id_product
+            var storeProducts = response.filter(function(product) {
+                return product.id_product == productId;
+            });
+
+            if (storeProducts.length > 0) {
+                // Product is in store products, show modal
+                $('#deleteProductName').text(productName);
+                $('#deleteProductStoreCount').text(storeProducts.length);
+                $('#deleteProductModal').modal('show');
+            } else {
+                // Product is not in store products, use simple confirmation
+                var isDelete = confirm("Are you sure to delete " + productName + "?");
+                if (isDelete) {
+                    $.post(productDeleteApiUrl, { product_id: productId }, function(response) {
+                        alert("Product deleted.");
+                        loadProducts(null, false);
+                    }).fail(function(xhr) {
+                        console.error("Error details:", xhr.responseText);
+                        alert("Error while deleting product.");
+                    });
+                }
+            }
+        },
+        error: function(xhr) {
+            console.error("Error fetching store products:", xhr.responseText);
+            alert("Error checking store products: " + xhr.responseText);
+        }
+    });
 });
 
 // Ця функція забезпечує правильну ініціалізацію пошуку

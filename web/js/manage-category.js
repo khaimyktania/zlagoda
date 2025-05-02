@@ -3,6 +3,14 @@ var categoryListApiUrl = 'http://127.0.0.1:5000/getCategories';
 var categorySaveApiUrl = 'http://127.0.0.1:5000/saveCategory';
 var categoryDeleteApiUrl = 'http://127.0.0.1:5000/deleteCategory';
 
+//для запиту
+var storeProductsSummaryApiUrl = 'http://127.0.0.1:5000/api/reports/store-products-summary-by-category';
+var summaryModal = $("#summaryModal");
+
+var deadCategoriesApiUrl = 'http://127.0.0.1:5000/api/reports/dead-categories';
+var deadCategoriesModal = $("#deadCategoriesModal");
+
+
 // DOM elements
 var categoryModal = $("#categoryModal");
 var categoryForm = $("#categoryForm");
@@ -35,10 +43,15 @@ $(document).ready(function() {
     $("#addCategoryBtn").click(openAddCategoryModal);
     $("#saveCategory").click(saveCategory);
     $("#sortCategoriesBtn").click(sortCategories);
+    //для запиту
+    $("#deadCategoriesBtn").click(showDeadCategories);
 
     // Event delegation for dynamic buttons
     $(document).on('click', '.edit-category', editCategory);
     $(document).on('click', '.delete-category', deleteCategory);
+    //для запиту
+    $(document).on('click', '.summary-category', showCategorySummary);
+
 
     // Reset form and clear errors when modal is closed
     categoryModal.on('hide.bs.modal', resetCategoryForm);
@@ -47,6 +60,15 @@ $(document).ready(function() {
     categoryModal.on('show.bs.modal', function() {
         $('.error-message').hide().find('.error-text').text('');
         $('.is-invalid').removeClass('is-invalid');
+    });
+
+    //для запиту
+    // Clear summary modal when closed
+    summaryModal.on('hide.bs.modal', function() {
+        $('#summaryContent').empty();
+    });
+    deadCategoriesModal.on('hide.bs.modal', function() {
+        $('#deadCategoriesContent').empty();
     });
 });
 
@@ -75,6 +97,7 @@ function displayCategories(categories, salesMap = {}) {
                 <td>
                     <span class="btn btn-xs btn-primary edit-category">Edit</span>
                     <span class="btn btn-xs btn-danger delete-category">Delete</span>
+                    <span class="btn btn-xs btn-info summary-category">Summary</span>
                 </td>
             </tr>
         `;
@@ -132,6 +155,84 @@ function editCategory() {
 
     categoryModal.find('.modal-title').text('Edit Category');
     categoryModal.modal('show');
+}
+
+//для запиту
+// Show category summary in modal
+function showCategorySummary() {
+    var tr = $(this).closest('tr');
+    var categoryNumber = tr.data('number');
+    var categoryName = tr.data('name');
+
+    $.ajax({
+        url: storeProductsSummaryApiUrl,
+        type: 'GET',
+        data: { category_number: categoryNumber },
+        success: function(response) {
+            var content = '<div class="table-responsive"><table class="table table-bordered"><thead><tr>' +
+                '<th>Номер категорії</th>' +
+                '<th>Назва категорії</th>' +
+                '<th>Кількість продуктів у магазині</th>' +
+                '<th>Загальна кількість</th>' +
+                '</tr></thead><tbody>';
+
+            if (response.length === 0) {
+                content += '<tr><td colspan="4">Продуктів у магазині для цієї категорії не знайдено.</td></tr>';
+            } else {
+                response.forEach(function(row) {
+                    content += '<tr>' +
+                        '<td>' + row.category_number + '</td>' +
+                        '<td>' + row.category_name + '</td>' +
+                        '<td>' + row.store_product_count + '</td>' +
+                        '<td>' + row.total_quantity + '</td>' +
+                        '</tr>';
+                });
+            }
+
+            content += '</tbody></table></div>';
+            $('#summaryContent').html(content);
+            summaryModal.find('.modal-title').text('Зведення для категорії: ' + categoryName);
+            summaryModal.modal('show');
+        },
+        error: function(xhr) {
+            console.error('Помилка отримання зведення:', xhr.responseText);
+            alert('Помилка отримання зведення: ' + xhr.responseText);
+        }
+    });
+}
+
+//для запиту
+function showDeadCategories() {
+    $.ajax({
+        url: deadCategoriesApiUrl,
+        type: 'GET',
+        success: function(response) {
+            var content = '<div class="table-responsive"><table class="table table-bordered"><thead><tr>' +
+                '<th>Номер категорії</th>' +
+                '<th>Назва категорії</th>' +
+                '</tr></thead><tbody>';
+
+            if (response.length === 0) {
+                content += '<tr><td colspan="2">Категорій без неактивних продуктів не знайдено.</td></tr>';
+            } else {
+                response.forEach(function(row) {
+                    content += '<tr>' +
+                        '<td>' + row.category_number + '</td>' +
+                        '<td>' + row.category_name + '</td>' +
+                        '</tr>';
+                });
+            }
+
+            content += '</tbody></table></div>';
+            $('#deadCategoriesContent').html(content);
+            deadCategoriesModal.find('.modal-title').text('Категорії без неактивних продуктів');
+            deadCategoriesModal.modal('show');
+        },
+        error: function(xhr) {
+            console.error('Помилка отримання даних про категорії:', xhr.responseText);
+            alert('Помилка отримання даних про категорії: ' + xhr.responseText);
+        }
+    });
 }
 
 // Validate category form

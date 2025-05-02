@@ -1315,6 +1315,42 @@ def category_sales_count():
         return jsonify({"error": "Server error"}), 500
 
 
+#для запиту
+@app.route('/api/reports/store-products-summary-by-category', methods=['GET'])
+@require_role('manager')
+def get_store_products_summary_by_category():
+    connection = None
+    try:
+        category_number = request.args.get('category_number')
+        if not category_number:
+            return jsonify({'success': False, 'message': 'Category number is required'}), 400
+
+        connection = get_sql_connection()
+        response = category_dao.get_store_products_summary_by_category(connection, category_number)
+        return jsonify(response)
+    except Exception as e:
+        print(f"Помилка в get_store_products_summary_by_category: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
+
+#для запиту
+@app.route('/api/reports/dead-categories', methods=['GET'])
+@require_role('manager')
+def get_dead_categories():
+    connection = None
+    try:
+        connection = get_sql_connection()
+        response = category_dao.get_dead_categories(connection)
+        return jsonify(response)
+    except Exception as e:
+        print(f"Помилка в get_dead_categories: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
+
 
 if __name__ == "__main__":
     print("Starting Python Flask Server For Grocery Store Management System")

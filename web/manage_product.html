@@ -482,6 +482,23 @@
         </div>
     </div>
 
+   <div class="modal fade-scale" id="deleteProductModal" role="dialog" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Cannot Delete Product</h4>
+            </div>
+            <div class="modal-body">
+                <p>The product <strong id="deleteProductName"></strong> cannot be deleted because it is associated with <strong id="deleteProductStoreCount"></strong> store product(s).</p>
+                <p>Please remove the product from the store inventory before deleting.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+    </div>
+
     <!-- Scripts -->
     <script src="web/js/package/jquery.min.js"></script>
     <script src="web/js/common.js"></script>

@@ -18,34 +18,34 @@
 
     <style>
         /* Minimalistic Blue Theme */
-        :root {
-            --primary-blue: #4A90E2;
-            --light-blue: #E6F0FA;
-            --dark-blue: #2E5A87;
-            --text-color: #333;
-        }
+         :root {
+             --primary-blue: #4A90E2;
+             --light-blue: #E6F0FA;
+             --dark-blue: #2E5A87;
+             --text-color: #333;
+         }
 
-        body {
-            background: #F9FAFB;
-            font-family: 'Roboto', sans-serif;
-            color: var(--text-color);
-        }
+         body {
+             background: #F9FAFB;
+             font-family: 'Roboto', sans-serif;
+             color: var(--text-color);
+         }
 
         .logout-btn-fixed {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            background: none;
-            color: var(--primary-blue);
-            border: none;
-            padding: 15px;
-            text-align: center;
-            font-weight: 500;
-            transition: background 0.3s ease;
-        }
-        .logout-btn-fixed:hover {
-            background: var(--light-blue);
-        }
+             position: absolute;
+             bottom: 0;
+             width: 100%;
+             background: none;
+             color: var(--primary-blue);
+             border: none;
+             padding: 15px;
+             text-align: center;
+             font-weight: 500;
+             transition: background 0.3s ease;
+         }
+         .logout-btn-fixed:hover {
+             background: var(--light-blue);
+         }
 
         /* Always visible sidebar on desktop */
         @media (min-width: 992px) {
@@ -72,20 +72,19 @@
                 margin-left: 0;
             }
         }
-
         /* Sidebar Styling */
-        #mySidebar .w3-bar-item {
-            color: var(--text-color);
-            padding: 12px 16px;
-            font-weight: 400;
-            transition: background 0.3s ease, color 0.3s ease;
-        }
-        #mySidebar .w3-bar-item:hover {
-            background: var(--light-blue);
-            color: var(--primary-blue);
-        }
+         #mySidebar .w3-bar-item {
+             color: var(--text-color);
+             padding: 12px 16px;
+             font-weight: 400;
+             transition: background 0.3s ease, color 0.3s ease;
+         }
+         #mySidebar .w3-bar-item:hover {
+             background: var(--light-blue);
+             color: var(--primary-blue);
+         }
 
-        /* Error Messaging */
+        /* Стилі для повідомлень про помилки */
         .error-container {
             position: relative;
             min-height: 20px;
@@ -133,87 +132,86 @@
             max-width: 100%;
         }
 
-        /* Invalid Input Styling */
+        /* Стилі для підсвічування червоним */
         .is-invalid {
             border: 2px solid #dc3545 !important;
             background-color: rgba(220, 53, 69, 0.05) !important;
             box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
         }
+         /* Main Content Styling */
+         h2 {
+             color: var(--dark-blue);
+             font-weight: 500;
+             font-size: 24px;
+             margin-bottom: 20px;
+         }
 
-        /* Main Content Styling */
-        h2 {
-            color: var(--dark-blue);
-            font-weight: 500;
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
+         .table {
+             border: 1px solid #E5E7EB;
+             border-radius: 5px;
+             overflow: hidden;
+         }
 
-        .table {
-            border: 1px solid #E5E7EB;
-            border-radius: 5px;
-            overflow: hidden;
-        }
+         .table th, .table td {
+             border: 1px solid #E5E7EB;
+         }
 
-        .table th, .table td {
-            border: 1px solid #E5E7EB;
-        }
+         .form-control {
+             border: 1px solid #E5E7EB;
+             border-radius: 5px;
+         }
 
-        .form-control {
-            border: 1px solid #E5E7EB;
-            border-radius: 5px;
-        }
+         button {
+             background: var(--primary-blue);
+             color: white;
+             border: none;
+             padding: 8px 16px;
+             border-radius: 5px;
+             margin: 5px 0;
+             cursor: pointer;
+             font-weight: 500;
+             transition: background 0.3s ease;
+         }
+         button:hover {
+             background: var(--dark-blue);
+         }
 
-        button {
-            background: var(--primary-blue);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
-            margin: 5px 0;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background 0.3s ease;
-        }
-        button:hover {
-            background: var(--dark-blue);
-        }
+         .btn-secondary {
+             background: #6c757d;
+         }
+         .btn-secondary:hover {
+             background: #5a6268;
+         }
 
-        .btn-secondary {
-            background: #6c757d;
-        }
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
+         /* Modal Styling */
+         .modal-content {
+             border-radius: 8px;
+             border: 1px solid #E5E7EB;
+         }
 
-        /* Modal Styling */
-        .modal-content {
-            border-radius: 8px;
-            border: 1px solid #E5E7EB;
-        }
+         .modal-header h4 {
+             color: var(--dark-blue);
+             font-weight: 500;
+         }
 
-        .modal-header h4 {
-            color: var(--dark-blue);
-            font-weight: 500;
-        }
+         .modal-footer button {
+             background: var(--primary-blue);
+             color: white;
+             border: none;
+             padding: 8px 16px;
+             border-radius: 5px;
+             transition: background 0.3s ease;
+         }
+         .modal-footer button:hover {
+             background: var(--dark-blue);
+         }
 
-        .modal-footer button {
-            background: var(--primary-blue);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
-            transition: background 0.3s ease;
-        }
-        .modal-footer button:hover {
-            background: var(--dark-blue);
-        }
-
-        .modal-footer .btn-secondary {
-            background: #6c757d;
-        }
-        .modal-footer .btn-secondary:hover {
-            background: #5a6268;
-        }
+         .modal-footer .btn-secondary {
+             background: #6c757d;
+         }
+         .modal-footer .btn-secondary:hover {
+             background: #5a6268;
+         }
     </style>
 </head>
 <body class="tooltips">
@@ -274,6 +272,7 @@
                                 <button id="sortCategoriesBtn" class="btn btn-secondary ml-2">Sort by Name ▼</button>
                                 <button id="sortBySalesBtn" class="btn btn-secondary ml-2">Sort by Sales ▼</button>
                                 <button id="clearFiltersBtn" class="btn btn-secondary ml-2">Clear Filters</button>
+                                <button id="deadCategoriesBtn" class="btn btn-sm btn-warning">Dead Categories</button>
                             </div>
                         </div>
                         <table class="table table-bordered">
@@ -324,304 +323,353 @@
             </div>
         </div>
     </div>
+
 </div> <!-- #main -->
+
+<!-- Modal for category summary -->
+    <div class="modal fade" id="summaryModal" tabindex="-1" aria-labelledby="summaryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="summaryModalLabel">Зведення для категорії</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="summaryContent"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрити</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Modal for dead categories -->
+    <div class="modal fade" id="deadCategoriesModal" tabindex="-1" aria-labelledby="deadCategoriesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deadCategoriesModalLabel">Категорії без неактивних продуктів</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="deadCategoriesContent"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрити</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 <!-- Scripts -->
 <script src="web/js/package/jquery.min.js"></script>
 <script src="web/js/package/bootstrap.min.js"></script>
 <script src="web/js/common.js"></script>
+<script src="web/js/manage-category.js"></script>
 
 <script>
-// API endpoints
-var categoryListApiUrl = 'http://127.0.0.1:5000/getCategories';
-var categorySaveApiUrl = 'http://127.0.0.1:5000/saveCategory';
-var categoryDeleteApiUrl = 'http://127.0.0.1:5000/deleteCategory';
+ // API endpoints
+ var categoryListApiUrl = 'http://127.0.0.1:5000/getCategories';
+ var categorySaveApiUrl = 'http://127.0.0.1:5000/saveCategory';
+ var categoryDeleteApiUrl = 'http://127.0.0.1:5000/deleteCategory';
 
-// DOM elements
-var categoryModal = $("#categoryModal");
-var categoryForm = $("#categoryForm");
-var sortDirection = 'asc'; // Default sort direction
+//для запиту
+var storeProductsSummaryApiUrl = 'http://127.0.0.1:5000/api/reports/store-products-summary-by-category';
+var summaryModal = $("#summaryModal");
 
-// Додайте цей код у ваш JavaScript-файл
-function clearPageData() {
-    // Очистити всі відображувані дані
-    document.getElementById('categoryTableBody').innerHTML = '';
-    // Скинути всі форми
-    document.querySelectorAll('form').forEach(form => form.reset());
-    // Reset sort direction and button text
-    sortDirection = 'asc';
-    $("#sortCategoriesBtn").text('Sort by Name ▼');
-    $("#sortBySalesBtn").text('Sort by Sales ▼');
-    // Reload categories
-    loadCategories();
-}
+ // DOM elements
+ var categoryModal = $("#categoryModal");
+ var categoryForm = $("#categoryForm");
+ var sortDirection = 'asc'; // Default sort direction
 
-// Викликайте цю функцію при переході між вкладками
-document.querySelectorAll('.tab-link').forEach(link => {
-    link.addEventListener('click', clearPageData);
-});
+ // Додайте цей код у ваш JavaScript-файл
+ function clearPageData() {
+     // Очистити всі відображувані дані
+     document.getElementById('categoryTableBody').innerHTML = '';
+     // Скинути всі форми
+     document.querySelectorAll('form').forEach(form => form.reset());
+     // Reset sort direction and button text
+     sortDirection = 'asc';
+     $("#sortCategoriesBtn").text('Sort by Name ▼');
+     $("#sortBySalesBtn").text('Sort by Sales ▼');
+     // Reload categories
+     loadCategories();
+ }
 
-$(document).ready(function() {
-    // Прибирати помилки при введенні в поля
-    $('#category_name').on('input change', function() {
-        const field = $(this).attr('id');
-        $(`#${field}`).removeClass('is-invalid');
-        $(`#${field}_error`).hide();
-    });
-    // Load categories when page loads
-    loadCategories();
+ // Викликайте цю функцію при переході між вкладками
+ document.querySelectorAll('.tab-link').forEach(link => {
+     link.addEventListener('click', clearPageData);
+ });
 
-    // Setup event handlers
-    $("#addCategoryBtn").click(openAddCategoryModal);
-    $("#saveCategory").click(saveCategory);
-    $("#sortCategoriesBtn").click(sortCategories);
-    $("#sortBySalesBtn").click(sortBySales);
-    $("#clearFiltersBtn").click(clearPageData);
+ $(document).ready(function() {
+     // Прибирати помилки при введенні в поля
+     $('#category_name').on('input change', function() {
+         const field = $(this).attr('id');
+         $(`#${field}`).removeClass('is-invalid');
+         $(`#${field}_error`).hide();
+     });
+     // Load categories when page loads
+     loadCategories();
 
-    // Event delegation for dynamic buttons
-    $(document).on('click', '.edit-category', editCategory);
-    $(document).on('click', '.delete-category', deleteCategory);
+     // Setup event handlers
+     $("#addCategoryBtn").click(openAddCategoryModal);
+     $("#saveCategory").click(saveCategory);
+     $("#sortCategoriesBtn").click(sortCategories);
+     $("#sortBySalesBtn").click(sortBySales);
+     $("#clearFiltersBtn").click(clearPageData);
 
-    // Reset form and clear errors when modal is closed
-    categoryModal.on('hide.bs.modal', resetCategoryForm);
+     // Event delegation for dynamic buttons
+     $(document).on('click', '.edit-category', editCategory);
+     $(document).on('click', '.delete-category', deleteCategory);
+     $(document).on('click', '.summary-category', showCategorySummary);
 
-    // Clear errors when modal is opened
-    categoryModal.on('show.bs.modal', function() {
-        $('.error-message').hide().find('.error-text').text('');
-        $('.is-invalid').removeClass('is-invalid');
-    });
-});
 
-// Load all categories into the table with sales data
-function loadCategories() {
-    $.get("/api/category_sales_count", function(salesData) {
-        if (!Array.isArray(salesData)) {
-            console.error("Invalid sales data format");
-            alert("Error loading sales data.");
-            return;
-        }
+     // Reset form and clear errors when modal is closed
+     categoryModal.on('hide.bs.modal', resetCategoryForm);
 
-        const salesMap = {};
-        salesData.forEach(row => {
-            salesMap[row.category_number] = row.total_sales;
-        });
+     // Clear errors when modal is opened
+     categoryModal.on('show.bs.modal', function() {
+         $('.error-message').hide().find('.error-text').text('');
+         $('.is-invalid').removeClass('is-invalid');
+     });
+ });
 
-        $.get(categoryListApiUrl, function(categories) {
-            displayCategories(categories, salesMap);
-        }).fail(function(error) {
-            console.error("Error loading categories:", error);
-            alert("Error loading categories. Please check the console for details.");
-        });
-    }).fail(function(err) {
-        console.error("Failed to load category sales count", err.responseText);
-        alert("Failed to load sales data");
-    });
-}
+ // Load all categories into the table with sales data
+ function loadCategories() {
+     $.get("/api/category_sales_count", function(salesData) {
+         if (!Array.isArray(salesData)) {
+             console.error("Invalid sales data format");
+             alert("Error loading sales data.");
+             return;
+         }
 
-// Display categories in the table
-function displayCategories(categories, salesMap = {}) {
-    var tbody = $("#categoryTableBody");
-    tbody.empty();
+         const salesMap = {};
+         salesData.forEach(row => {
+             salesMap[row.category_number] = row.total_sales;
+         });
 
-    categories.forEach(function(category) {
-        const totalSales = salesMap[category.category_number] || 0;
-        var row = `
-            <tr data-number="${category.category_number}" data-name="${category.name}">
-                <td>${category.category_number}</td>
-                <td>${category.name}</td>
-                <td>${totalSales}</td>
-                <td>
-                    <span class="btn btn-xs btn-primary edit-category">Edit</span>
-                    <span class="btn btn-xs btn-danger delete-category">Delete</span>
-                </td>
-            </tr>
-        `;
-        tbody.append(row);
-    });
-}
+         $.get(categoryListApiUrl, function(categories) {
+             displayCategories(categories, salesMap);
+         }).fail(function(error) {
+             console.error("Error loading categories:", error);
+             alert("Error loading categories. Please check the console for details.");
+         });
+     }).fail(function(err) {
+         console.error("Failed to load category sales count", err.responseText);
+         alert("Failed to load sales data");
+     });
+ }
 
-// Sort categories by name
-function sortCategories() {
-    $.get("/api/category_sales_count", function(salesData) {
-        if (!Array.isArray(salesData)) {
-            alert("Error loading sales data.");
-            return;
-        }
+ // Display categories in the table
+ function displayCategories(categories, salesMap = {}) {
+     var tbody = $("#categoryTableBody");
+     tbody.empty();
 
-        const salesMap = {};
-        salesData.forEach(row => {
-            salesMap[row.category_number] = row.total_sales;
-        });
+     categories.forEach(function(category) {
+         const totalSales = salesMap[category.category_number] || 0;
+         var row = `
+             <tr data-number="${category.category_number}" data-name="${category.name}">
+                 <td>${category.category_number}</td>
+                 <td>${category.name}</td>
+                 <td>${totalSales}</td>
+                 <td>
+                     <span class="btn btn-xs btn-primary edit-category">Edit</span>
+                     <span class="btn btn-xs btn-danger delete-category">Delete</span>
+                     <span class="btn btn-xs btn-info summary-category">Summary</span>
+                 </td>
+             </tr>
+         `;
+         tbody.append(row);
+     });
+ }
 
-        $.get(categoryListApiUrl, function(categories) {
-            categories.sort(function(a, b) {
-                if (sortDirection === 'asc') {
-                    return a.name.localeCompare(b.name);
-                } else {
-                    return b.name.localeCompare(a.name);
-                }
-            });
+ // Sort categories by name
+ function sortCategories() {
+     $.get("/api/category_sales_count", function(salesData) {
+         if (!Array.isArray(salesData)) {
+             alert("Error loading sales data.");
+             return;
+         }
 
-            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-            $("#sortCategoriesBtn").text(sortDirection === 'asc' ? 'Sort by Name ▼' : 'Sort by Name ▲');
-            displayCategories(categories, salesMap);
-        }).fail(function(error) {
-            console.error("Error loading categories for sorting:", error);
-            alert("Error loading categories for sorting. Please check the console for details.");
-        });
-    }).fail(function(err) {
-        console.error("Failed to load category sales count", err.responseText);
-        alert("Failed to load sales data");
-    });
-}
+         const salesMap = {};
+         salesData.forEach(row => {
+             salesMap[row.category_number] = row.total_sales;
+         });
 
-// Sort categories by sales
-function sortBySales() {
-    $.get("/api/category_sales_count", function(salesData) {
-        if (!Array.isArray(salesData)) {
-            alert("Error loading sales data.");
-            return;
-        }
+         $.get(categoryListApiUrl, function(categories) {
+             categories.sort(function(a, b) {
+                 if (sortDirection === 'asc') {
+                     return a.name.localeCompare(b.name);
+                 } else {
+                     return b.name.localeCompare(a.name);
+                 }
+             });
 
-        const salesMap = {};
-        salesData.forEach(row => {
-            salesMap[row.category_number] = row.total_sales;
-        });
+             sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+             $("#sortCategoriesBtn").text(sortDirection === 'asc' ? 'Sort by Name ▼' : 'Sort by Name ▲');
+             displayCategories(categories, salesMap);
+         }).fail(function(error) {
+             console.error("Error loading categories for sorting:", error);
+             alert("Error loading categories for sorting. Please check the console for details.");
+         });
+     }).fail(function(err) {
+         console.error("Failed to load category sales count", err.responseText);
+         alert("Failed to load sales data");
+     });
+ }
 
-        $.get(categoryListApiUrl, function(categories) {
-            categories.sort(function(a, b) {
-                const salesA = salesMap[a.category_number] || 0;
-                const salesB = salesMap[b.category_number] || 0;
-                return salesB - salesA;
-            });
+ // Sort categories by sales
+ function sortBySales() {
+     $.get("/api/category_sales_count", function(salesData) {
+         if (!Array.isArray(salesData)) {
+             alert("Error loading sales data.");
+             return;
+         }
 
-            displayCategories(categories, salesMap);
-        });
-    }).fail(function(err) {
-        console.error("Failed to load category sales count", err.responseText);
-        alert("Failed to load sales data");
-    });
-}
+         const salesMap = {};
+         salesData.forEach(row => {
+             salesMap[row.category_number] = row.total_sales;
+         });
 
-// Open modal for adding a new category
-function openAddCategoryModal() {
-    resetCategoryForm();
-    categoryModal.find('.modal-title').text('Add New Category');
-    categoryModal.modal('show');
-}
+         $.get(categoryListApiUrl, function(categories) {
+             categories.sort(function(a, b) {
+                 const salesA = salesMap[a.category_number] || 0;
+                 const salesB = salesMap[b.category_number] || 0;
+                 return salesB - salesA;
+             });
 
-// Edit category - populate form with existing data
-function editCategory() {
-    var tr = $(this).closest('tr');
-    var categoryNumber = tr.data('number');
-    var categoryName = tr.data('name');
+             displayCategories(categories, salesMap);
+         });
+     }).fail(function(err) {
+         console.error("Failed to load category sales count", err.responseText);
+         alert("Failed to load sales data");
+     });
+ }
 
-    $("#category_number").val(categoryNumber);
-    $("#category_name").val(categoryName);
+ // Open modal for adding a new category
+ function openAddCategoryModal() {
+     resetCategoryForm();
+     categoryModal.find('.modal-title').text('Add New Category');
+     categoryModal.modal('show');
+ }
 
-    categoryModal.find('.modal-title').text('Edit Category');
-    categoryModal.modal('show');
-}
+ // Edit category - populate form with existing data
+ function editCategory() {
+     var tr = $(this).closest('tr');
+     var categoryNumber = tr.data('number');
+     var categoryName = tr.data('name');
 
-// Validate category form
-function validateCategoryForm() {
-    let isValid = true;
-    const errors = {};
+     $("#category_number").val(categoryNumber);
+     $("#category_name").val(categoryName);
 
-    $('.error-message').hide().find('.error-text').text('');
-    $('.is-invalid').removeClass('is-invalid');
+     categoryModal.find('.modal-title').text('Edit Category');
+     categoryModal.modal('show');
+ }
 
-    const categoryName = $("#category_name").val().trim();
-    if (!categoryName) {
-        errors.category_name = 'Назва категорії є обов\'язковим полем.';
-        isValid = false;
-    } else if (categoryName.length < 3) {
-        errors.category_name = 'Назва категорії має містити щонайменше 3 символи.';
-        isValid = false;
-    } else if (!/^[a-zA-Z0-9\s]+$/.test(categoryName)) {
-        errors.category_name = 'Назва категорії може містити лише літери, цифри та пробіли.';
-        isValid = false;
-    }
+ // Validate category form
+ function validateCategoryForm() {
+     let isValid = true;
+     const errors = {};
 
-    for (let field in errors) {
-        $(`#${field}_error`).find('.error-text').text(errors[field]);
-        $(`#${field}_error`).show();
-        $(`#${field}`).addClass('is-invalid');
-    }
+     $('.error-message').hide().find('.error-text').text('');
+     $('.is-invalid').removeClass('is-invalid');
 
-    return isValid;
-}
+     const categoryName = $("#category_name").val().trim();
+     if (!categoryName) {
+         errors.category_name = 'Назва категорії є обов\'язковим полем.';
+         isValid = false;
+     } else if (categoryName.length < 3) {
+         errors.category_name = 'Назва категорії має містити щонайменше 3 символи.';
+         isValid = false;
+     } else if (!/^[a-zA-Z0-9\s]+$/.test(categoryName)) {
+         errors.category_name = 'Назва категорії може містити лише літери, цифри та пробіли.';
+         isValid = false;
+     }
 
-// Save category (create or update)
-function saveCategory() {
-    if (!validateCategoryForm()) {
-        return;
-    }
+     for (let field in errors) {
+         $(`#${field}_error`).find('.error-text').text(errors[field]);
+         $(`#${field}_error`).show();
+         $(`#${field}`).addClass('is-invalid');
+     }
 
-    var categoryData = {
-        category_number: $("#category_number").val(),
-        category_name: $("#category_name").val()
-    };
+     return isValid;
+ }
 
-    $.ajax({
-        url: categorySaveApiUrl,
-        method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify(categoryData),
-        success: function(response) {
-            categoryModal.modal('hide');
-            loadCategories();
+ // Save category (create or update)
+ function saveCategory() {
+     if (!validateCategoryForm()) {
+         return;
+     }
 
-            if (categoryData.category_number) {
-                alert("Category updated successfully");
-            } else {
-                alert("Category created successfully");
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error("Error saving category:", xhr.responseText);
-            alert("Error saving category: " + xhr.responseText);
-        }
-    });
-}
+     var categoryData = {
+         category_number: $("#category_number").val(),
+         category_name: $("#category_name").val()
+     };
 
-// Delete category
-function deleteCategory() {
-    var tr = $(this).closest('tr');
-    var categoryNumber = tr.data('number');
-    var categoryName = tr.data('name');
+     $.ajax({
+         url: categorySaveApiUrl,
+         method: 'POST',
+         contentType: 'application/json',
+         data: JSON.stringify(categoryData),
+         success: function(response) {
+             categoryModal.modal('hide');
+             loadCategories();
 
-    var confirmDelete = confirm(`Are you sure you want to delete the category "${categoryName}"?`);
-    if (!confirmDelete) return;
+             if (categoryData.category_number) {
+                 alert("Category updated successfully");
+             } else {
+                 alert("Category created successfully");
+             }
+         },
+         error: function(xhr, status, error) {
+             console.error("Error saving category:", xhr.responseText);
+             alert("Error saving category: " + xhr.responseText);
+         }
+     });
+ }
 
-    $.ajax({
-        url: categoryDeleteApiUrl,
-        method: 'POST',
-        data: { category_number: categoryNumber },
-        success: function(response) {
-            if (response.success) {
-                alert("Category deleted successfully");
-                loadCategories();
-            } else {
-                alert(response.message);
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error("Error deleting category:", xhr.responseText);
-            alert("Error deleting category: " + xhr.responseText);
-        }
-    });
-}
+ // Delete category
+ function deleteCategory() {
+     var tr = $(this).closest('tr');
+     var categoryNumber = tr.data('number');
+     var categoryName = tr.data('name');
 
-// Reset category form and clear errors
-function resetCategoryForm() {
-    categoryForm[0].reset();
-    $("#category_number").val('');
-    categoryModal.find('.modal-title').text('Add New Category');
-    $('.error-message').hide().find('.error-text').text('');
-    $('.is-invalid').removeClass('is-invalid');
-}
-</script>
+     var confirmDelete = confirm(`Are you sure you want to delete the category "${categoryName}"?`);
+     if (!confirmDelete) return;
+
+     $.ajax({
+         url: categoryDeleteApiUrl,
+         method: 'POST',
+         data: { category_number: categoryNumber },
+         success: function(response) {
+             if (response.success) {
+                 alert("Category deleted successfully");
+                 loadCategories();
+             } else {
+                 alert(response.message);
+             }
+         },
+         error: function(xhr, status, error) {
+             console.error("Error deleting category:", xhr.responseText);
+             alert("Error deleting category: " + xhr.responseText);
+         }
+     });
+ }
+
+ // Reset category form and clear errors
+ function resetCategoryForm() {
+     categoryForm[0].reset();
+     $("#category_number").val('');
+     categoryModal.find('.modal-title').text('Add New Category');
+     $('.error-message').hide().find('.error-text').text('');
+     $('.is-invalid').removeClass('is-invalid');
+ }
+ </script>
 
 <script>
     fetch('/api/employee_info', {
@@ -638,12 +686,15 @@ function resetCategoryForm() {
     .then(data => {
         const role = data.empl_role.toLowerCase();
 
+        // Сховати всі вкладки спочатку
         document.querySelectorAll('.role-manager, .role-cashier')
             .forEach(el => el.style.display = 'none');
 
+        // Показати лише ті, що відповідають ролі
         document.querySelectorAll(`.role-${role}`)
             .forEach(el => el.style.display = 'block');
 
+        // Показати сам сайдбар
         document.getElementById('mySidebar').style.display = 'block';
     })
     .catch(err => {
@@ -663,6 +714,7 @@ function resetCategoryForm() {
     }
 </script>
 <script>
+    // Підсвічує активну вкладку сайдбару
     document.addEventListener('DOMContentLoaded', function () {
         const currentPath = window.location.pathname;
         const sidebarLinks = document.querySelectorAll('#mySidebar a');
@@ -675,6 +727,5 @@ function resetCategoryForm() {
     });
 </script>
 
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9397807ffeecafa4',t:'MTc0NjE4ODczMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9397807ffeecafa4',t:'MTc0NjE4ODczMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

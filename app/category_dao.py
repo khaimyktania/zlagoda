@@ -105,6 +105,74 @@ def delete_category(connection, category_number):
         print(f"Помилка видалення категорії: {e}")
         raise
 
+
+#для запиту
+def get_store_products_summary_by_category(connection, category_number):
+    query = """
+        SELECT 
+            c.category_number,
+            c.category_name,
+            COUNT(sp.UPC) AS store_product_count,
+            SUM(sp.products_number) AS total_quantity
+        FROM 
+            category c
+            INNER JOIN products p ON c.category_number = p.category_number
+            INNER JOIN store_products sp ON p.id_product = sp.id_product
+        WHERE 
+            c.category_number = %s
+        GROUP BY 
+            c.category_number, c.category_name
+        HAVING 
+            COUNT(sp.UPC) > 0
+        ORDER BY 
+            c.category_number;
+    """
+    try:
+        result = execute_query(connection, query, (category_number,))
+        return result
+    except Exception as e:
+        print(f"Помилка в get_store_products_summary_by_category: {e}")
+        raise
+
+#для запиту
+def get_dead_categories(connection):
+    query = """
+        SELECT 
+            c.category_number,
+            c.category_name
+        FROM 
+            category c
+        WHERE 
+            EXISTS (
+                SELECT 1
+                FROM products p
+                INNER JOIN store_products sp ON p.id_product = sp.id_product
+                WHERE 
+                    p.category_number = c.category_number
+                    AND NOT EXISTS (
+                        SELECT 1
+                        FROM sale s
+                        WHERE s.UPC = sp.UPC
+                    )
+            )
+            AND NOT EXISTS (
+                SELECT 1
+                FROM products p
+                INNER JOIN store_products sp ON p.id_product = sp.id_product
+                INNER JOIN sale s ON sp.UPC = s.UPC
+                WHERE 
+                    p.category_number = c.category_number
+            )
+        ORDER BY 
+            c.category_number;
+    """
+    try:
+        result = execute_query(connection, query)
+        return result
+    except Exception as e:
+        print(f"Помилка в get_dead_categories: {e}")
+        raise
+
 def get_category_sales(connection):
     query = """
         SELECT 
