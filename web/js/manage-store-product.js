@@ -18,27 +18,29 @@ const getNonPromotionalProductsSortedByQuantityApiUrl = "/getNonPromotionalProdu
 const getNonPromotionalProductsSortedByNameApiUrl = "/getNonPromotionalProductsSortedByName";
 const getAllProductsSortedByQuantityApiUrl = "/getAllProductsSortedByQuantity";
 
+let currentRole = null;
+fetch('/api/employee_info', {
+    method: 'GET',
+    credentials: 'include'
+})
+.then(res => res.json())
+.then(data => {
+    currentRole = data.empl_role.toLowerCase();  // зберігаємо роль
+
+    // Тепер все викликається після встановлення ролі
+    loadStoreProducts();
+    loadProductDropdown();
+    initEventHandlers();
+})
+.catch(err => {
+    console.error('Failed to fetch role:', err);
+    alert('Could not load user role.');
+});
 
 $(function () {
-    // Initial load of store products
-
-       loadStoreProducts();
-
-    // Завантаження випадаючого списку продуктів для модального вікна
-    loadProductDropdown();
-
-    // Ініціалізація обробників подій
-
-    // Ініціалізація навігації по вкладкам
-    initTabNavigation();
-    loadStoreProducts();
-
-    // Load product dropdown for modal
-    loadProductDropdown();
-
-    // Initialize event handlers
-    initEventHandlers();
+    initTabNavigation(); // тільки вкладки
 });
+
 // Ініціалізація навігації по вкладкам з правильним завантаженням даних
 function initTabNavigation() {
     // Очищення існуючих обробників кліків по вкладкам, щоб уникнути дублювання
@@ -146,6 +148,12 @@ function renderProductsTable(products) {
         $("table").find('tbody').empty().html(table);
     }
 }
+$('#getAllStoreProductsSorted').on('click', function () {
+    $.get("/getAllStoreProductsSorted", function (data) {
+        renderProductsTable(data);  // ✅ ПРАВИЛЬНО
+        $("#filterStatus").text("All store products sorted by name");
+    });
+});
 
 // Load products dropdown for store product form
 function loadProductDropdown() {
@@ -184,30 +192,6 @@ function initEventHandlers() {
     });
 
     // Filter all store products by name
-$('#getAllStoreProductsSorted').on('click', function () {
-    $.get("/getAllStoreProductsSorted", function (data) {
-        let tableContent = '';
-        if (Array.isArray(data)) {
-            data.forEach(product => {
-    const promoClass = product.promotional_product ? 'promotional-product' : '';
-    tableContent += `<tr class="${promoClass}">
-        <td>${product.UPC}</td>
-        <td>${product.UPC_prom || '-'}</td>
-        <td>${product.product_name}</td>
-        <td>${product.selling_price}</td>
-        <td>${product.products_number}</td>
-        <td>${product.promotional_product ? 'Yes' : 'No'}</td>
-        <td><span class="btn btn-xs btn-info view-store-product" data-upc="${product.UPC}">View</span></td>
-    </tr>`;
-});
-
-        } else {
-            tableContent = '<tr><td colspan="7">Error loading data</td></tr>';
-        }
-        $("table tbody").html(tableContent);
-        $("#filterStatus").text("All store products sorted by name");
-    });
-});
 
 
     // Delete store product

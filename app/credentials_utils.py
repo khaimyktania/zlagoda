@@ -39,3 +39,12 @@ def auto_generate_credentials(employees):
 def check_password(input_password, stored_hash, salt):
     return hash_password(input_password, salt) == stored_hash
 
+def delete_credentials(user_id):
+    credentials = load_credentials()
+    if str(user_id) in credentials:
+        del credentials[str(user_id)]
+        save_credentials(credentials)
+        print(f"Credentials for user {user_id} deleted.")
+    else:
+        print(f"No credentials found for user {user_id}.")
+
