@@ -104,3 +104,22 @@ def delete_category(connection, category_number):
     except Exception as e:
         print(f"Помилка видалення категорії: {e}")
         raise
+
+def get_category_sales(connection):
+    query = """
+        SELECT 
+            c.category_name,
+            COUNT(s.sale_number) AS total_sales
+        FROM sale s
+        JOIN store_product sp ON s.UPC = sp.UPC
+        JOIN product p ON sp.id_product = p.id_product
+        JOIN category c ON p.category_number = c.category_number
+        GROUP BY c.category_name
+        ORDER BY total_sales DESC;
+    """
+    try:
+        result = execute_query(connection, query)
+        return result
+    except Exception as e:
+        print(f"Error in get_category_sales: {e}")
+        raise
