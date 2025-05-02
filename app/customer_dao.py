@@ -106,16 +106,7 @@ def validate_customer(customer):
     except Exception:
         errors.append("Invalid format for percent.")
 
-    # Перевірка номеру картки — літерa 'C' (українська або англійська), за якою йде 4 цифри
-    try:
-        card_number = customer['card_number']
-        # Перевірка, чи є номер картки у форматі "Cxxxx", де x - цифра
-        pattern = r"^[СсCс]\d{4}$"
-        if not re.match(pattern, card_number):
-            errors.append(
-                "Card number must start with 'C' (either Ukrainian or English), followed by 4 digits.")
-    except Exception:
-        errors.append("Invalid card number format.")
+
 
     # Телефон — строго 13 символів: + і 12 цифр
     phone = customer.get('phone_number', '')
