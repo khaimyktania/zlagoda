@@ -17,12 +17,36 @@
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
 
     <style>
+
+        /* Minimalistic Blue Theme */
+        :root {
+            --primary-blue: #4A90E2;
+            --light-blue: #E6F0FA;
+            --dark-blue: #2E5A87;
+            --text-color: #333;
+        }
+
+        body {
+            background: #F9FAFB;
+            font-family: 'Roboto', sans-serif;
+            color: var(--text-color);
+        }
+
         .logout-btn-fixed {
             position: absolute;
             bottom: 0;
             width: 100%;
+            background: none;
+            color: var(--primary-blue);
+            border: none;
+            padding: 15px;
+            text-align: center;
+            font-weight: 500;
+            transition: background 0.3s ease;
         }
-
+        .logout-btn-fixed:hover {
+            background: var(--light-blue);
+        }
 
         /* Always visible sidebar on desktop */
         @media (min-width: 992px) {
@@ -32,9 +56,11 @@
                 position: fixed;
                 height: 100%;
                 z-index: 1000;
+                background: white;
+                border-right: 1px solid #E5E7EB;
             }
             #main {
-                margin-left: 250px;
+                margin-left: 200px;
             }
             #openNav {
                 display: none !important;
@@ -48,17 +74,30 @@
             }
         }
 
+        /* Sidebar Styling */
+        #mySidebar .w3-bar-item {
+            color: var(--text-color);
+            padding: 12px 16px;
+            font-weight: 400;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        #mySidebar .w3-bar-item:hover {
+            background: var(--light-blue);
+            color: var(--primary-blue);
+        }
+
         /* Check details styling */
         .check-item {
-            border: 1px solid #ddd;
+            border: 1px solid #E5E7EB;
             border-radius: 5px;
             margin-bottom: 10px;
             padding: 15px;
             transition: all 0.3s;
+            background: white;
         }
 
         .check-item:hover {
-            background-color: #f8f9fa;
+            background-color: var(--light-blue);
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
@@ -72,7 +111,7 @@
         .check-amount {
             font-size: 1.2em;
             font-weight: bold;
-            color: #28a745;
+            color: var(--dark-blue);
         }
 
         .check-vat {
@@ -94,16 +133,16 @@
         .check-product-item {
             display: flex;
             justify-content: space-between;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #E5E7EB;
             padding: 5px 0;
         }
 
         .filter-controls {
-            background-color: #f8f9fa;
+            background-color: white;
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 20px;
-            border: 1px solid #ddd;
+            border: 1px solid #E5E7EB;
         }
 
         .filter-section {
@@ -115,30 +154,31 @@
             gap: 10px;
             align-items: center;
         }
+
         .manager-only {
-    display: none;
-}
-.manager-only.active {
-    display: block;
-}
+            display: none;
+        }
+        .manager-only.active {
+            display: block;
+        }
 
         .statistics-section {
-            background-color: #e9ecef;
+            background-color: var(--light-blue);
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 20px;
         }
 
         .new-check-product {
-            border: 1px solid #ddd;
+            border: 1px solid #E5E7EB;
             padding: 10px;
             margin-bottom: 10px;
             border-radius: 5px;
-            background-color: #f8f9fa;
+            background-color: white;
         }
 
         .product-total-row {
-            border-top: 2px solid #ddd;
+            border-top: 2px solid #E5E7EB;
             margin-top: 15px;
             padding-top: 10px;
             font-weight: bold;
@@ -154,8 +194,83 @@
         #loading-indicator { display: none; }
         #total-sales {
             font-weight: bold;
-            color: #007bff;
+            color: var(--primary-blue);
             margin-top: 10px;
+        }
+
+        /* Button Styling */
+        button {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            margin: 5px 0;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background: var(--dark-blue);
+        }
+
+        .btn-outline-secondary {
+            color: #ffffff;
+            border-color: #6c757d;
+        }
+        .btn-outline-secondary:hover {
+            background-color: var(--light-blue);
+            color: var(--text-color);
+            border-color: var(--text-color);
+        }
+
+        /* Modal Styling */
+        .modal-content {
+            border-radius: 8px;
+            border: 1px solid #E5E7EB;
+        }
+
+        .modal-header h4 {
+            color: var(--dark-blue);
+            font-weight: 500;
+        }
+
+        .modal-footer button {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+        .modal-footer button:hover {
+            background: var(--dark-blue);
+        }
+
+        .modal-footer .btn-secondary {
+            background: #6c757d;
+        }
+        .modal-footer .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .modal-footer .btn-danger {
+            background: #dc3545;
+        }
+        .modal-footer .btn-danger:hover {
+            background: #c82333;
+        }
+
+        /* Alert Styling */
+        .alert-info {
+            background-color: var(--light-blue);
+            color: var(--text-color);
+            border: 1px solid #E5E7EB;
+        }
+
+        .form-control {
+            border: 1px solid #E5E7EB;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -180,7 +295,7 @@
 <div id="main">
     <!-- Header -->
     <div class="header content rows-content-header">
-        <button id="openNav" class="w3-button w3-teal w3-xlarge">&#9776;</button>
+        <button id="openNav" class="w3-button w3-teal w3-xlarge">☰</button>
         <div class="navbar navbar-default" role="navigation">
             <div class="container">
                 <div class="navbar-collapse collapse">
@@ -206,37 +321,37 @@
                 <div class="box-info full" id="taskFormContainer">
                     <h2>Check Management</h2>
 
-                   <!-- Statistics Section -->
-<div class="statistics-section">
-    <h4>Check Statistics</h4>
-    <div class="row">
-        <div class="col-md-3">
-            <p><strong>Total Checks:</strong> <span id="stats-total-checks">0</span></p>
-            <p><strong>Total Sales:</strong> <span id="stats-total-sales">$0.00</span></p>
-           <div class="col-md-3">
-    <p><strong>Total Sales by Cashier:</strong> <span id="stats-cashier-sales">$0.00</span></p>
-    <p><strong>Selected Cashier:</strong> <span id="stats-selected-cashier">None</span></p>
-</div>
-        </div>
-        <div class="col-md-3">
-            <p><strong>Total VAT:</strong> <span id="stats-total-vat">$0.00</span></p>
-            <p><strong>Average Check:</strong> <span id="stats-average-check">$0.00</span></p>
-        </div>
-        <div class="col-md-3">
-            <p><strong>Period:</strong> <span id="stats-period">All time</span></p>
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-sm btn-outline-secondary" data-period="today">Today</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" data-period="week">Week</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" data-period="month">Month</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" data-period="year">Year</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" data-period="all">All</button>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <p><strong>Date Range:</strong> <span id="stats-date-range">N/A</span></p>
-        </div>
-    </div>
-</div>
+                    <!-- Statistics Section -->
+                    <div class="statistics-section">
+                        <h4>Check Statistics</h4>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <p><strong>Total Checks:</strong> <span id="stats-total-checks">0</span></p>
+                                <p><strong>Total Sales:</strong> <span id="stats-total-sales">$0.00</span></p>
+                                <div class="col-md-3">
+                                    <p><strong>Total Sales by Cashier:</strong> <span id="stats-cashier-sales">$0.00</span></p>
+                                    <p><strong>Selected Cashier:</strong> <span id="stats-selected-cashier">None</span></p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <p><strong>Total VAT:</strong> <span id="stats-total-vat">$0.00</span></p>
+                                <p><strong>Average Check:</strong> <span id="stats-average-check">$0.00</span></p>
+                            </div>
+                            <div class="col-md-3">
+                                <p><strong>Period:</strong> <span id="stats-period">All time</span></p>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-period="today">Today</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-period="week">Week</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-period="month">Month</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-period="year">Year</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-period="all">All</button>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <p><strong>Date Range:</strong> <span id="stats-date-range">N/A</span></p>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Filter Controls -->
                     <div class="filter-controls">
@@ -287,48 +402,46 @@
                                         </div>
                                     </div>
                                 </div>
-                                   <div class="col-md-4">
-        <label for="purchases-start-date">Start Date</label>
-        <input type="date" id="purchases-start-date" class="form-control">
-    </div>
-    <div class="col-md-4">
-        <label for="purchases-end-date">End Date</label>
-        <input type="date" id="purchases-end-date" class="form-control">
-    </div>
-    <div class="col-md-4 align-self-end">
-        <button id="load-customer-purchases" class="btn btn-primary">Load Purchases</button>
-    </div>
-<div id="customer-purchases-list"></div>
+                                <div class="col-md-4">
+                                    <label for="purchases-start-date">Start Date</label>
+                                    <input type="date" id="purchases-start-date" class="form-control">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="purchases-end-date">End Date</label>
+                                    <input type="date" id="purchases-end-date" class="form-control">
+                                </div>
+                                <div class="col-md-4 align-self-end">
+                                    <button id="load-customer-purchases" class="btn btn-primary">Load Purchases</button>
+                                </div>
+                                <div id="customer-purchases-list"></div>
 
                                 <!-- Product Sales by Name Filter Section -->
-<!-- Product Sales by Name Filter Section -->
-<div class="filter-section product-sales-filter">
-    <h4>Product Sales by Period</h4>
-    <div class="form-row align-items-end">
-        <div class="col-md-5">
-            <label for="product-sales-select">Product</label>
-            <select class="form-control" id="product-sales-select">
-                <option value="">Select product</option>
-                <!-- Products will be populated dynamically -->
-            </select>
-        </div>
-        <div class="col-md-3">
-            <label for="sales-start-date">From</label>
-            <input type="date" class="form-control" id="sales-start-date">
-        </div>
-        <div class="col-md-3">
-            <label for="sales-end-date">To</label>
-            <input type="date" class="form-control" id="sales-end-date">
-        </div>
-        <div class="col-md-1">
-            <button class="btn btn-primary" id="calculate-sales-by-name">Calculate</button>
-        </div>
-    </div>
-    <div class="alert alert-info mt-3" id="sales-result" style="display: none;"></div>
-</div>
+                                <div class="filter-section product-sales-filter">
+                                    <h4>Product Sales by Period</h4>
+                                    <div class="form-row align-items-end">
+                                        <div class="col-md-5">
+                                            <label for="product-sales-select">Product</label>
+                                            <select class="form-control" id="product-sales-select">
+                                                <option value="">Select product</option>
+                                                <!-- Products will be populated dynamically -->
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="sales-start-date">From</label>
+                                            <input type="date" class="form-control" id="sales-start-date">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="sales-end-date">To</label>
+                                            <input type="date" class="form-control" id="sales-end-date">
+                                        </div>
+                                        <div class="col-md-1">
+                                            <button class="btn btn-primary" id="calculate-sales-by-name">Calculate</button>
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-info mt-3" id="sales-result" style="display: none;"></div>
+                                </div>
                             </div>
                         </div>
-
                     </div>
 
                     <!-- Action Buttons -->
@@ -420,7 +533,6 @@
                             </div>
                         </div>
 
-
                         <!-- Products List -->
                         <div class="row mt-3">
                             <div class="col-md-12">
@@ -460,22 +572,22 @@
         </div>
     </div>
 
-<div class="modal fade" id="customerPurchasesModal" tabindex="-1" aria-labelledby="customerPurchasesModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="customerPurchasesModalLabel">Customer Purchases</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div id="customer-purchases-list2"></div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    <div class="modal fade" id="customerPurchasesModal" tabindex="-1" aria-labelledby="customerPurchasesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="customerPurchasesModalLabel">Customer Purchases</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="customer-purchases-list2"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
     <!-- Check Details Modal -->
     <div class="modal fade" id="checkDetailsModal" tabindex="-1" role="dialog">
@@ -562,5 +674,19 @@
             document.getElementById('openNav').style.display = 'inline-block';
         }
     </script>
+    <script>
+    // Підсвічує активну вкладку сайдбару
+    document.addEventListener('DOMContentLoaded', function () {
+        const currentPath = window.location.pathname;
+        const sidebarLinks = document.querySelectorAll('#mySidebar a');
+
+        sidebarLinks.forEach(link => {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('w3-blue');
+            }
+        });
+    });
+</script>
+
 </body>
 </html>

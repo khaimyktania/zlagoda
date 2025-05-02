@@ -79,21 +79,19 @@
     }
 
     #report-output {
-  width: 100%;
-  overflow-x: auto;
-  padding: 0 10px 30px 10px; /* ← додано нижній padding */
-  background: white;
-  border-radius: 8px;
-  border: 1px solid #E5E7EB;
-  margin-top: 20px;
-}
-
+      width: 100%;
+      overflow-x: auto;
+      padding: 0 10px 30px 10px; /* ← додано нижній padding */
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #E5E7EB;
+      margin-top: 20px;
+    }
 
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
-
     }
     th, td {
       border-bottom: 1px solid #E5E7EB;
@@ -203,13 +201,13 @@
 
 <!-- Sidebar -->
 <div id="mySidebar" class="w3-sidebar w3-bar-block w3-card w3-animate-left w3-light-grey" style="display: none;">
-  <a href="/manage-employee" class="w3-bar-item w3-button role-manager">Employees</a>
+  <a href="/manage-employee" class="w3-bar-item w3-button role-manager">Workers</a>
   <a href="/manage_product" class="w3-bar-item w3-button role-manager role-cashier">Manage Products</a>
   <a href="/manage_store_product" class="w3-bar-item w3-button role-manager role-cashier">Store Products</a>
   <a href="/manage_category" class="w3-bar-item w3-button role-manager">Categories</a>
   <a href="/manage_customer" class="w3-bar-item w3-button role-manager role-cashier">Customers</a>
   <a href="/manage_check" class="w3-bar-item w3-button role-manager role-cashier">Checks</a>
-  <a href="/manage_reports" class="w3-bar-item w3-button role-manager">Reports</a>
+  <a href="/reports" class="w3-bar-item w3-button role-manager">Reports</a>
   <a href="/manager_account.html" class="w3-bar-item w3-button role-manager">My Account</a>
   <a href="/cashier_account.html" class="w3-bar-item w3-button role-cashier">My Account</a>
   <a href="/logout" class="w3-bar-item w3-button logout-btn-fixed">Log Out</a>
@@ -473,6 +471,20 @@
     console.log('Page loaded, initializing UI');
     initializeUI();
   });
+</script>
+<script>
+    // Підсвічує активну вкладку сайдбару
+    document.addEventListener('DOMContentLoaded', function () {
+        const currentPath = window.location.pathname;
+        const sidebarLinks = document.querySelectorAll('#mySidebar a');
+
+        sidebarLinks.forEach(link => {
+            const linkPath = link.getAttribute('href');
+            if (linkPath === currentPath || (currentPath === '/reports' && linkPath === '/reports')) {
+                link.classList.add('w3-blue');
+            }
+        });
+    });
 </script>
 
 </body>

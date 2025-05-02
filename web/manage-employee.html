@@ -446,6 +446,20 @@ fetch('/api/employee_info', {
     document.getElementById('openNav').style.display = 'inline-block';
   }
 </script>
+<script>
+    // Підсвічує активну вкладку сайдбару
+    document.addEventListener('DOMContentLoaded', function () {
+        const currentPath = window.location.pathname;
+        const sidebarLinks = document.querySelectorAll('#mySidebar a');
+
+        sidebarLinks.forEach(link => {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('w3-blue');
+            }
+        });
+    });
+</script>
+
 
 
 </body>

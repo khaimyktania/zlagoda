@@ -279,6 +279,7 @@ function initSearchForm() {
     // Clear search button
     $("#clearSearchBtn").on("click", function() {
         $("#searchInput").val("");
+        $("#categoryFilter").val("");
         resetSearchUI();
         loadProducts();
     });
@@ -334,6 +335,8 @@ $(document).ready(function() {
 
         // Повернення до всіх продуктів
         $("#backToAllProducts").on("click", function() {
+            $("#searchInput").val("");
+            $("#categoryFilter").val("");  // Очищення категорії
             resetSearchUI();
             loadProducts();
         });
