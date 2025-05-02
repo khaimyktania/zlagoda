@@ -342,6 +342,7 @@ function checkCurrentUserRole() {
             adjustUIBasedOnRole();
             if (currentUserRole.toLowerCase() === 'cashier') {
                 applyFiltersForCashier();
+
                 $('#total-sales-by-cashier-container').hide();
             } else {
                 loadCashierFilter();
@@ -358,6 +359,52 @@ function checkCurrentUserRole() {
             $('#total-sales-by-cashier-container').hide();
             loadCheckStatistics('all');
             loadRecentChecks();
+        }
+    });
+}
+
+function applyFiltersForCashier() {
+    const startDate = $('#start-date').val();
+    const endDate = $('#end-date').val();
+
+    if (!startDate || !endDate) {
+        alert('Please select both start and end dates');
+        return;
+    }
+
+    const startDateFormatted = startDate + ' 00:00:00';
+    const endDateFormatted = endDate + ' 23:59:59';
+
+    $('#loading-indicator').show();
+    $('#checks-list').find('.check-item').remove();
+
+    const filterParams = {
+        start_date: startDateFormatted,
+        end_date: endDateFormatted,
+        id_employee: currentUserId
+    };
+
+    $.ajax({
+        url: API_ENDPOINTS.GET_CHECKS_BY_DATE_RANGE,
+        type: 'GET',
+        data: filterParams,
+        success: function(response) {
+            $('#loading-indicator').hide();
+            if (response && Array.isArray(response)) {
+                if (response.length === 0) {
+                    $('#checks-list').html('<div class="alert alert-info">No checks found for the selected criteria.</div>');
+                } else {
+                    renderChecksListItems(response);
+                }
+            } else {
+                $('#checks-list').html('<div class="alert alert-warning">Invalid response format. Please try again.</div>');
+            }
+            $('#filter-status').text(`Showing your checks from ${startDate} to ${endDate}`).show();
+        },
+        error: function(xhr) {
+            $('#loading-indicator').hide();
+            console.error('Error applying filters:', xhr.responseText);
+            $('#checks-list').html('<div class="alert alert-danger">Error applying filter: ' + xhr.responseText + '</div>');
         }
     });
 }
@@ -654,6 +701,7 @@ function loadStoreProducts() {
             console.log("Store products data received:", response);
             if (!Array.isArray(response)) {
                 console.error("Response is not an array:", response);
+                $('#product-select').html('<option value="">Invalid data format</option>');
                 $('#product-search').html('<option value="">Invalid data format</option>');
                 return;
             }
@@ -678,19 +726,28 @@ function loadStoreProducts() {
             });
 
             console.log(`Found ${availableProducts} available products`);
+
+            // Заповнюємо обидва розкривні списки
+            $('#product-select').html(options);
             $('#product-search').html(options);
 
+            // Логування для перевірки
+            console.log("Product select HTML after update:", $('#product-select').html());
+            console.log("Product search HTML after update:", $('#product-search').html());
+
             if (availableProducts === 0) {
+                $('#product-select').html('<option value="">No products available</option>');
                 $('#product-search').html('<option value="">No products available</option>');
             }
         },
         error: function(xhr, status, error) {
             console.error('Error loading store products:', xhr.responseText, status, error);
+            $('#product-select').html('<option value="">Error loading products</option>');
             $('#product-search').html('<option value="">Error loading products</option>');
+            alert('Failed to load products. Please try again.');
         }
     });
 }
-
 function loadProductUnitsSold(upc, startDate, endDate) {
     if (currentUserRole.toLowerCase() !== 'manager') {
         $('#product-units-result').val('N/A');
@@ -761,7 +818,7 @@ function prepareCreateCheckModal() {
     // Show loading indicators
     $('#employee-select').html('<option value="">Loading employees...</option>');
     $('#customer-select').html('<option value="">Loading customers...</option>');
-    $('#product-select').html('<option value="">Loading products...</option>');
+//    $('#product-select').html('<option value="">Loading products...</option>');
 
     // Load all required data
     loadEmployees();

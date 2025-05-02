@@ -553,16 +553,19 @@ def delete_customer():
     # Add these routes to your server.py file
 
 @app.route('/getStoreProducts', methods=['GET'])
-@require_role('cashier','manager')
+@require_role('cashier', 'manager')
 def get_store_products():
-    connection = get_sql_connection()
+    connection = None
     try:
+        connection = get_sql_connection()
         response = store_product_dao.get_all_store_products(connection)
         return jsonify(response)
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+        print(f"Error in get_store_products: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
     finally:
-        connection.close()
+        if connection:
+            connection.close()
 
 @app.route('/getStoreProductByUPC', methods=['GET'])
 @require_role('cashier','manager')
