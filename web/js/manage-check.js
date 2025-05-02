@@ -331,37 +331,40 @@ function setDefaultDates() {
 
 
 function checkCurrentUserRole() {
-    console.log("Checking current user role...");
-    $.ajax({
-        url: '/api/employee_info',
-        type: 'GET',
-        success: function(response) {
-            currentUserRole = response.empl_role;
-            currentUserId = response.id_employee;
-            console.log("Current user role:", currentUserRole, "Current user ID:", currentUserId);
-            adjustUIBasedOnRole();
-            if (currentUserRole.toLowerCase() === 'cashier') {
-                applyFiltersForCashier();
+        console.log("Checking current user role and ID...");
+        $.ajax({
+            url: '/api/employee_info',
+            type: 'GET',
+            success: function(response) {
+                console.log("Employee info response:", response);
+                currentUserRole = response.empl_role || '';
+                currentUserId = String(response.id_employee || '');
 
-                $('#total-sales-by-cashier-container').hide();
-            } else {
-                loadCashierFilter();
+                if (!currentUserId) {
+                    console.error("No id_employee in response. Cannot proceed.");
+                    alert('Error: User ID not found. Please log in again.');
+                    window.location.href = '/login.html'; // Перенаправлення на логін
+                    return;
+                }
+
+                console.log("Current user role:", currentUserRole, "Current user ID:", currentUserId);
+                adjustUIBasedOnRole();
+                if (currentUserRole.toLowerCase() === 'cashier') {
+                    applyFiltersForCashier();
+                    $('#total-sales-by-cashier-container').hide();
+                } else {
+                    loadCashierFilter();
+                }
+                loadCheckStatistics('all');
+                loadRecentChecks();
+            },
+            error: function(xhr) {
+                console.error('Error getting user info:', xhr.responseText);
+                alert('Error loading user information. Please log in again.');
+                window.location.href = '/login.html'; // Перенаправлення на логін
             }
-            loadCheckStatistics('all');
-            loadRecentChecks();
-        },
-        error: function(xhr) {
-            console.error('Error getting user info:', xhr.responseText);
-            currentUserRole = 'cashier';
-            currentUserId = '';
-            alert('Error loading user information. Limited functionality available.');
-            adjustUIBasedOnRole();
-            $('#total-sales-by-cashier-container').hide();
-            loadCheckStatistics('all');
-            loadRecentChecks();
-        }
-    });
-}
+        });
+    }
 
 function applyFiltersForCashier() {
     const startDate = $('#start-date').val();
@@ -1380,45 +1383,62 @@ function searchCheckByNumber() {
 // View check details
 // View check details
 function viewCheckDetails(checkNumber) {
-    $('#checkDetailsModal .modal-body').html('<div class="text-center py-5"><div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div><p class="mt-2">Loading check details...</p></div>');
-    $('#checkDetailsModal').modal('show');
+        console.log("Fetching check details for check number:", checkNumber);
+        console.log("Current user ID:", currentUserId, "Role:", currentUserRole);
 
-    $.ajax({
-        url: API_ENDPOINTS.GET_CHECK_BY_NUMBER,
-        type: 'GET',
-        data: { check_number: checkNumber },
-        success: function(checkData) {
-            if (checkData) {
-                if (currentUserRole.toLowerCase() === 'cashier' && checkData.id_employee !== currentUserId) {
-                    $('#checkDetailsModal').modal('hide');
-                    alert('You do not have permission to view this check.');
-                    return;
-                }
+        $('#checkDetailsModal .modal-body').html('<div class="text-center py-5"><div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div><p class="mt-2">Loading check details...</p></div>');
+        $('#checkDetailsModal').modal('show');
 
-                $.ajax({
-                    url: API_ENDPOINTS.GET_CHECK_PRODUCTS,
-                    type: 'GET',
-                    data: { check_number: checkNumber },
-                    success: function(productsData) {
-                        displayCheckDetails(checkData, productsData);
-                    },
-                    error: function(xhr) {
-                        console.error('Error getting check products:', xhr.responseText);
-                        displayCheckDetails(checkData, []);
+        $.ajax({
+            url: API_ENDPOINTS.GET_CHECK_BY_NUMBER,
+            type: 'GET',
+            data: { check_number: checkNumber },
+            success: function(checkData) {
+                console.log("Check data received:", checkData);
+
+                if (checkData && checkData.check_number) {
+                    // Перетворюємо id_employee і currentUserId в рядки для коректного порівняння
+                    const checkEmployeeId = String(checkData.id_employee || '');
+                    const userId = String(currentUserId || '');
+
+                    // Логування для дебагу
+                    console.log("Check employee ID:", checkEmployeeId, "User ID:", userId);
+
+                    // Перевірка для касира
+                    if (currentUserRole.toLowerCase() === 'cashier' && checkEmployeeId !== userId) {
+                        console.warn("Access denied: Cashier attempting to view another cashier's check");
+                        $('#checkDetailsModal').modal('hide');
+                        alert('You do not have permission to view this check.');
+                        return;
                     }
-                });
-            } else {
+
+                    // Завантажуємо продукти чека
+                    $.ajax({
+                        url: API_ENDPOINTS.GET_CHECK_PRODUCTS,
+                        type: 'GET',
+                        data: { check_number: checkNumber },
+                        success: function(productsData) {
+                            console.log("Check products received:", productsData);
+                            displayCheckDetails(checkData, productsData);
+                        },
+                        error: function(xhr) {
+                            console.error('Error getting check products:', xhr.responseText);
+                            displayCheckDetails(checkData, []);
+                        }
+                    });
+                } else {
+                    console.warn("Check not found or invalid data:", checkData);
+                    $('#checkDetailsModal').modal('hide');
+                    alert('Check not found');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error getting check details:', xhr.responseText, status, error);
                 $('#checkDetailsModal').modal('hide');
-                alert('Check not found');
+                alert('Error loading check details: ' + error);
             }
-        },
-        error: function(xhr, status, error) {
-            console.error('Error getting check details:', xhr.responseText, status, error);
-            $('#checkDetailsModal').modal('hide');
-            alert('Error loading check details: ' + error);
-        }
-    });
-}
+        });
+    }
 
 function loadCashierTotalSales(cashierId, startDate, endDate) {
     if (currentUserRole.toLowerCase() !== 'manager') {

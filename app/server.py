@@ -5,7 +5,7 @@ from credentials_utils import load_credentials, save_credentials, auto_generate_
 from flask import jsonify, session
 from datetime import date
 from app import category_dao
-from sql_connection import get_sql_connection
+from sql_connection import get_sql_connection, execute_query
 import json
 import employee_dao
 import product_dao
@@ -91,21 +91,41 @@ def login():
 
 
 @app.route('/api/employee_info', methods=['GET'])
-def get_logged_in_employee_info():
-    id_emp = session.get('id_employee')
-    if not id_emp:
-        return jsonify({'success': False, 'message': 'Not logged in'}), 401
+def get_employee_info():
+    try:
+        user_id = session.get('id_employee')
+        user_role = session.get('role')
+        print(f"Fetching employee info for user_id: {user_id}, role: {user_role}")
 
-    employee = employee_dao.get_employee_by_id(connection, id_emp)
-    if not employee:
-        return jsonify({'success': False, 'message': 'Employee not found'}), 404
+        if not user_id:
+            print("Session error: No id_employee in session")
+            return jsonify({'success': False, 'message': 'User not authenticated, no id_employee in session'}), 401
 
-    return jsonify({
-        'success': True,
-        'empl_name': employee['empl_name'],
-        'empl_surname': employee['empl_surname'],
-        'empl_role': employee['empl_role']
-    })
+        connection = get_sql_connection()
+        query = """
+        SELECT id_employee, empl_name, empl_surname, empl_role
+        FROM employee
+        WHERE id_employee = %s
+        """
+        result = execute_query(connection, query, (user_id,))
+        connection.close()
+
+        if result:
+            employee = result[0]
+            response = {
+                'id_employee': employee['id_employee'],
+                'empl_name': employee['empl_name'],
+                'empl_surname': employee['empl_surname'],
+                'empl_role': employee['empl_role']
+            }
+            print(f"Returning employee info: {response}")
+            return jsonify(response)
+        else:
+            print(f"Employee not found for user_id: {user_id}")
+            return jsonify({'success': False, 'message': 'Employee not found in database'}), 404
+    except Exception as e:
+        print(f"Error in get_employee_info: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/manage_product')
 @require_role('cashier','manager')
