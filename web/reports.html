@@ -1,16 +1,12 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>ZLAGODA — Звіти</title>
-  <meta charset="utf-8">
+  <title>ZLAGODA — Reports</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Fonts & Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,300,600,700">
-
-  <!-- Bootstrap + Custom Styles -->
   <link rel="stylesheet" href="web/static/bootstrap.min.css">
   <link rel="stylesheet" href="web/static/style.css">
   <link rel="stylesheet" href="web/static/sidebar-menu.css">
@@ -23,73 +19,58 @@
       bottom: 0;
       width: 100%;
     }
-    /* Always visible sidebar on desktop */
     @media (min-width: 992px) {
-      #mySidebar {
-        display: block !important;
-        width: 200px;
-        position: fixed;
-        height: 100%;
-        z-index: 1000;
-      }
-      #main {
-        margin-left: 250px;
-      }
-      #openNav {
-        display: none !important;
-      }
+      #mySidebar { display: block !important; width: 200px; position: fixed; height: 100%; z-index: 1000; }
+      #main { margin-left: 250px; }
+      #openNav { display: none !important; }
     }
-
-    /* Content margin reset on small screens */
     @media (max-width: 991px) {
-      #main {
-        margin-left: 0;
-      }
+      #main { margin-left: 0; }
     }
 
-    /* Table styles */
     #report-output {
       width: 100%;
-      max-width: 100%;
-      overflow-x: auto; /* Горизонтальна прокрутка */
-      box-sizing: border-box; /* Включаємо padding і border у ширину */
-      padding: 0 10px; /* Додаємо невеликий відступ */
+      overflow-x: auto;
+      padding: 0 10px;
     }
     table {
       width: 100%;
-      max-width: 100%; /* Уникаємо перевищення контейнера */
-      table-layout: fixed; /* Фіксована ширина колонок */
       border-collapse: collapse;
       margin-top: 20px;
     }
     th, td {
-      border: 1px solid #999;
+      border: 1px solid #333;
       padding: 8px;
       text-align: left;
-      white-space: normal;
       word-wrap: break-word;
-      box-sizing: border-box;
-      min-width: 100px; /* Мінімальна ширина колонок */
-      max-width: 250px; /* Максимальна ширина колонок */
-      overflow: hidden; /* Обрізаємо надлишковий вміст */
-      text-overflow: ellipsis; /* Додаємо три крапки для довгого тексту */
     }
     th {
       background-color: #eee;
       font-weight: bold;
     }
 
-    /* Адаптивність для малих екранів */
-    @media (max-width: 768px) {
-      th, td {
-        min-width: 80px; /* Зменшуємо ширину колонок */
-        max-width: 150px;
-        font-size: 14px; /* Зменшуємо шрифт */
-      }
-    }
-
-    /* Print styles */
     @media print {
+      @page {
+        margin: 1.5cm;
+        @top-center {
+          content: "ZLAGODA REPORT";
+          font-size: 10pt;
+          font-weight: bold;
+          color: #333;
+        }
+        @bottom-center {
+          content: "Report generated: " var(--print-date) " | Page " counter(page) " of " counter(pages);
+          font-size: 10pt;
+          color: #333;
+        }
+        @top-left { content: none; }
+        @top-right { content: none; }
+        @bottom-left { content: none; }
+        @bottom-right { content: none; }
+      }
+      body {
+        margin: 0;
+      }
       button, .no-print, .w3-sidebar {
         display: none !important;
       }
@@ -97,30 +78,36 @@
         margin: 0 !important;
       }
       #report-output {
-        overflow: visible;
-        padding: 0;
+        overflow: visible !important;
+        padding: 0 !important;
+      }
+      #report-title {
+        font-size: 14pt;
+        text-align: center;
+        margin-bottom: 10px;
       }
       table {
-        width: 100%;
-        max-width: 100%;
-        table-layout: auto; /* Дозволяємо таблиці адаптуватися */
+        width: 100% !important;
+        max-width: 100% !important;
+        table-layout: auto !important;
+        border-collapse: collapse !important;
       }
       th, td {
-        font-size: 10px; /* Ще менший шрифт для друку */
-        min-width: 50px;
-        max-width: none; /* Знімаємо обмеження */
-        overflow: visible;
-        text-overflow: clip;
+        font-size: 10px !important;
+        white-space: normal !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        overflow: visible !important;
+        text-overflow: initial !important;
       }
     }
   </style>
 </head>
-<body class="tooltips">
+<body>
 
 <!-- Sidebar -->
 <div id="mySidebar" class="w3-sidebar w3-bar-block w3-card w3-animate-left w3-light-grey" style="display: none;">
-  <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">✕ Close</button>
-  <a href="/manage-employee" class="w3-bar-item w3-button role-manager">Workers</a>
+  <a href="/manage-employee" class="w3-bar-item w3-button role-manager">Employees</a>
   <a href="/manage_product" class="w3-bar-item w3-button role-manager role-cashier">Manage Products</a>
   <a href="/manage_store_product" class="w3-bar-item w3-button role-manager role-cashier">Store Products</a>
   <a href="/manage_category" class="w3-bar-item w3-button role-manager">Categories</a>
@@ -132,104 +119,109 @@
   <a href="/logout" class="w3-bar-item w3-button logout-btn-fixed">Log Out</a>
 </div>
 
-<!-- Main Content -->
+<!-- Main -->
 <div id="main">
-  <div class="header content rows-content-header">
-    <button id="openNav" class="w3-button w3-teal w3-xlarge">☰</button>
-    <div class="navbar navbar-default" role="navigation">
-      <div class="container">
-        <div class="navbar-collapse collapse">
-          <ul class="nav navbar-nav visible-lg visible-md limit-chars">
-            <ul class="breadcrumb">
-              <a href="index.html">
-                <i class="zmdi zmdi-view-dashboard zmdi-hc-fw" title="Orders"></i>
-              </a>
-              <a href="reports.html">
-                <i class="zmdi zmdi-assignment zmdi-hc-fw" title="Reports"></i>
-              </a>
-            </ul>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
+  <button id="openNav" class="w3-button w3-teal w3-xlarge no-print" onclick="w3_open()">☰</button>
 
   <div class="container">
-    <div class="right content-page">
-      <div class="body content rows scroll-y">
-        <div class="box-info full">
-          <h2 class="no-print">Звіти</h2>
-
-          <!-- Buttons -->
-          <div class="no-print">
-            <button onclick="loadReport('employees')" class="btn btn-default">🧍 Працівники</button>
-            <button onclick="loadReport('customers')" class="btn btn-default">🪪 Клієнти</button>
-            <button onclick="loadReport('categories')" class="btn btn-default">🗂️ Категорії</button>
-            <button onclick="loadReport('products')" class="btn btn-default">📦 Товари</button>
-            <button onclick="loadReport('store-products')" class="btn btn-default">🛒 Товари у магазині</button>
-            <button onclick="loadReport('receipts')" class="btn btn-default">🧾 Чеки</button>
-            <button onclick="printReport()" class="btn btn-primary">🖨️ Друк звіту</button>
-          </div>
-
-          <!-- Report Title -->
-          <h3 id="report-title" class="mt-4"></h3>
-
-          <!-- Output -->
-          <div id="report-output" class="mt-3"></div>
-        </div>
+    <div class="row mt-3">
+      <h2 class="no-print">Reports</h2>
+      <div class="no-print">
+        <button onclick="loadReport('employees')" class="btn btn-default">🧍 Employees</button>
+        <button onclick="loadReport('customers')" class="btn btn-default">🪪 Customers</button>
+        <button onclick="loadReport('categories')" class="btn btn-default">🗂️ Categories</button>
+        <button onclick="loadReport('products')" class="btn btn-default">📦 Products</button>
+        <button onclick="loadReport('store-products')" class="btn btn-default">🛒 Store Products</button>
+        <button onclick="loadReport('receipts')" class="btn btn-default">🧾 Receipts</button>
+        <button onclick="printReport()" class="btn btn-primary">🖨️ Print Report</button>
       </div>
+      <h3 id="report-title" class="mt-3"></h3>
+      <div id="report-output" class="mt-2"></div>
     </div>
   </div>
 </div>
 
-<!-- Scripts -->
-<script src="js/package/jquery.min.js"></script>
-<script src="js/package/bootstrap.min.js"></script>
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 <script>
-  fetch('/api/employee_info', {
-    method: 'GET',
-    credentials: 'include'
-  })
-  .then(res => {
-    if (!res.ok) {
-      if (res.status === 401) window.location.href = '/login.html';
-      throw new Error('Not authorized');
-    }
-    return res.json();
-  })
-  .then(data => {
-    const role = data.empl_role.toLowerCase().replace(/cashier/i, 'cashier').replace(/manager/i, 'manager');
-    console.log("User role:", role); // Дебаг
+  /* Mock data for testing */
+  const mockData = {
+    employees: [
+      { id_employee: 'E001', empl_surname: 'Doe', empl_name: 'John', empl_patronymic: 'A', empl_role: 'Manager', salary: 50000, date_of_birth: '1990-01-01', date_of_start: '2020-01-01', phone_number: '123-456-7890', city: 'Kyiv', street: 'Main St', zip_code: '01001' }
+    ],
+    customers: [
+      { card_number: 'C001', cust_surname: 'Smith', cust_name: 'Jane', cust_patronymic: 'B', percent: 5 }
+    ],
+    categories: [
+      { category_number: 'CAT01', category_name: 'Electronics' }
+    ],
+    products: [
+      { id_product: 'P001', product_name: 'Laptop', characteristics: '16GB RAM', producer: 'BrandX' }
+    ],
+    'store-products': [
+      { UPC: 'UPC001', UPC_prom: null, id_product: 'P001', selling_price: 999.99, products_number: 10, promotional_product: false }
+    ],
+    receipts: [
+      { '0': 'CHK001', '1': '2023-10-01', '2': 100.00, '3': 20.00 }
+    ]
+  };
 
-    // Приховуємо всі елементи з класами role-manager і role-cashier
-    document.querySelectorAll('.role-manager, .role-cashier')
-        .forEach(el => el.style.display = 'none');
+  /* Initialize sidebar and role-based UI */
+  function initializeUI() {
+    console.log('Initializing UI...');
+    fetch('/api/employee_info', {
+      method: 'GET',
+      credentials: 'include'
+    })
+    .then(res => {
+      console.log('Employee Info Response:', res.status, res.statusText);
+      if (!res.ok) {
+        if (res.status === 401) {
+          console.warn('Unauthorized, redirecting to login');
+          window.location.href = '/login.html';
+        }
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      return res.json();
+    })
+    .then(data => {
+      console.log('Employee Data:', data);
+      const role = data.empl_role?.toLowerCase().replace(/cashier/i, 'cashier').replace(/manager/i, 'manager') || 'unknown';
+      console.log('User role:', role);
 
-    // Показуємо елементи, що відповідають ролі
-    document.querySelectorAll(`.role-${role}`)
-        .forEach(el => el.style.display = 'block');
+      document.querySelectorAll('.role-manager, .role-cashier')
+          .forEach(el => el.style.display = 'none');
+      document.querySelectorAll(`.role-${role}`)
+          .forEach(el => el.style.display = 'block');
+      document.getElementById('mySidebar').style.display = 'block';
+    })
+    .catch(err => {
+      console.error('Role fetch error:', err.message);
+      alert('Failed to load user role. Using mock data for testing.');
+      document.querySelectorAll('.role-manager, .role-cashier')
+          .forEach(el => el.style.display = 'block');
+      document.getElementById('mySidebar').style.display = 'block';
+    });
+  }
 
-    // Показуємо бічну панель
-    document.getElementById('mySidebar').style.display = 'block';
-  })
-  .catch(err => {
-    console.error('Role fetch error:', err);
-  });
-
+  /* Sidebar toggle functions */
   function w3_open() {
+    console.log('Opening sidebar');
     document.getElementById('mySidebar').style.display = 'block';
     document.getElementById('main').style.marginLeft = '250px';
     document.getElementById('openNav').style.display = 'none';
   }
 
   function w3_close() {
+    console.log('Closing sidebar');
     document.getElementById('mySidebar').style.display = 'none';
     document.getElementById('main').style.marginLeft = '0';
     document.getElementById('openNav').style.display = 'inline-block';
   }
 
+  /* Load report data */
   function loadReport(type) {
+    console.log('Button clicked for report:', type);
     const endpoints = {
       'employees': '/api/reports/employees',
       'customers': '/api/reports/customers',
@@ -240,122 +232,125 @@
     };
 
     const titles = {
-      'employees': 'Звіт по працівниках',
-      'customers': 'Звіт по клієнтах',
-      'categories': 'Звіт по категоріях',
-      'products': 'Звіт по товарах',
-      'store-products': 'Звіт по товарах у магазині',
-      'receipts': 'Звіт по чеках',
+      'employees': 'Employee Report',
+      'customers': 'Customer Report',
+      'categories': 'Category Report',
+      'products': 'Product Report',
+      'store-products': 'Store Products Report',
+      'receipts': 'Receipts Report',
     };
 
     if (!endpoints[type]) {
-      alert('Невідомий тип звіту');
+      alert('Unknown report type');
+      console.error('Invalid report type:', type);
       return;
     }
 
+    console.log(`Loading report: ${type} from ${endpoints[type]}`);
     fetch(endpoints[type])
       .then(res => {
-        if (!res.ok) throw new Error(`Помилка ${res.status}`);
+        console.log(`Report Response (${type}):`, res.status, res.statusText);
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
         return res.json();
       })
       .then(data => {
+        console.log(`Report Data (${type}):`, data);
         document.getElementById('report-title').innerText = titles[type];
         document.getElementById('report-output').innerHTML = generateTable(data, type);
       })
       .catch(err => {
-        console.error('Помилка завантаження звіту:', err);
-        document.getElementById('report-output').innerHTML = '<p style="color:red;">Не вдалося завантажити звіт.</p>';
+        console.error(`Error loading report (${type}):`, err.message);
+        alert(`Error loading ${titles[type]}. Using mock data.`);
+        document.getElementById('report-title').innerText = titles[type];
+        document.getElementById('report-output').innerHTML = generateTable(mockData[type] || [], type);
       });
   }
 
+  /* Generate table HTML */
   function generateTable(data, reportType) {
     if (!Array.isArray(data) || data.length === 0) {
-      return '<p>Немає даних для відображення.</p>';
+      return '<p>No data to display.</p>';
     }
 
-    // Визначення назв колонок для кожного атрибута
     const columnNames = {
-      // Employees
-      'id_employee': 'Employee ID',
-      'empl_surname': 'Last Name',
-      'empl_name': 'First Name',
-      'empl_patronymic': 'Middle Name',
+      'id_employee': 'ID',
+      'empl_surname': 'Surname',
+      'empl_name': 'Name',
+      'empl_patronymic': 'Patronymic',
       'empl_role': 'Role',
       'salary': 'Salary',
-      'date_of_birth': 'Date of Birth',
+      'date_of_birth': 'Birth Date',
       'date_of_start': 'Start Date',
-      'phone_number': 'Phone Number',
+      'phone_number': 'Phone',
       'city': 'City',
       'street': 'Street',
-      'zip_code': 'ZIP Code',
-
-      // Customers
-      'card_number': 'Card Number',
-      'cust_surname': 'Last Name',
-      'cust_name': 'First Name',
-      'cust_patronymic': 'Middle Name',
+      'zip_code': 'ZIP',
+      'card_number': 'Card No.',
+      'cust_surname': 'Surname',
+      'cust_name': 'Name',
+      'cust_patronymic': 'Patronymic',
       'percent': 'Discount (%)',
-
-      // Categories
       'category_number': 'Category ID',
       'category_name': 'Category Name',
-
-      // Products
       'id_product': 'Product ID',
       'product_name': 'Product Name',
       'characteristics': 'Characteristics',
       'producer': 'Producer',
-
-      // Store Products
       'UPC': 'UPC',
       'UPC_prom': 'Promotional UPC',
-      'selling_price': 'Selling Price',
-      'products_number': 'Quantity in Store',
-      'promotional_product': 'Promotional',
-
-      'check_number': 'Number of check',
+      'selling_price': 'Price',
+      'products_number': 'Quantity',
+      'promotional_product': 'Promo',
+      'check_number': 'Check No.',
       'print_date': 'Date',
-      'sum_total': 'Sum',
+      'sum_total': 'Total',
       'vat': 'VAT'
     };
 
-    // Зіставлення числових ключів для звіту receipts
-    const receiptKeyMapping = {
-      '1': 'check_number',
-      '2': 'print_date',
-      '3': 'sum_total',
-      '4': 'vat'
-    };
-
-    // Витягуємо всі унікальні ключі з усіх рядків
-    const keysSet = new Set();
-    data.forEach(row => Object.keys(row).forEach(key => keysSet.add(key)));
-
-    // Для receipts заміняємо числові ключі на правильні
-    let finalKeys;
     if (reportType === 'receipts') {
-      const mappedKeys = [...keysSet].map(key => receiptKeyMapping[key] || key);
-      const idKeys = ['check_number'];
-      const otherKeys = mappedKeys.filter(k => !idKeys.includes(k)).sort();
-      finalKeys = idKeys.filter(k => mappedKeys.includes(k)).concat(otherKeys);
-    } else {
-      const idKeys = ['id_employee', 'card_number', 'category_number', 'id_product', 'UPC', 'check_number'];
-      const otherKeys = [...keysSet].filter(k => !idKeys.includes(k)).sort();
-      finalKeys = idKeys.filter(k => keysSet.has(k)).concat(otherKeys);
+      const receiptKeyMapping = {
+        '0': 'check_number',
+        '1': 'print_date',
+        '2': 'sum_total',
+        '3': 'vat'
+      };
+
+      data = data.map(row => {
+        let converted = {};
+        for (let key in row) {
+          const mapped = receiptKeyMapping[key] || key;
+          converted[mapped] = row[key];
+        }
+        return converted;
+      });
     }
 
+    const keys = Object.keys(data[0]);
+    const idKeys = ['id_employee', 'card_number', 'category_number', 'id_product', 'UPC', 'check_number'];
+    const idKey = idKeys.find(k => keys.includes(k));
+    const firstKeys = [];
+
+    if (idKey) firstKeys.push(idKey);
+
+    if (keys.includes('empl_surname')) firstKeys.push('empl_surname', 'empl_name');
+    else if (keys.includes('cust_surname')) firstKeys.push('cust_surname', 'cust_name');
+    else if (keys.includes('category_name')) firstKeys.push('category_name');
+    else if (keys.includes('product_name')) firstKeys.push('product_name');
+    else if (keys.includes('print_date')) firstKeys.push('print_date');
+
+    const remainingKeys = keys.filter(k => !firstKeys.includes(k)).sort();
+    const finalKeys = firstKeys.concat(remainingKeys);
+
     let html = '<table><thead><tr>';
-    finalKeys.forEach(key => {
-      html += `<th>${columnNames[key] || key}</th>`;
+    finalKeys.forEach(k => {
+      html += `<th>${columnNames[k] || k}</th>`;
     });
     html += '</tr></thead><tbody>';
 
     data.forEach(row => {
       html += '<tr>';
-      finalKeys.forEach(key => {
-        // Для receipts використовуємо оригінальний ключ із даних
-        const dataKey = reportType === 'receipts' ? Object.keys(receiptKeyMapping).find(k => receiptKeyMapping[k] === key) || key : key;
-        html += `<td>${row[dataKey] !== null ? row[dataKey] : ''}</td>`;
+      finalKeys.forEach(k => {
+        html += `<td>${row[k] !== null && row[k] !== undefined ? row[k] : ''}</td>`;
       });
       html += '</tr>';
     });
@@ -364,9 +359,24 @@
     return html;
   }
 
+  /* Print report */
   function printReport() {
+    console.log('Initiating print');
+    const reportContent = document.getElementById('report-output').innerHTML;
+    if (!reportContent || reportContent.includes('No data')) {
+      alert('Please load a report first.');
+      console.warn('Print attempted without valid report data');
+      return;
+    }
+    document.documentElement.style.setProperty('--print-date', `"${new Date().toLocaleDateString('en-GB')}"`);
     window.print();
   }
+
+  /* Initialize on page load */
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('Page loaded, initializing UI');
+    initializeUI();
+  });
 </script>
 
 </body>
