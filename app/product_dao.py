@@ -137,3 +137,20 @@ def search_products_by_name(connection, name):
         print(f"Помилка в search_products_by_name: {e}")
         raise
 
+def get_available_products(connection):
+    """
+    Отримати продукти, які ще не додані до store_products
+    """
+    query = """
+    SELECT p.* 
+    FROM products p
+    LEFT JOIN store_products sp ON p.id_product = sp.id_product
+    WHERE sp.id_product IS NULL
+    ORDER BY p.product_name;
+    """
+    try:
+        result = execute_query(connection, query)
+        return result
+    except Exception as e:
+        print(f"Помилка в get_available_products: {e}")
+        raise

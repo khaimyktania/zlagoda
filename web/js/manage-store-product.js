@@ -152,8 +152,9 @@ $('#getAllStoreProductsSorted').on('click', function () {
 });
 
 // Load products dropdown for store product form
+// Load products dropdown for store product form
 function loadProductDropdown() {
-    $.get("/getAllProductsSorted", function (response) {
+    $.get("/getAvailableProducts", function (response) {
         if (response) {
             productSelect.empty();
             productSelect.append('<option value="">Select product</option>');
@@ -168,6 +169,7 @@ function loadProductDropdown() {
         }
     });
 }
+
 $('#storeProductModal').on('show.bs.modal', function(e) {
     var modalTitle = $(this).find('.modal-title').text();
     if (modalTitle === 'Add New Store Product') {

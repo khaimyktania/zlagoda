@@ -7,6 +7,7 @@ let customers = [];
 let storeProducts = [];
 let currentUserRole = '';
 let currentUserId = '';
+let currentUserName = '';
 
 // API endpoints
 const API_ENDPOINTS = {
@@ -506,41 +507,41 @@ function renderCustomerPurchases(purchases) {
 }
 
 function checkCurrentUserRole() {
-        console.log("Checking current user role and ID...");
-        $.ajax({
-            url: '/api/employee_info',
-            type: 'GET',
-            success: function(response) {
-                console.log("Employee info response:", response);
-                currentUserRole = response.empl_role || '';
-                currentUserId = String(response.id_employee || '');
+    console.log("Checking current user role and ID...");
+    $.ajax({
+        url: '/api/employee_info',
+        type: 'GET',
+        success: function(response) {
+            console.log("Employee info response:", response);
+            currentUserRole = response.empl_role || '';
+            currentUserId = String(response.id_employee || '');
+            currentUserName = `${response.empl_surname} ${response.empl_name}`; // Зберігаємо ім'я користувача
 
-                if (!currentUserId) {
-                    console.error("No id_employee in response. Cannot proceed.");
-                    alert('Error: User ID not found. Please log in again.');
-                    window.location.href = '/login.html'; // Перенаправлення на логін
-                    return;
-                }
-
-                console.log("Current user role:", currentUserRole, "Current user ID:", currentUserId);
-                adjustUIBasedOnRole();
-                if (currentUserRole.toLowerCase() === 'cashier') {
-                    applyFiltersForCashier();
-                    $('#total-sales-by-cashier-container').hide();
-                } else {
-                    loadCashierFilter();
-                }
-                loadCheckStatistics('all');
-                loadRecentChecks();
-            },
-            error: function(xhr) {
-                console.error('Error getting user info:', xhr.responseText);
-                alert('Error loading user information. Please log in again.');
-                window.location.href = '/login.html'; // Перенаправлення на логін
+            if (!currentUserId) {
+                console.error("No id_employee in response. Cannot proceed.");
+                alert('Error: User ID not found. Please log in again.');
+                window.location.href = '/login.html';
+                return;
             }
-        });
-    }
 
+            console.log("Current user role:", currentUserRole, "Current user ID:", currentUserId, "Name:", currentUserName);
+            adjustUIBasedOnRole();
+            if (currentUserRole.toLowerCase() === 'cashier') {
+                applyFiltersForCashier();
+                $('#total-sales-by-cashier-container').hide();
+            } else {
+                loadCashierFilter();
+            }
+            loadCheckStatistics('all');
+            loadRecentChecks();
+        },
+        error: function(xhr) {
+            console.error('Error getting user info:', xhr.responseText);
+            alert('Error loading user information. Please log in again.');
+            window.location.href = '/login.html';
+        }
+    });
+}
 function applyFiltersForCashier() {
     const startDate = $('#start-date').val();
     const endDate = $('#end-date').val();
@@ -996,13 +997,22 @@ function prepareCreateCheckModal() {
     // Show loading indicators
     $('#employee-select').html('<option value="">Loading employees...</option>');
     $('#customer-select').html('<option value="">Loading customers...</option>');
-//    $('#product-select').html('<option value="">Loading products...</option>');
 
-    // Load all required data
-    loadEmployees();
+    // Load customers and products
     loadCustomers();
     loadStoreProducts();
     generateCheckNumber();
+
+    // Load employees and handle cashier restrictions
+    if (currentUserRole.toLowerCase() === 'cashier') {
+        // For cashiers, set their own ID and disable the employee select
+        $('#employee-select').html(`<option value="${currentUserId}">${currentUserName || 'Current Cashier'}</option>`);
+        $('#employee-select').prop('disabled', true);
+    } else {
+        // For managers, load all employees and enable the select
+        loadEmployees();
+        $('#employee-select').prop('disabled', false);
+    }
 }
 
 // Generate new check number with improved error handling
@@ -1208,36 +1218,35 @@ function saveCheck() {
         return;
     }
 
-    const employeeId = $('#employee-select').val();
-    if (!employeeId) {
-        alert('Please select an employee');
-        return;
+    let employeeId;
+    if (currentUserRole.toLowerCase() === 'cashier') {
+        employeeId = currentUserId; // Для касирів завжди використовуємо їхній ID
+    } else {
+        employeeId = $('#employee-select').val();
+        if (!employeeId) {
+            alert('Please select an employee');
+            return;
+        }
     }
 
     const checkNumber = $('#check-number').val();
-
-    // Використовуємо правильну назву поля card_number як у DAO
     const cardNumber = $('#customer-select').val() || null;
 
-    // Prepare products for API - ensure all fields have correct types
     const products = currentCheckItems.map(item => ({
         UPC: item.UPC,
         product_number: parseInt(item.quantity),
         selling_price: parseFloat(item.price)
     }));
 
-    // Create the check data object with properly formatted fields
-    // Використовуємо правильну назву поля card_number як у DAO
     const checkData = {
         check_number: checkNumber,
         id_employee: employeeId,
-        card_number: cardNumber,  // Правильна назва поля
+        card_number: cardNumber,
         sum_total: parseFloat(currentTotalAmount.toFixed(2)),
         vat: parseFloat(currentVAT.toFixed(2)),
         products: products
     };
 
-    // Debug: Log the complete request payload
     console.log("Saving check data:", JSON.stringify(checkData));
 
     $.ajax({
@@ -1262,7 +1271,7 @@ function saveCheck() {
             try {
                 const responseJson = JSON.parse(xhr.responseText);
                 errorMessage += JSON.stringify(responseJson);
-                console.log("Error response:", responseJson);  // Log the error response
+                console.log("Error response:", responseJson);
             } catch (e) {
                 errorMessage += ' Status: ' + status + '. Error: ' + error;
             }
@@ -1271,7 +1280,6 @@ function saveCheck() {
         }
     });
 }
-
 
 // Format date for input field (YYYY-MM-DD)
 function formatDateForInput(date) {

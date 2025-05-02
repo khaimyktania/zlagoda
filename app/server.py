@@ -370,6 +370,20 @@ def get_employees_never_sold_promotional_to_non_card_holders():
 def get_all_products_sorted():
     return jsonify(product_dao.get_all_products_sorted(connection))
 
+@app.route('/getAvailableProducts', methods=['GET'])
+@require_role('cashier', 'manager')
+def get_available_products():
+    connection = None
+    try:
+        connection = get_sql_connection()
+        products = product_dao.get_available_products(connection)
+        return jsonify(products)
+    except Exception as e:
+        print(f"Помилка в get_available_products: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
 
 @app.route('/getProductsByCategory', methods=['GET'])
 @require_role('cashier','manager')
