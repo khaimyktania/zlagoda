@@ -17,67 +17,69 @@
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
 
     <style>
-.error-container {
-    position: relative;
-    min-height: 20px;
-}
+        .error-container {
+            position: relative;
+            min-height: 20px;
+        }
 
-.error-message {
-    position: absolute;
-    top: 0;
-    left: 0;
-    display: flex;
-    align-items: flex-start; /* Змінено з center на flex-start, щоб текст вирівнювався зверху */
-    z-index: 1000;
-    max-width: 100%; /* Обмежуємо ширину контейнера помилки шириною поля */
-}
+        .error-message {
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            align-items: flex-start; /* Змінено з center на flex-start, щоб текст вирівнювався зверху */
+            z-index: 1000;
+            max-width: 100%; /* Обмежуємо ширину контейнера помилки шириною поля */
+        }
 
-.error-icon {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    background-color: #ff8c00;
-    color: white;
-    text-align: center;
-    line-height: 16px;
-    border-radius: 3px;
-    font-size: 12px;
-    margin-right: 5px;
-    flex-shrink: 0; /* Іконка не стискається */
-}
+        .error-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-color: #ff8c00;
+            color: white;
+            text-align: center;
+            line-height: 16px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-right: 5px;
+            flex-shrink: 0; /* Іконка не стискається */
+        }
 
-.error-text {
-    display: inline-block;
-    background-color: white;
-    color: #333;
-    padding: 5px 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    font-size: 12px;
-    white-space: normal; /* Дозволяємо перенос тексту */
-    word-wrap: break-word; /* Переносимо слова на новий рядок */
-    max-width: calc(100% - 25px); /* Обмежуємо ширину тексту, враховуючи ширину іконки та відступ */
-}
+        .error-text {
+            display: inline-block;
+            background-color: white;
+            color: #333;
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            font-size: 12px;
+            white-space: normal; /* Дозволяємо перенос тексту */
+            word-wrap: break-word; /* Переносимо слова на новий рядок */
+            max-width: calc(100% - 25px); /* Обмежуємо ширину тексту, враховуючи ширину іконки та відступ */
+        }
 
-/* Динамічне прив'язування до ширини поля вводу */
-.form-group .error-message {
-    max-width: 100%; /* Забезпечуємо, щоб контейнер помилки не виходив за межі поля */
-}
+        /* Динамічне прив'язування до ширини поля вводу */
+        .form-group .error-message {
+            max-width: 100%; /* Забезпечуємо, щоб контейнер помилки не виходив за межі поля */
+        }
 
-@media (min-width: 768px) {
-    .col-md-4 .error-message {
-        max-width: 100%; /* Для колонок шириною 4 */
-    }
-    .col-md-6 .error-message {
-        max-width: 100%; /* Для колонок шириною 6 */
-    }
-}
+        @media (min-width: 768px) {
+            .col-md-4 .error-message {
+                max-width: 100%; /* Для колонок шириною 4 */
+            }
+            .col-md-6 .error-message {
+                max-width: 100%; /* Для колонок шириною 6 */
+            }
+        }
+
         .logout-btn-fixed {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    }
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
+
         /* Always visible sidebar on desktop */
         @media (min-width: 992px) {
             #mySidebar {
@@ -101,65 +103,34 @@
                 margin-left: 0;
             }
         }
-    </style>
 
+        /* Стилі для підсвічування червоним */
+        .is-invalid {
+            border: 2px solid #dc3545 !important;
+            background-color: rgba(220, 53, 69, 0.05) !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+        }
+    </style>
 </head>
 <body class="tooltips">
 
 <!-- Sidebar -->
-<!-- Sidebar -->
-<!-- Sidebar -->
-<div id="mySidebar"
-     class="w3-sidebar w3-bar-block w3-card w3-animate-left w3-light-grey"
-     style="display: none;">
-  <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">✕ Close</button>
-
-  <!-- Workers (тільки менеджер) -->
-  <a href="/manage-employee" class="w3-bar-item w3-button role-manager">Workers</a>
-
-  <!-- Manage Products (і менеджер, і касир) -->
-  <a href="/manage_product"
-     class="w3-bar-item w3-button role-manager role-cashier">
-    Manage Products
-  </a>
-
-  <!-- Store Products (і менеджер, і касир) -->
-  <a href="/manage_store_product"
-     class="w3-bar-item w3-button role-manager role-cashier">
-    Store Products
-  </a>
-
-  <!-- Categories (тільки менеджер) -->
-  <a href="/manage_category" class="w3-bar-item w3-button role-manager">
-    Categories
-  </a>
-
-  <!-- Customers (і менеджер, і касир) -->
-  <a href="/manage_customer"
-     class="w3-bar-item w3-button role-manager role-cashier">
-    Customers
-  </a>
-
-  <!-- Checks (і менеджер, і касир) -->
-  <a href="/manage_check"
-     class="w3-bar-item w3-button role-manager role-cashier">
-    Checks
-  </a>
-
-  <!-- Reports (тільки менеджер) -->
-  <a href="/reports" class="w3-bar-item w3-button role-manager">Reports</a>
-
+<div id="mySidebar" class="w3-sidebar w3-bar-block w3-card w3-animate-left w3-light-grey" style="display: none;">
+    <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">✕ Close</button>
+    <a href="/manage-employee" class="w3-bar-item w3-button role-manager">Workers</a>
+    <a href="/manage_product" class="w3-bar-item w3-button role-manager role-cashier">Manage Products</a>
+    <a href="/manage_store_product" class="w3-bar-item w3-button role-manager role-cashier">Store Products</a>
+    <a href="/manage_category" class="w3-bar-item w3-button role-manager">Categories</a>
+    <a href="/manage_customer" class="w3-bar-item w3-button role-manager role-cashier">Customers</a>
+    <a href="/manage_check" class="w3-bar-item w3-button role-manager role-cashier">Checks</a>
+    <a href="/reports" class="w3-bar-item w3-button role-manager">Reports</a>
     <a href="/manager_account.html" class="w3-bar-item w3-button role-manager">My Account</a>
-<a href="/cashier_account.html" class="w3-bar-item w3-button role-cashier">My Account</a>
-<a href="/logout" class="w3-bar-item w3-button logout-btn-fixed">Log Out</a>
-
+    <a href="/cashier_account.html" class="w3-bar-item w3-button role-cashier">My Account</a>
+    <a href="/logout" class="w3-bar-item w3-button logout-btn-fixed">Log Out</a>
 </div>
-
-
 
 <!-- Main -->
 <div id="main">
-
     <div class="header content rows-content-header">
         <button id="openNav" class="w3-button w3-teal w3-xlarge">&#9776;</button>
         <div class="navbar navbar-default" role="navigation">
@@ -188,35 +159,33 @@
                     <h2>Manage Employees</h2>
                     <div class="panel-body pt-0">
                         <div class="row mt-3 mb-3">
-    <div class="col-md-6">
-        <input type="text" id="searchSurname" class="form-control" placeholder="Enter employee surname">
-    </div>
-    <div class="col-md-2">
-        <button class="btn btn-sm btn-info" id="searchBySurname">Find Contact Info</button>
-    </div>
-</div>
-
-<!-- Блок для виводу результату -->
-<div id="contactInfoResult" class="alert alert-secondary" style="display: none;"></div>
-<div class="row mt-3 mb-3">
-    <div class="col-md-12">
-        <button class="btn btn-sm btn-warning" id="findEmployeesNeverSoldPromotional">Find Employees (Never Sold Promotional to Non-Card Holders)</button>
-    </div>
-</div>
-<div id="neverSoldPromotionalResult" class="alert alert-secondary" style="display: none;"></div>
-                        <div class="row mb-4">
-                          <div class="col-sm-12">
-    <select id="sortSelect" class="form-control" style="width: auto; display: inline-block;">
-        <option value="default">Default</option>
-        <option value="byName">Sort by surname</option>
-        <option value="cashiersByName">Cashiers sorted by surname</option>
-    </select>
-</div>
-
-                                <button type="button" class="btn btn-sm btn-primary pull-right" id="addEmployeeBtn">
-                                    Add New Employee
-                                </button>
+                            <div class="col-md-6">
+                                <input type="text" id="searchSurname" class="form-control" placeholder="Enter employee surname">
                             </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-sm btn-info" id="searchBySurname">Find Contact Info</button>
+                            </div>
+                        </div>
+
+                        <!-- Блок для виводу результату -->
+                        <div id="contactInfoResult" class="alert alert-secondary" style="display: none;"></div>
+                        <div class="row mt-3 mb-3">
+                            <div class="col-md-12">
+                                <button class="btn btn-sm btn-warning" id="findEmployeesNeverSoldPromotional">Find Employees (Never Sold Promotional to Non-Card Holders)</button>
+                            </div>
+                        </div>
+                        <div id="neverSoldPromotionalResult" class="alert alert-secondary" style="display: none;"></div>
+                        <div class="row mb-4">
+                            <div class="col-sm-12">
+                                <select id="sortSelect" class="form-control" style="width: auto; display: inline-block;">
+                                    <option value="default">Default</option>
+                                    <option value="byName">Sort by surname</option>
+                                    <option value="cashiersByName">Cashiers sorted by surname</option>
+                                </select>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-primary pull-right" id="addEmployeeBtn">
+                                Add New Employee
+                            </button>
                         </div>
                         <table class="table table-bordered">
                             <thead>
@@ -239,233 +208,224 @@
     </div>
 
     <!-- Modal -->
-<div class="modal fade-scale" id="employeeModal" role="dialog" data-backdrop="static">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Add New Employee</h4>
-            </div>
-            <div class="modal-body">
-                <form id="employeeForm">
-                    <input type="hidden" name="id_employee" id="id_employee">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Surname</label>
-                                <input class="form-control" name="empl_surname" id="empl_surname" type="text" placeholder="Surname">
-                                <div class="error-container" style="position: relative; min-height: 20px;">
-                                    <div id="empl_surname_error" class="error-message" style="display: none;">
-                                        <span class="error-icon">⚠️</span>
-                                        <span class="error-text"></span>
+    <div class="modal fade-scale" id="employeeModal" role="dialog" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Add New Employee</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="employeeForm">
+                        <input type="hidden" name="id_employee" id="id_employee">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Surname</label>
+                                    <input class="form-control" name="empl_surname" id="empl_surname" type="text" placeholder="Surname">
+                                    <div class="error-container" style="position: relative; min-height: 20px;">
+                                        <div id="empl_surname_error" class="error-message" style="display: none;">
+                                            <span class="error-icon">⚠️</span>
+                                            <span class="error-text"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Name</label>
+                                    <input class="form-control" name="empl_name" id="empl_name" type="text" placeholder="Name">
+                                    <div class="error-container" style="position: relative; min-height: 20px;">
+                                        <div id="empl_name_error" class="error-message" style="display: none;">
+                                            <span class="error-icon">⚠️</span>
+                                            <span class="error-text"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Patronymic</label>
+                                    <input class="form-control" name="empl_patronymic" id="empl_patronymic" type="text" placeholder="Patronymic">
+                                    <div class="error-container" style="position: relative; min-height: 20px;">
+                                        <div id="empl_patronymic_error" class="error-message" style="display: none;">
+                                            <span class="error-icon">⚠️</span>
+                                            <span class="error-text"></span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Name</label>
-                                <input class="form-control" name="empl_name" id="empl_name" type="text" placeholder="Name">
-                                <div class="error-container" style="position: relative; min-height: 20px;">
-                                    <div id="empl_name_error" class="error-message" style="display: none;">
-                                        <span class="error-icon">⚠️</span>
-                                        <span class="error-text"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Patronymic</label>
-                                <input class="form-control" name="empl_patronymic" id="empl_patronymic" type="text" placeholder="Patronymic">
-                                <div class="error-container" style="position: relative; min-height: 20px;">
-                                    <div id="empl_patronymic_error" class="error-message" style="display: none;">
-                                        <span class="error-icon">⚠️</span>
-                                        <span class="error-text"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Role</label>
-                                <select class="form-control" name="empl_role" id="empl_role">
-                                    <option value="Cashier">Cashier</option>
-                                    <option value="Manager">Manager</option>
-                                </select>
-                                <div class="error-container" style="position: relative; min-height: 20px;">
-                                    <div id="empl_role_error" class="error-message" style="display: none;">
-                                        <span class="error-icon">⚠️</span>
-                                        <span class="error-text"></span>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Role</label>
+                                    <select class="form-control" name="empl_role" id="empl_role">
+                                        <option value="Cashier">Cashier</option>
+                                        <option value="Manager">Manager</option>
+                                    </select>
+                                    <div class="error-container" style="position: relative; min-height: 20px;">
+                                        <div id="empl_role_error" class="error-message" style="display: none;">
+                                            <span class="error-icon">⚠️</span>
+                                            <span class="error-text"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Salary</label>
+                                    <input class="form-control" name="salary" id="salary" type="number" step="0.01" placeholder="0.00">
+                                    <div class="error-container" style="position: relative; min-height: 20px;">
+                                        <div id="salary_error" class="error-message" style="display: none;">
+                                            <span class="error-icon">⚠️</span>
+                                            <span class="error-text"></span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Salary</label>
-                                <input class="form-control" name="salary" id="salary" type="number" step="0.01" placeholder="0.00">
-                                <div class="error-container" style="position: relative; min-height: 20px;">
-                                    <div id="salary_error" class="error-message" style="display: none;">
-                                        <span class="error-icon">⚠️</span>
-                                        <span class="error-text"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Date of Birth</label>
-                                <input class="form-control" name="date_of_birth" id="date_of_birth" type="date">
-                                <div class="error-container" style="position: relative; min-height: 20px;">
-                                    <div id="date_of_birth_error" class="error-message" style="display: none;">
-                                        <span class="error-icon">⚠️</span>
-                                        <span class="error-text"></span>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Date of Birth</label>
+                                    <input class="form-control" name="date_of_birth" id="date_of_birth" type="date">
+                                    <div class="error-container" style="position: relative; min-height: 20px;">
+                                        <div id="date_of_birth_error" class="error-message" style="display: none;">
+                                            <span class="error-icon">⚠️</span>
+                                            <span class="error-text"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Date of Start</label>
+                                    <input class="form-control" name="date_of_start" id="date_of_start" type="date">
+                                    <div class="error-container" style="position: relative; min-height: 20px;">
+                                        <div id="date_of_start_error" class="error-message" style="display: none;">
+                                            <span class="error-icon">⚠️</span>
+                                            <span class="error-text"></span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Date of Start</label>
-                                <input class="form-control" name="date_of_start" id="date_of_start" type="date">
-                                <div class="error-container" style="position: relative; min-height: 20px;">
-                                    <div id="date_of_start_error" class="error-message" style="display: none;">
-                                        <span class="error-icon">⚠️</span>
-                                        <span class="error-text"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="form-group">
-                        <label>Phone Number</label>
-                        <input class="form-control" name="phone_number" id="phone_number" type="text" placeholder="Phone Number">
-                        <div class="error-container" style="position: relative; min-height: 20px;">
-                            <div id="phone_number_error" class="error-message" style="display: none;">
-                                <span class="error-icon">⚠️</span>
-                                <span class="error-text"></span>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input class="form-control" name="phone_number" id="phone_number" type="text" placeholder="Phone Number">
+                            <div class="error-container" style="position: relative; min-height: 20px;">
+                                <div id="phone_number_error" class="error-message" style="display: none;">
+                                    <span class="error-icon">⚠️</span>
+                                    <span class="error-text"></span>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>City</label>
-                                <input class="form-control" name="city" id="city" type="text" placeholder="City">
-                                <div class="error-container" style="position: relative; min-height: 20px;">
-                                    <div id="city_error" class="error-message" style="display: none;">
-                                        <span class="error-icon">⚠️</span>
-                                        <span class="error-text"></span>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>City</label>
+                                    <input class="form-control" name="city" id="city" type="text" placeholder="City">
+                                    <div class="error-container" style="position: relative; min-height: 20px;">
+                                        <div id="city_error" class="error-message" style="display: none;">
+                                            <span class="error-icon">⚠️</span>
+                                            <span class="error-text"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Street</label>
+                                    <input class="form-control" name="street" id="street" type="text" placeholder="Street">
+                                    <div class="error-container" style="position: relative; min-height: 20px;">
+                                        <div id="street_error" class="error-message" style="display: none;">
+                                            <span class="error-icon">⚠️</span>
+                                            <span class="error-text"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>ZIP Code</label>
+                                    <input class="form-control" name="zip_code" id="zip_code" type="text" placeholder="ZIP Code">
+                                    <div class="error-container" style="position: relative; min-height: 20px;">
+                                        <div id="zip_code_error" class="error-message" style="display: none;">
+                                            <span class="error-icon">⚠️</span>
+                                            <span class="error-text"></span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Street</label>
-                                <input class="form-control" name="street" id="street" type="text" placeholder="Street">
-                                <div class="error-container" style="position: relative; min-height: 20px;">
-                                    <div id="street_error" class="error-message" style="display: none;">
-                                        <span class="error-icon">⚠️</span>
-                                        <span class="error-text"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>ZIP Code</label>
-                                <input class="form-control" name="zip_code" id="zip_code" type="text" placeholder="ZIP Code">
-                                <div class="error-container" style="position: relative; min-height: 20px;">
-                                    <div id="zip_code_error" class="error-message" style="display: none;">
-                                        <span class="error-icon">⚠️</span>
-                                        <span class="error-text"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="saveEmployee">Save</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveEmployee">Save</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Scripts -->
-<script src="/web/js/package/jquery.min.js"></script>
-<script src="/web/js/common.js"></script>
-<script src="/web/js/manage-employee.js"></script>
-<script src="/web/js/package/bootstrap.min.js"></script>
+    <!-- Scripts -->
+    <script src="/web/js/package/jquery.min.js"></script>
+    <script src="/web/js/common.js"></script>
+    <script src="/web/js/manage-employee.js"></script>
+    <script src="/web/js/package/bootstrap.min.js"></script>
 
-<script>
-fetch('/api/employee_info', {
-  method: 'GET',
-  credentials: 'include'
-})
-.then(res => {
-  if (!res.ok) {
-    if (res.status === 401) window.location.href = '/login.html';
-    throw new Error('Not authorized');
-  }
-  return res.json();
-})
-.then(data => {
-  const role = data.empl_role.toLowerCase();
-
-  // Сховати всі вкладки спочатку
-  document.querySelectorAll('.role-manager, .role-cashier')
-    .forEach(el => el.style.display = 'none');
-
-  // Показати лише ті, що відповідають ролі
-  document.querySelectorAll(`.role-${role}`)
-    .forEach(el => el.style.display = 'block');
-
-  // Показати сам сайдбар
-  document.getElementById('mySidebar').style.display = 'block';
-})
-.catch(err => {
-  console.error('Role fetch error:', err);
-});
-
-
-  function w3_open() {
-    document.getElementById('mySidebar').style.display = 'block';
-    document.getElementById('main').style.marginLeft = '250px';
-    document.getElementById('openNav').style.display = 'none';
-  }
-  function w3_close() {
-    document.getElementById('mySidebar').style.display = 'none';
-    document.getElementById('main').style.marginLeft = '0';
-    document.getElementById('openNav').style.display = 'inline-block';
-  }
-</script>
-<script>
-    // Підсвічує активну вкладку сайдбару
-    document.addEventListener('DOMContentLoaded', function () {
-        const currentPath = window.location.pathname;
-        const sidebarLinks = document.querySelectorAll('#mySidebar a');
-
-        sidebarLinks.forEach(link => {
-            if (link.getAttribute('href') === currentPath) {
-                link.classList.add('w3-blue');
-            }
-        });
+    <script>
+    fetch('/api/employee_info', {
+        method: 'GET',
+        credentials: 'include'
+    })
+    .then(res => {
+        if (!res.ok) {
+            if (res.status === 401) window.location.href = '/login.html';
+            throw new Error('Not authorized');
+        }
+        return res.json();
+    })
+    .then(data => {
+        const role = data.empl_role.toLowerCase();
+        document.querySelectorAll('.role-manager, .role-cashier')
+            .forEach(el => el.style.display = 'none');
+        document.querySelectorAll(`.role-${role}`)
+            .forEach(el => el.style.display = 'block');
+        document.getElementById('mySidebar').style.display = 'block';
+    })
+    .catch(err => {
+        console.error('Role fetch error:', err);
     });
-</script>
 
+    function w3_open() {
+        document.getElementById('mySidebar').style.display = 'block';
+        document.getElementById('main').style.marginLeft = '250px';
+        document.getElementById('openNav').style.display = 'none';
+    }
 
+    function w3_close() {
+        document.getElementById('mySidebar').style.display = 'none';
+        document.getElementById('main').style.marginLeft = '0';
+        document.getElementById('openNav').style.display = 'inline-block';
+    }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const currentPath = window.location.pathname;
+            const sidebarLinks = document.querySelectorAll('#mySidebar a');
+            sidebarLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('w3-blue');
+                }
+            });
+        });
+    </script>
 
+    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'939a3badeabdbcaa',t:'MTc0NjIxNzM3MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>

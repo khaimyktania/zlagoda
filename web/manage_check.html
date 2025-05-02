@@ -17,7 +17,6 @@
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
 
     <style>
-
         /* Minimalistic Blue Theme */
         :root {
             --primary-blue: #4A90E2;
@@ -137,7 +136,7 @@
             padding: 5px 0;
         }
 
-        .filter-controls {
+        .filter-controls, .statistics-section {
             background-color: white;
             padding: 15px;
             border-radius: 5px;
@@ -146,13 +145,14 @@
         }
 
         .filter-section {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
 
         .date-filter {
             display: flex;
             gap: 10px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .manager-only {
@@ -160,13 +160,6 @@
         }
         .manager-only.active {
             display: block;
-        }
-
-        .statistics-section {
-            background-color: var(--light-blue);
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
         }
 
         .new-check-product {
@@ -189,8 +182,8 @@
             overflow-y: auto;
         }
 
-        .cashier-filter { margin-bottom: 20px; }
-        #filter-status { margin-top: 10px; }
+        .cashier-filter { margin-bottom: 15px; }
+        #filter-status { margin-top: 15px; }
         #loading-indicator { display: none; }
         #total-sales {
             font-weight: bold;
@@ -215,7 +208,8 @@
         }
 
         .btn-outline-secondary {
-            color: #ffffff;
+            background: none;
+            color: var(--text-color);
             border-color: #6c757d;
         }
         .btn-outline-secondary:hover {
@@ -271,6 +265,119 @@
         .form-control {
             border: 1px solid #E5E7EB;
             border-radius: 5px;
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+
+        /* New Layout Styling */
+        .accordion-header {
+            background: var(--light-blue);
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--dark-blue);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .accordion-header:hover {
+            background: #D1E3F6;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .accordion-content.active {
+            max-height: 1000px;
+            padding: 15px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .stats-item {
+            background: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #E5E7EB;
+            text-align: center;
+        }
+        .stats-item strong {
+            display: block;
+            color: var(--dark-blue);
+            font-size: 0.9em;
+        }
+        .filter-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 767px) {
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .search-section {
+            flex-grow: 0;
+            max-width: 300px;
+        }
+        .search-section .input-group {
+            display: flex;
+            align-items: center;
+        }
+        .search-section .input-group input {
+            flex: 1;
+            margin-right: 5px;
+            border-radius: 5px 0 0 5px;
+        }
+        .search-section .input-group .input-group-append {
+            display: inline-block;
+        }
+        .search-section .input-group .btn {
+            border-radius: 0 5px 5px 0;
+            height: 100%;
+        }
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .customer-purchases-actions {
+            margin-top: 10px;
+            padding-left: 15px; /* Align with form-group padding */
+        }
+        .product-sales-actions {
+            margin-top: 10px;
+            padding-left: 15px; /* Align with form-group padding */
+        }
+        @media (max-width: 576px) {
+            .action-buttons {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .search-section {
+                max-width: 100%;
+                width: 100%;
+            }
+            .filter-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+            .customer-purchases-actions,
+            .product-sales-actions {
+                padding-left: 0;
+            }
         }
     </style>
 </head>
@@ -323,44 +430,66 @@
 
                     <!-- Statistics Section -->
                     <div class="statistics-section">
-                        <h4>Check Statistics</h4>
-                        <div class="row">
-                            <div class="col-md-3">
-                                <p><strong>Total Checks:</strong> <span id="stats-total-checks">0</span></p>
-                                <p><strong>Total Sales:</strong> <span id="stats-total-sales">$0.00</span></p>
-                                <div class="col-md-3">
-                                    <p><strong>Total Sales by Cashier:</strong> <span id="stats-cashier-sales">$0.00</span></p>
-                                    <p><strong>Selected Cashier:</strong> <span id="stats-selected-cashier">None</span></p>
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span>Check Statistics</span>
+                            <i class="zmdi zmdi-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content active">
+                            <div class="stats-grid">
+                                <div class="stats-item">
+                                    <strong>Total Checks</strong>
+                                    <span id="stats-total-checks">0</span>
+                                </div>
+                                <div class="stats-item">
+                                    <strong>Total Sales</strong>
+                                    <span id="stats-total-sales">$0.00</span>
+                                </div>
+                                <div class="stats-item">
+                                    <strong>Total Sales by Cashier</strong>
+                                    <span id="stats-cashier-sales">$0.00</span>
+                                </div>
+                                <div class="stats-item">
+                                    <strong>Selected Cashier</strong>
+                                    <span id="stats-selected-cashier">None</span>
+                                </div>
+                                <div class="stats-item">
+                                    <strong>Total VAT</strong>
+                                    <span id="stats-total-vat">$0.00</span>
+                                </div>
+                                <div class="stats-item">
+                                    <strong>Average Check</strong>
+                                    <span id="stats-average-check">$0.00</span>
+                                </div>
+                                <div class="stats-item">
+                                    <strong>Period</strong>
+                                    <span id="stats-period">All time</span>
+                                </div>
+                                <div class="stats-item">
+                                    <strong>Date Range</strong>
+                                    <span id="stats-date-range">N/A</span>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <p><strong>Total VAT:</strong> <span id="stats-total-vat">$0.00</span></p>
-                                <p><strong>Average Check:</strong> <span id="stats-average-check">$0.00</span></p>
-                            </div>
-                            <div class="col-md-3">
-                                <p><strong>Period:</strong> <span id="stats-period">All time</span></p>
-                                <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-period="today">Today</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-period="week">Week</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-period="month">Month</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-period="year">Year</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-period="all">All</button>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <p><strong>Date Range:</strong> <span id="stats-date-range">N/A</span></p>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-period="today">Today</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-period="week">Week</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-period="month">Month</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-period="year">Year</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-period="all">All</button>
                             </div>
                         </div>
                     </div>
 
                     <!-- Filter Controls -->
                     <div class="filter-controls">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <h4>Filter Checks</h4>
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span>Filter Checks</span>
+                            <i class="zmdi zmdi-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content active">
+                            <div class="filter-grid">
                                 <!-- Date Filter Section -->
                                 <div class="filter-section">
-                                    <label>Date Range:</label>
+                                    <h5>Date Range</h5>
                                     <div class="date-filter">
                                         <div class="form-group">
                                             <label for="start-date">From</label>
@@ -375,7 +504,7 @@
 
                                 <!-- Cashier Filter Section -->
                                 <div class="filter-section cashier-filter">
-                                    <label>Cashier:</label>
+                                    <h5>Cashier</h5>
                                     <div class="form-group">
                                         <select class="form-control" id="cashier-select">
                                             <option value="">All Cashiers</option>
@@ -384,40 +513,27 @@
                                     </div>
                                 </div>
 
-                                <!-- Filter Actions -->
-                                <div class="filter-actions mt-3">
-                                    <button class="btn btn-primary" id="apply-cashier-filter">Apply Filters</button>
-                                    <button class="btn btn-outline-secondary" id="reset-date-filter">Reset All</button>
-                                </div>
-
-                                <!-- Filter Status Display -->
-                                <div class="alert alert-info mt-3" id="filter-status" style="display: none;"></div>
-
-                                <!-- Check Number Search -->
-                                <div class="search-section mt-3">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" id="check-number-search" placeholder="Enter check number">
-                                        <div class="input-group-append">
-                                            <button class="btn btn-outline-secondary" type="button" id="search-check">Search</button>
+                                <!-- Customer Purchases Filter -->
+                                <div class="filter-section">
+                                    <h5>Customer Purchases</h5>
+                                    <div class="form-row align-items-end">
+                                        <div class="col-md-6">
+                                            <label for="purchases-start-date">Start Date</label>
+                                            <input type="date" id="purchases-start-date" class="form-control">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="purchases-end-date">End Date</label>
+                                            <input type="date" id="purchases-end-date" class="form-control">
                                         </div>
                                     </div>
+                                    <div class="customer-purchases-actions">
+                                        <button id="load-customer-purchases" class="btn btn-primary">Load Purchases</button>
+                                    </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <label for="purchases-start-date">Start Date</label>
-                                    <input type="date" id="purchases-start-date" class="form-control">
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="purchases-end-date">End Date</label>
-                                    <input type="date" id="purchases-end-date" class="form-control">
-                                </div>
-                                <div class="col-md-4 align-self-end">
-                                    <button id="load-customer-purchases" class="btn btn-primary">Load Purchases</button>
-                                </div>
-                                <div id="customer-purchases-list"></div>
 
-                                <!-- Product Sales by Name Filter Section -->
+                                <!-- Product Sales by Period Filter -->
                                 <div class="filter-section product-sales-filter">
-                                    <h4>Product Sales by Period</h4>
+                                    <h5>Product Sales by Period</h5>
                                     <div class="form-row align-items-end">
                                         <div class="col-md-5">
                                             <label for="product-sales-select">Product</label>
@@ -430,27 +546,44 @@
                                             <label for="sales-start-date">From</label>
                                             <input type="date" class="form-control" id="sales-start-date">
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <label for="sales-end-date">To</label>
                                             <input type="date" class="form-control" id="sales-end-date">
                                         </div>
-                                        <div class="col-md-1">
-                                            <button class="btn btn-primary" id="calculate-sales-by-name">Calculate</button>
-                                        </div>
+                                    </div>
+                                    <div class="product-sales-actions">
+                                        <button class="btn btn-primary" id="calculate-sales-by-name">Calculate</button>
                                     </div>
                                     <div class="alert alert-info mt-3" id="sales-result" style="display: none;"></div>
                                 </div>
                             </div>
+
+                            <!-- Search and Filter Actions -->
+                            <div class="action-buttons mt-3">
+                                <div class="search-section">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="check-number-search" placeholder="Enter check number">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-outline-secondary" type="button" id="search-check">Search</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="filter-actions">
+                                    <button class="btn btn-primary" id="apply-cashier-filter">Apply Filters</button>
+                                    <button class="btn btn-outline-secondary" id="reset-date-filter">Reset All</button>
+                                </div>
+                            </div>
+
+                            <!-- Filter Status Display -->
+                            <div class="alert alert-info mt-3" id="filter-status" style="display: none;"></div>
                         </div>
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="row mb-4">
-                        <div class="col-sm-12">
-                            <button type="button" class="btn btn-primary pull-right" data-toggle="modal" data-target="#createCheckModal">
-                                Create New Check
-                            </button>
-                        </div>
+                    <div class="action-buttons mb-4">
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createCheckModal">
+                            Create New Check
+                        </button>
                     </div>
 
                     <!-- Checks List -->
@@ -572,6 +705,7 @@
         </div>
     </div>
 
+    <!-- Customer Purchases Modal -->
     <div class="modal fade" id="customerPurchasesModal" tabindex="-1" aria-labelledby="customerPurchasesModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -691,20 +825,28 @@
             document.getElementById('main').style.marginLeft = '0';
             document.getElementById('openNav').style.display = 'inline-block';
         }
+
+        // Accordion toggle function
+        function toggleAccordion(element) {
+            const content = element.nextElementSibling;
+            content.classList.toggle('active');
+            const icon = element.querySelector('i');
+            icon.classList.toggle('zmdi-chevron-down');
+            icon.classList.toggle('zmdi-chevron-up');
+        }
     </script>
     <script>
-    // Підсвічує активну вкладку сайдбару
-    document.addEventListener('DOMContentLoaded', function () {
-        const currentPath = window.location.pathname;
-        const sidebarLinks = document.querySelectorAll('#mySidebar a');
+        // Highlight active sidebar link
+        document.addEventListener('DOMContentLoaded', function () {
+            const currentPath = window.location.pathname;
+            const sidebarLinks = document.querySelectorAll('#mySidebar a');
 
-        sidebarLinks.forEach(link => {
-            if (link.getAttribute('href') === currentPath) {
-                link.classList.add('w3-blue');
-            }
+            sidebarLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('w3-blue');
+                }
+            });
         });
-    });
-</script>
-
+    </script>
 </body>
 </html>

@@ -6,15 +6,15 @@ $(function () {
 
 // Додайте цей код у ваш JavaScript-файл
 function clearPageData() {
-  // Очистити всі відображувані дані
-  document.getElementById('dataContainer').innerHTML = '';
-  // Скинути всі форми
-  document.querySelectorAll('form').forEach(form => form.reset());
+    // Очистити всі відображувані дані
+    document.getElementById('dataContainer').innerHTML = '';
+    // Скинути всі форми
+    document.querySelectorAll('form').forEach(form => form.reset());
 }
 
 // Викликайте цю функцію при переході між вкладками
 document.querySelectorAll('.tab-link').forEach(link => {
-  link.addEventListener('click', clearPageData);
+    link.addEventListener('click', clearPageData);
 });
 
 // Load employees
@@ -41,6 +41,7 @@ $('#addEmployeeBtn').on('click', function() {
     $("#employeeForm")[0].reset();
     $("#id_employee").val(''); // Ensure ID is empty for new employee
     $('.error-message').hide().find('.error-text').text(''); // Очищаємо повідомлення про помилки при відкритті
+    $('.form-control').removeClass('is-invalid'); // Очищаємо підсвічування при відкритті
     employeeModal.modal('show');
 });
 
@@ -71,6 +72,7 @@ $(document).on('click', '.edit-employee', function() {
             // Update modal title and show
             employeeModal.find('.modal-title').text('Edit Employee');
             $('.error-message').hide().find('.error-text').text(''); // Очищаємо повідомлення про помилки при відкритті
+            $('.form-control').removeClass('is-invalid'); // Очищаємо підсвічування при відкритті
             employeeModal.modal('show');
         }
     });
@@ -155,6 +157,8 @@ $("#saveEmployee").on("click", function () {
                 }
                 employeeModal.modal('hide');
                 loadEmployees(); // refresh table
+                $('.error-message').hide().find('.error-text').text(''); // Очищаємо повідомлення після успіху
+                $('.form-control').removeClass('is-invalid'); // Очищаємо підсвічування після успіху
             },
             error: function(xhr, status, error) {
                 console.error("Error details:", xhr.responseText); // Debug logging
