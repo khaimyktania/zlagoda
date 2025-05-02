@@ -40,6 +40,7 @@ $('#addEmployeeBtn').on('click', function() {
     employeeModal.find('.modal-title').text('Add New Employee');
     $("#employeeForm")[0].reset();
     $("#id_employee").val(''); // Ensure ID is empty for new employee
+    $('.error-message').hide().find('.error-text').text(''); // Очищаємо повідомлення про помилки при відкритті
     employeeModal.modal('show');
 });
 
@@ -54,7 +55,7 @@ $(document).on('click', '.edit-employee', function() {
 
         if(employee) {
             // Fill the form with employee data
-              $("#id_employee").val(employee.id_employee);
+            $("#id_employee").val(employee.id_employee);
             $("#empl_surname").val(employee.empl_surname);
             $("#empl_name").val(employee.empl_name);
             $("#empl_patronymic").val(employee.empl_patronymic);
@@ -69,6 +70,7 @@ $(document).on('click', '.edit-employee', function() {
 
             // Update modal title and show
             employeeModal.find('.modal-title').text('Edit Employee');
+            $('.error-message').hide().find('.error-text').text(''); // Очищаємо повідомлення про помилки при відкритті
             employeeModal.modal('show');
         }
     });
@@ -92,81 +94,82 @@ $("#saveEmployee").on("click", function () {
             street: null,
             zip_code: null
         };
-    // Build object from form fields
-    for (var i = 0; i < data.length; ++i) {
-        var element = data[i];
-        switch(element.name) {
-            case 'id_employee':
-                requestPayload.id_employee = element.value;
-                break;
-            case 'empl_surname':
-                requestPayload.empl_surname = element.value;
-                break;
-            case 'empl_name':
-                requestPayload.empl_name = element.value;
-                break;
-            case 'empl_patronymic':
-                requestPayload.empl_patronymic = element.value;
-                break;
-            case 'empl_role':
-                requestPayload.empl_role = element.value;
-                break;
-            case 'salary':
-                requestPayload.salary = element.value;
-                break;
-            case 'date_of_birth':
-                requestPayload.date_of_birth = element.value;
-                break;
-            case 'date_of_start':
-                requestPayload.date_of_start = element.value;
-                break;
-            case 'phone_number':
-                requestPayload.phone_number = element.value;
-                break;
-            case 'city':
-                requestPayload.city = element.value;
-                break;
-            case 'street':
-                requestPayload.street = element.value;
-                break;
-            case 'zip_code':
-                requestPayload.zip_code = element.value;
-                break;
-        }
-    }
-
-    console.log("Sending payload:", requestPayload); // Debug logging
-
-    // Send POST request
-    $.ajax({
-        type: "POST",
-        url: '/insertEmployee',
-        data: {
-            data: JSON.stringify(requestPayload)
-        },
-        success: function(response) {
-            console.log("Response:", response); // Debug logging
-            if(requestPayload.id_employee) {
-                alert("Employee updated successfully!");
-            } else {
-                alert("Employee added successfully!");
+        // Build object from form fields
+        for (var i = 0; i < data.length; ++i) {
+            var element = data[i];
+            switch(element.name) {
+                case 'id_employee':
+                    requestPayload.id_employee = element.value;
+                    break;
+                case 'empl_surname':
+                    requestPayload.empl_surname = element.value;
+                    break;
+                case 'empl_name':
+                    requestPayload.empl_name = element.value;
+                    break;
+                case 'empl_patronymic':
+                    requestPayload.empl_patronymic = element.value;
+                    break;
+                case 'empl_role':
+                    requestPayload.empl_role = element.value;
+                    break;
+                case 'salary':
+                    requestPayload.salary = element.value;
+                    break;
+                case 'date_of_birth':
+                    requestPayload.date_of_birth = element.value;
+                    break;
+                case 'date_of_start':
+                    requestPayload.date_of_start = element.value;
+                    break;
+                case 'phone_number':
+                    requestPayload.phone_number = element.value;
+                    break;
+                case 'city':
+                    requestPayload.city = element.value;
+                    break;
+                case 'street':
+                    requestPayload.street = element.value;
+                    break;
+                case 'zip_code':
+                    requestPayload.zip_code = element.value;
+                    break;
             }
-            employeeModal.modal('hide');
-            loadEmployees(); // refresh table
-        },
-        error: function(xhr, status, error) {
-            console.error("Error details:", xhr.responseText); // Debug logging
-            alert("Error while saving employee: " + error);
         }
-    });
-}
+
+        console.log("Sending payload:", requestPayload); // Debug logging
+
+        // Send POST request
+        $.ajax({
+            type: "POST",
+            url: '/insertEmployee',
+            data: {
+                data: JSON.stringify(requestPayload)
+            },
+            success: function(response) {
+                console.log("Response:", response); // Debug logging
+                if(requestPayload.id_employee) {
+                    alert("Employee updated successfully!");
+                } else {
+                    alert("Employee added successfully!");
+                }
+                employeeModal.modal('hide');
+                loadEmployees(); // refresh table
+            },
+            error: function(xhr, status, error) {
+                console.error("Error details:", xhr.responseText); // Debug logging
+                alert("Error while saving employee: " + error);
+            }
+        });
+    }
 });
 
-// Очистка повідомлень про помилки при закритті модального вікна
+// Об'єднаний обробник для очищення форми та повідомлень про помилки при закритті модального вікна
 employeeModal.on('hide.bs.modal', function(){
     $("#employeeForm")[0].reset();
-    $('.error-message').hide().text('');
+    $('.error-message').hide().find('.error-text').text('');
 });
+
 // Delete employee
 $(document).on("click", ".delete-employee", function () {
     var tr = $(this).closest('tr');
@@ -186,11 +189,6 @@ $(document).on("click", ".delete-employee", function () {
             alert("Error: " + (xhr.responseJSON ? xhr.responseJSON.message : "Error while deleting employee"));
         });
     }
-});
-
-// Reset form when modal is closed
-employeeModal.on('hide.bs.modal', function(){
-    $("#employeeForm")[0].reset();
 });
 
 $("#sortSelect").on("change", function () {
@@ -246,6 +244,7 @@ $("#searchBySurname").on("click", function () {
         $("#contactInfoResult").html("Error while fetching contact info.").show();
     });
 });
+
 function validateEmployeeForm() {
     let isValid = true;
     const errors = {};
