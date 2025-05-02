@@ -99,7 +99,6 @@ function loadStoreProducts() {
 }
 
 // Render products table with the given data
-// Render products table with the given data
 function renderProductsTable(products) {
     if (products) {
         let table = '';
@@ -152,7 +151,6 @@ $('#getAllStoreProductsSorted').on('click', function () {
     });
 });
 
-
 // Load products dropdown for store product form
 function loadProductDropdown() {
     $.get("/getAllProductsSorted", function (response) {
@@ -185,7 +183,10 @@ $('#storeProductModal').on('show.bs.modal', function(e) {
             }
         });
     }
+    $('.error-message').hide().find('.error-text').text(''); // Очищаємо повідомлення про помилки
+    $('.is-invalid').removeClass('is-invalid'); // Очищаємо підсвічування
 });
+
 // Initialize all event handlers
 function initEventHandlers() {
     // Add new store product button
@@ -204,15 +205,12 @@ function initEventHandlers() {
         viewProductDetails(upc);
     });
 
-    // Filter all store products by name
-
-
     // Delete store product
     $(document).on('click', '.delete-store-product', function() {
         var tr = $(this).closest('tr');
         deleteStoreProduct(tr);
     });
-$(document).on('click', '.reprice-store-product', function() {
+    $(document).on('click', '.reprice-store-product', function() {
         var tr = $(this).closest('tr');
         openRepriceModal(tr);
     });
@@ -412,7 +410,6 @@ function openRepriceModal(tr) {
 }
 
 // View product details by UPC
-// View product details by UPC
 function viewProductDetails(upc) {
     $.ajax({
         url: getProductDetailByUpcApiUrl,
@@ -477,10 +474,17 @@ function openEditStoreProductModal(tr) {
     $('#UPC_prom').prop('disabled', !isPromotional);
 
     storeProductModal.modal('show');
+    $('.error-message').hide().find('.error-text').text(''); // Очищаємо повідомлення про помилки
+    $('.is-invalid').removeClass('is-invalid'); // Очищаємо підсвічування
 }
 
 // Save or update store product
 function saveStoreProduct() {
+    // Перевіряємо валідацію перед збереженням
+    if (!validateStoreProductForm()) {
+        return;
+    }
+
     // Collect form data
     var formData = {
         UPC: $('#UPC').val(),
@@ -491,17 +495,7 @@ function saveStoreProduct() {
         promotional_product: $('#promotional_product').is(':checked') ? 1 : 0
     };
 
-    // Validation
-    if (!formData.UPC) {
-        alert('UPC is required');
-        return;
-    }
-
-    if (!formData.id_product) {
-        alert('Product is required');
-        return;
-    }
-
+    // Validation (basic check already done in validateStoreProductForm)
     if (formData.promotional_product === 1 && !formData.UPC_prom) {
         // Generate promotional UPC if not provided
         formData.UPC_prom = 'P' + formData.UPC;
@@ -521,6 +515,8 @@ function saveStoreProduct() {
                 // Reset form
                 $('#storeProductForm')[0].reset();
                 $('#UPC').prop('readonly', false);
+                $('.error-message').hide().find('.error-text').text(''); // Очищаємо повідомлення після успіху
+                $('.is-invalid').removeClass('is-invalid'); // Очищаємо підсвічування
             } else {
                 alert('Error: ' + response.error);
             }
@@ -626,4 +622,73 @@ storeProductModal.on('hidden.bs.modal', function() {
     $('#storeProductForm')[0].reset();
     $('#UPC').prop('readonly', false);
     storeProductModal.find('.modal-title').text('Add New Store Product');
+    $('.error-message').hide().find('.error-text').text(''); // Очищаємо повідомлення про помилки
+    $('.is-invalid').removeClass('is-invalid'); // Очищаємо підсвічування
 });
+
+// Функція для валідації форми
+function validateStoreProductForm() {
+    let isValid = true;
+    const errors = {};
+
+    // Скидання попередніх повідомлень про помилки та підсвічування
+    $('.error-message').hide().find('.error-text').text('');
+    $('.is-invalid').removeClass('is-invalid');
+
+    // Валідація UPC
+    const UPC = $("#UPC").val().trim();
+    if (!UPC) {
+        errors.UPC = 'UPC є обов\'язковим полем.';
+        isValid = false;
+    } else if (!/^[A-Z0-9]{8,}$/.test(UPC)) {
+        errors.UPC = 'UPC має містити щонайменше 8 символів (літери A-Z і цифри 0-9).';
+        isValid = false;
+    }
+
+    // Валідація Promotional UPC (якщо промо-товар)
+    const promotionalProduct = $("#promotional_product").is(':checked');
+    const UPC_prom = $("#UPC_prom").val().trim();
+    if (promotionalProduct && !UPC_prom) {
+        errors.UPC_prom = 'Для промо-товару потрібен Promotional UPC.';
+        isValid = false;
+    } else if (UPC_prom && !/^[A-Z0-9]{8,}$/.test(UPC_prom)) {
+        errors.UPC_prom = 'Promotional UPC має містити щонайменше 8 символів (літери A-Z і цифри 0-9).';
+        isValid = false;
+    }
+
+    // Валідація Product
+    const id_product = $("#id_product").val();
+    if (!id_product) {
+        errors.id_product = 'Оберіть продукт.';
+        isValid = false;
+    }
+
+    // Валідація Selling Price
+    const selling_price = $("#selling_price").val().trim();
+    if (!selling_price) {
+        errors.selling_price = 'Вкажіть ціну продажу.';
+        isValid = false;
+    } else if (isNaN(selling_price) || parseFloat(selling_price) <= 0) {
+        errors.selling_price = 'Ціна продажу має бути додатним числом.';
+        isValid = false;
+    }
+
+    // Валідація Quantity
+    const products_number = $("#products_number").val().trim();
+    if (!products_number) {
+        errors.products_number = 'Вкажіть кількість.';
+        isValid = false;
+    } else if (isNaN(products_number) || parseInt(products_number) <= 0) {
+        errors.products_number = 'Кількість має бути цілим додатним числом.';
+        isValid = false;
+    }
+
+    // Відображення помилок і підсвічування
+    for (let field in errors) {
+        $(`#${field}_error`).find('.error-text').text(errors[field]);
+        $(`#${field}_error`).show();
+        $(`#${field}`).addClass('is-invalid');
+    }
+
+    return isValid;
+}

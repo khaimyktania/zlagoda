@@ -18,19 +18,19 @@
 
     <style>
         .logout-btn-fixed {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    }
-    .reprice-store-product {
-        background-color: #ff9800;
-        border-color: #ff9800;
-        color: white;
-    }
-    .reprice-store-product:hover {
-        background-color: #fb8c00;
-        border-color: #fb8c00;
-    }
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
+        .reprice-store-product {
+            background-color: #ff9800;
+            border-color: #ff9800;
+            color: white;
+        }
+        .reprice-store-product:hover {
+            background-color: #fb8c00;
+            border-color: #fb8c00;
+        }
         /* Always visible sidebar on desktop */
         @media (min-width: 992px) {
             #mySidebar {
@@ -86,66 +86,82 @@
             padding-top: 15px;
             margin-top: 10px;
         }
-    </style>
 
+        /* Стилі для повідомлень про помилки */
+        .error-container {
+            position: relative;
+            min-height: 20px;
+        }
+
+        .error-message {
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            align-items: flex-start;
+            z-index: 1000;
+            max-width: 100%;
+        }
+
+        .error-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-color: #ff8c00;
+            color: white;
+            text-align: center;
+            line-height: 16px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-right: 5px;
+            flex-shrink: 0;
+        }
+
+        .error-text {
+            display: inline-block;
+            background-color: white;
+            color: #333;
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            font-size: 12px;
+            white-space: normal;
+            word-wrap: break-word;
+            max-width: calc(100% - 25px);
+        }
+
+        .form-group .error-message {
+            max-width: 100%;
+        }
+
+        /* Стилі для підсвічування червоним */
+        .is-invalid {
+            border: 2px solid #dc3545 !important;
+            background-color: rgba(220, 53, 69, 0.05) !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+        }
+    </style>
 </head>
 <body class="tooltips">
 
 <!-- Sidebar -->
-<!-- Sidebar -->
-<!-- Sidebar -->
-<!-- Sidebar -->
-<div id="mySidebar"
-     class="w3-sidebar w3-bar-block w3-card w3-animate-left w3-light-grey"
-     style="display: none;">
-  <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">✕ Close</button>
-
-  <!-- Workers (тільки менеджер) -->
-  <a href="/manage-employee" class="w3-bar-item w3-button role-manager">Workers</a>
-
-  <!-- Manage Products (і менеджер, і касир) -->
-  <a href="/manage_product"
-     class="w3-bar-item w3-button role-manager role-cashier">
-    Manage Products
-  </a>
-
-  <!-- Store Products (і менеджер, і касир) -->
-  <a href="/manage_store_product"
-     class="w3-bar-item w3-button role-manager role-cashier">
-    Store Products
-  </a>
-
-  <!-- Categories (тільки менеджер) -->
-  <a href="/manage_category" class="w3-bar-item w3-button role-manager">
-    Categories
-  </a>
-
-  <!-- Customers (і менеджер, і касир) -->
-  <a href="/manage_customer"
-     class="w3-bar-item w3-button role-manager role-cashier">
-    Customers
-  </a>
-
-  <!-- Checks (і менеджер, і касир) -->
-  <a href="/manage_check"
-     class="w3-bar-item w3-button role-manager role-cashier">
-    Checks
-  </a>
-
-  <!-- Reports (тільки менеджер) -->
-  <a href="/reports" class="w3-bar-item w3-button role-manager">Reports</a>
-
+<div id="mySidebar" class="w3-sidebar w3-bar-block w3-card w3-animate-left w3-light-grey" style="display: none;">
+    <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">✕ Close</button>
+    <a href="/manage-employee" class="w3-bar-item w3-button role-manager">Workers</a>
+    <a href="/manage_product" class="w3-bar-item w3-button role-manager role-cashier">Manage Products</a>
+    <a href="/manage_store_product" class="w3-bar-item w3-button role-manager role-cashier">Store Products</a>
+    <a href="/manage_category" class="w3-bar-item w3-button role-manager">Categories</a>
+    <a href="/manage_customer" class="w3-bar-item w3-button role-manager role-cashier">Customers</a>
+    <a href="/manage_check" class="w3-bar-item w3-button role-manager role-cashier">Checks</a>
+    <a href="/reports" class="w3-bar-item w3-button role-manager">Reports</a>
     <a href="/manager_account.html" class="w3-bar-item w3-button role-manager">My Account</a>
-<a href="/cashier_account.html" class="w3-bar-item w3-button role-cashier">My Account</a>
-<a href="/logout" class="w3-bar-item w3-button logout-btn-fixed">Log Out</a>
-
+    <a href="/cashier_account.html" class="w3-bar-item w3-button role-cashier">My Account</a>
+    <a href="/logout" class="w3-bar-item w3-button logout-btn-fixed">Log Out</a>
 </div>
-
-
 
 <!-- Main -->
 <div id="main">
-
     <!-- Header -->
     <div class="header content rows-content-header">
         <button id="openNav" class="w3-button w3-teal w3-xlarge">&#9776;</button>
@@ -204,8 +220,6 @@
                                         <button type="button" class="btn btn-sm btn-outline-secondary" id="resetFilters">
                                             Reset Filters
                                         </button>
-
-
                                     </div>
                                 </div>
 
@@ -272,25 +286,55 @@
                         <div class="form-group">
                             <label>UPC</label>
                             <input class="form-control" name="UPC" id="UPC" type="text" placeholder="UPC" required>
+                            <div class="error-container">
+                                <div id="UPC_error" class="error-message" style="display: none;">
+                                    <span class="error-icon">⚠️</span>
+                                    <span class="error-text"></span>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>Promotional UPC (optional for non-promotional products)</label>
                             <input class="form-control" name="UPC_prom" id="UPC_prom" type="text" placeholder="Promotional UPC">
+                            <div class="error-container">
+                                <div id="UPC_prom_error" class="error-message" style="display: none;">
+                                    <span class="error-icon">⚠️</span>
+                                    <span class="error-text"></span>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>Product</label>
                             <select class="form-control" name="id_product" id="id_product" required>
                                 <option value="">Select product</option>
                             </select>
+                            <div class="error-container">
+                                <div id="id_product_error" class="error-message" style="display: none;">
+                                    <span class="error-icon">⚠️</span>
+                                    <span class="error-text"></span>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>Selling Price</label>
                             <input class="form-control" name="selling_price" id="selling_price" type="number" step="0.0001" placeholder="Selling Price" required>
+                            <div class="error-container">
+                                <div id="selling_price_error" class="error-message" style="display: none;">
+                                    <span class="error-icon">⚠️</span>
+                                    <span class="error-text"></span>
+                                </div>
+                            </div>
                             <small class="text-muted">Price includes 20% VAT</small>
                         </div>
                         <div class="form-group">
                             <label>Quantity</label>
                             <input class="form-control" name="products_number" id="products_number" type="number" placeholder="Quantity" required>
+                            <div class="error-container">
+                                <div id="products_number_error" class="error-message" style="display: none;">
+                                    <span class="error-icon">⚠️</span>
+                                    <span class="error-text"></span>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <div class="custom-control custom-checkbox">
@@ -416,5 +460,5 @@
 
     document.getElementById('openNav').addEventListener('click', w3_open);
 </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93976ee4a90d44f7',t:'MTc0NjE4ODAxMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

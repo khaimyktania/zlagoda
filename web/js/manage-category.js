@@ -10,18 +10,16 @@ var sortDirection = 'asc'; // Default sort direction
 
 // Додайте цей код у ваш JavaScript-файл
 function clearPageData() {
-  // Очистити всі відображувані дані
-  document.getElementById('dataContainer').innerHTML = '';
-  // Скинути всі форми
-  document.querySelectorAll('form').forEach(form => form.reset());
+    // Очистити всі відображувані дані
+    document.getElementById('dataContainer').innerHTML = '';
+    // Скинути всі форми
+    document.querySelectorAll('form').forEach(form => form.reset());
 }
 
 // Викликайте цю функцію при переході між вкладками
 document.querySelectorAll('.tab-link').forEach(link => {
-  link.addEventListener('click', clearPageData);
+    link.addEventListener('click', clearPageData);
 });
-
-
 
 $(document).ready(function() {
     // Load categories when page loads
@@ -36,8 +34,14 @@ $(document).ready(function() {
     $(document).on('click', '.edit-category', editCategory);
     $(document).on('click', '.delete-category', deleteCategory);
 
-    // Reset form when modal is closed
+    // Reset form and clear errors when modal is closed
     categoryModal.on('hide.bs.modal', resetCategoryForm);
+
+    // Clear errors when modal is opened
+    categoryModal.on('show.bs.modal', function() {
+        $('.error-message').hide().find('.error-text').text('');
+        $('.is-invalid').removeClass('is-invalid');
+    });
 });
 
 // Load all categories into the table
@@ -115,17 +119,49 @@ function editCategory() {
     categoryModal.modal('show');
 }
 
+// Validate category form
+function validateCategoryForm() {
+    let isValid = true;
+    const errors = {};
+
+    // Скидання попередніх повідомлень про помилки та підсвічування
+    $('.error-message').hide().find('.error-text').text('');
+    $('.is-invalid').removeClass('is-invalid');
+
+    // Валідація Category Name
+    const categoryName = $("#category_name").val().trim();
+    if (!categoryName) {
+        errors.category_name = 'Назва категорії є обов\'язковим полем.';
+        isValid = false;
+    } else if (categoryName.length < 3) {
+        errors.category_name = 'Назва категорії має містити щонайменше 3 символи.';
+        isValid = false;
+    } else if (!/^[a-zA-Z0-9\s]+$/.test(categoryName)) {
+        errors.category_name = 'Назва категорії може містити лише літери, цифри та пробіли.';
+        isValid = false;
+    }
+
+    // Відображення помилок і підсвічування
+    for (let field in errors) {
+        $(`#${field}_error`).find('.error-text').text(errors[field]);
+        $(`#${field}_error`).show();
+        $(`#${field}`).addClass('is-invalid');
+    }
+
+    return isValid;
+}
+
 // Save category (create or update)
 function saveCategory() {
+    // Перевіряємо валідацію перед збереженням
+    if (!validateCategoryForm()) {
+        return;
+    }
+
     var categoryData = {
         category_number: $("#category_number").val(),
         category_name: $("#category_name").val()
     };
-
-    if (!categoryData.category_name) {
-        alert("Category name is required");
-        return;
-    }
 
     $.ajax({
         url: categorySaveApiUrl,
@@ -178,9 +214,11 @@ function deleteCategory() {
     });
 }
 
-// Reset category form
+// Reset category form and clear errors
 function resetCategoryForm() {
     categoryForm[0].reset();
     $("#category_number").val(''); // Clear hidden field
     categoryModal.find('.modal-title').text('Add New Category');
+    $('.error-message').hide().find('.error-text').text(''); // Очищаємо повідомлення про помилки
+    $('.is-invalid').removeClass('is-invalid'); // Очищаємо підсвічування
 }
