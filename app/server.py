@@ -1178,6 +1178,8 @@ def get_product_sales_by_name():
         if connection:
             connection.close()
 
+
+
 if __name__ == "__main__":
     print("Starting Python Flask Server For Grocery Store Management System")
     app.run(port=5000, debug=True)

@@ -150,10 +150,11 @@ function renderProductsTable(products) {
 }
 $('#getAllStoreProductsSorted').on('click', function () {
     $.get("/getAllStoreProductsSorted", function (data) {
-        renderProductsTable(data);  // ✅ ПРАВИЛЬНО
+        renderProductsTable(data);  // використовує currentRole
         $("#filterStatus").text("All store products sorted by name");
     });
 });
+
 
 // Load products dropdown for store product form
 function loadProductDropdown() {

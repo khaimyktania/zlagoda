@@ -1,6 +1,6 @@
 from sql_connection import execute_query, get_sql_connection
 from datetime import datetime
-from credentials_utils import auto_generate_credentials, load_credentials, save_credentials, hash_password
+from credentials_utils import auto_generate_credentials, load_credentials, save_credentials, hash_password, delete_credentials
 import secrets
 import re
 
@@ -118,7 +118,7 @@ def delete_employee(connection, employee_id):
     query = "DELETE FROM employee WHERE id_employee = %s;"
     try:
         result = execute_query(connection, query, (employee_id,))
-        delete_credential(employee_id)
+        delete_credentials(employee_id)
         return result
     except Exception as e:
         print(f"Помилка видалення працівника: {e}")
