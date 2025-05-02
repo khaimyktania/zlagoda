@@ -3,9 +3,14 @@ from sql_connection import execute_query, get_sql_connection
 
 def get_all_store_products(connection):
     """
-    Get all products from store_products table
+    Get all products from store_products table with positive quantity
     """
-    query = "SELECT sp.*, p.product_name FROM store_products sp JOIN products p ON sp.id_product = p.id_product;"
+    query = """
+    SELECT sp.*, p.product_name 
+    FROM store_products sp 
+    JOIN products p ON sp.id_product = p.id_product 
+    WHERE sp.products_number > 0;
+    """
     try:
         result = execute_query(connection, query)
         return result
@@ -129,21 +134,23 @@ def get_store_product_detail_by_upc(connection, upc):
 
 def get_store_product_by_upc(connection, upc):
     """
-    Get a store product by its UPC
+    Get a store product by UPC
     """
     query = """
     SELECT sp.*, p.product_name 
     FROM store_products sp 
     JOIN products p ON sp.id_product = p.id_product 
-    WHERE sp.UPC = %s;
+    WHERE sp.UPC = %s
     """
     try:
-        result = execute_query(connection, query, (upc,))
-        return result[0] if result else None
+        cursor = connection.cursor()
+        cursor.execute(query, (upc,))
+        result = cursor.fetchone()
+        cursor.close()
+        return result
     except Exception as e:
         print(f"Error in get_store_product_by_upc: {e}")
-        raise
-
+        return None
 
 def insert_store_product(connection, store_product):
     """
@@ -203,16 +210,39 @@ def update_store_product(connection, store_product):
 
 def delete_store_product(connection, upc):
     """
-    Delete a store product by UPC
+    Soft delete a store product by setting its quantity to 0, preserving its data for checks.
     """
-    query = "DELETE FROM store_products WHERE UPC = %s"
+    print(f"Attempting to soft delete product with UPC: {upc}")
     try:
-        result = execute_query(connection, query, (upc,))
-        return result
-    except Exception as e:
-        print(f"Error deleting store product: {e}")
-        raise
+        # Перевіряємо, чи існує продукт
+        print("Calling get_store_product_by_upc")
+        product = get_store_product_by_upc(connection, upc)
+        if not product:
+            print(f"Product with UPC {upc} not found")
+            return {"success": False, "message": "Product not found"}
 
+        # Встановлюємо products_number = 0
+        soft_delete_query = """
+        UPDATE store_products 
+        SET products_number = 0 
+        WHERE UPC = %s
+        """
+        print(f"Executing query: {soft_delete_query} with UPC: {upc}")
+        cursor = connection.cursor()
+        cursor.execute(soft_delete_query, (upc,))
+        rows_updated = cursor.rowcount
+        print(f"Rows updated: {rows_updated}")
+        connection.commit()
+        return {"success": True, "rows_updated": rows_updated}
+
+    except Exception as e:
+        connection.rollback()
+        print(f"Error soft deleting store product: {str(e)}")
+        return {"success": False, "message": f"Error soft deleting store product: {str(e)}"}
+    finally:
+        if 'cursor' in locals():
+            print("Closing cursor")
+            cursor.close()
 
 def make_product_promotional(connection, upc, promotional=True):
     """
@@ -332,6 +362,8 @@ def generate_upc(connection):
     except Exception as e:
         print(f"Error generating UPC: {e}")
         raise
+
+
 
 def reprice_store_product(connection, upc, new_price, additional_quantity=0):
     """

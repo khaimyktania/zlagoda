@@ -171,6 +171,30 @@ if (currentUserRole.toLowerCase() === 'manager') {
         return date.toISOString().split('T')[0];
     }
 
+function deleteStoreProduct(upc) {
+    console.log("Deleting store product with UPC:", upc);
+    $.ajax({
+        url: '/deleteStoreProduct', // Переконайтеся, що це правильний URL
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ upc: upc }),
+        success: function(response) {
+            console.log("Delete response:", response);
+            if (response.success) {
+                alert(`Product deleted successfully. Rows updated: ${response.rows_updated}`);
+                loadStoreProducts();
+            } else {
+                console.error("Delete failed:", response.message);
+                alert('Failed to delete product: ' + response.message);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error deleting store product:', xhr.responseText, status, error);
+            alert('Failed to delete product. Please try again.');
+        }
+    });
+}
+
     // Функція для завантаження даних про покупки
     function loadCustomerPurchases(startDate, endDate) {
         if (!startDate || !endDate) {
@@ -223,6 +247,33 @@ if (currentUserRole.toLowerCase() === 'manager') {
         });
     }
 
+function loadStoreProductsForSales() {
+    console.log("Loading store products for sales filter...");
+    return $.ajax({
+        url: API_ENDPOINTS.GET_STORE_PRODUCTS,
+        type: 'GET',
+        success: function(response) {
+            console.log("Store products for sales filter loaded successfully:", response);
+            storeProducts = response;
+
+            // Заповнюємо розкривний список продуктів
+            let options = '<option value="">Select product</option>';
+            storeProducts.forEach(function(product) {
+                // Показуємо лише продукти в наявності
+                if (product.products_number > 0) {
+                    options += `<option value="${product.product_name}">
+                                ${product.product_name} - $${parseFloat(product.selling_price).toFixed(2)}
+                                </option>`;
+                }
+            });
+            $('#product-sales-select').html(options);
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading store products for sales:', xhr.responseText, status, error);
+            $('#product-sales-select').html('<option value="">Error loading products</option>');
+        }
+    });
+}
     // Функція для відображення даних у таблиці
     function renderCustomerPurchases(purchases) {
         console.log('Rendering table with data:', purchases);
@@ -594,34 +645,61 @@ function applyFiltersForCashier() {
     });
 }
 
-function loadStoreProductsForSales() {
-    console.log("Loading store products for sales filter...");
+function loadStoreProducts() {
+    console.log("Loading store products data...");
     return $.ajax({
         url: API_ENDPOINTS.GET_STORE_PRODUCTS,
         type: 'GET',
         success: function(response) {
-            console.log("Store products for sales filter loaded successfully:", response);
-            storeProducts = response;
+            console.log("Store products data received:", response);
+            if (!Array.isArray(response)) {
+                console.error("Response is not an array:", response);
+                $('#product-select').html('<option value="">Invalid data format</option>');
+                $('#product-search').html('<option value="">Invalid data format</option>');
+                return;
+            }
 
-            // Заповнюємо розкривний список продуктів
+            storeProducts = response;
             let options = '<option value="">Select product</option>';
-            storeProducts.forEach(function(product) {
-                // Показуємо лише продукти в наявності
-                if (product.products_number > 0) {
-                    options += `<option value="${product.product_name}">
+            let availableProducts = 0;
+
+            storeProducts.forEach(function(product, index) {
+                console.log(`Processing product ${index + 1}:`, product);
+                // Показуємо лише продукти з products_number > 0
+                if (product.products_number > 0 && product.UPC && product.product_name && product.selling_price) {
+                    options += `<option value="${product.UPC}"
+                                data-price="${product.selling_price}"
+                                data-name="${product.product_name}"
+                                data-stock="${product.products_number}">
                                 ${product.product_name} - $${parseFloat(product.selling_price).toFixed(2)}
                                 </option>`;
+                    availableProducts++;
+                } else {
+                    console.warn(`Skipping product due to zero stock or missing data:`, product);
                 }
             });
-            $('#product-sales-select').html(options);
+
+            console.log(`Found ${availableProducts} available products`);
+
+            $('#product-select').html(options);
+            $('#product-search').html(options);
+
+            console.log("Product select HTML after update:", $('#product-select').html());
+            console.log("Product search HTML after update:", $('#product-search').html());
+
+            if (availableProducts === 0) {
+                $('#product-select').html('<option value="">No products available</option>');
+                $('#product-search').html('<option value="">No products available</option>');
+            }
         },
         error: function(xhr, status, error) {
-            console.error('Error loading store products for sales:', xhr.responseText, status, error);
-            $('#product-sales-select').html('<option value="">Error loading products</option>');
+            console.error('Error loading store products:', xhr.responseText, status, error);
+            $('#product-select').html('<option value="">Error loading products</option>');
+            $('#product-search').html('<option value="">Error loading products</option>');
+            alert('Failed to load products. Please try again.');
         }
     });
 }
-
 // Функція для обчислення продажів за назвою товару
 function calculateProductSalesByName() {
     const productName = $('#product-sales-select').val();
@@ -1438,10 +1516,11 @@ function renderCheckProductsDetails(products, container) {
         let productsHtml = '<div class="mt-3">';
 
         products.forEach(function(product) {
+            const productName = product.product_name || 'Unknown Product';
             productsHtml += `
                 <div class="check-product-item">
                     <div>
-                        <span>${product.product_name}</span>
+                        <span>${productName}</span>
                         <small class="text-muted">UPC: ${product.UPC}</small>
                     </div>
                     <div>

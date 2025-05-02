@@ -57,15 +57,18 @@ def get_check_by_number(connection, check_number):
 
 def get_check_products(connection, check_number):
     """
-    Get all products in a specific check
+    Get all products in a specific check, handling cases where product might be 'deleted' (products_number = 0)
     """
     query = """
-    SELECT s.UPC, s.product_number, s.selling_price,
-           p.product_name, 
-           (s.product_number * s.selling_price) as total_price
+    SELECT 
+        s.UPC, 
+        s.product_number, 
+        s.selling_price,
+        COALESCE(p.product_name, 'Deleted Product') as product_name,
+        (s.product_number * s.selling_price) as total_price
     FROM sale s
-    JOIN store_products sp ON s.UPC = sp.UPC
-    JOIN products p ON sp.id_product = p.id_product
+    LEFT JOIN store_products sp ON s.UPC = sp.UPC
+    LEFT JOIN products p ON sp.id_product = p.id_product
     WHERE s.check_number = %s;
     """
     try:

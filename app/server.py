@@ -707,15 +707,28 @@ def insert_store_product():
 @app.route('/deleteStoreProduct', methods=['POST'])
 @require_role('manager')
 def delete_store_product():
-    connection = get_sql_connection()
+    connection = None
     try:
         upc = request.form['upc']
-        rows_deleted = store_product_dao.delete_store_product(connection, upc)
-        return jsonify({'success': True, 'message': 'Store product deleted successfully', 'rows_deleted': rows_deleted})
+        connection = get_sql_connection()
+        result = store_product_dao.delete_store_product(connection, upc)
+        if result['success']:
+            return jsonify({
+                'success': True,
+                'message': 'Store product deleted successfully',
+                'rows_updated': result['rows_updated']  # Змінено з rows_deleted на rows_updated
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': result['message']
+            }), 500
     except Exception as e:
+        print(f"Error in delete_store_product: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
     finally:
-        connection.close()
+        if connection:
+            connection.close()
 
 @app.route('/makePromotional', methods=['POST'])
 @require_role('manager')
