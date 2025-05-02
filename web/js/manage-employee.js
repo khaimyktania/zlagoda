@@ -252,6 +252,23 @@ $("#searchBySurname").on("click", function () {
     });
 });
 
+$("#findEmployeesNeverSoldPromotional").on("click", function () {
+    $.get('/getEmployeesNeverSoldPromotionalToNonCardHolders', function (response) {
+        if (response && response.length > 0) {
+            let resultHtml = "<h4>Employees who never sold promotional products to non-card holders:</h4><ul>";
+            $.each(response, function(index, employee) {
+                resultHtml += `<li>${employee.empl_surname} ${employee.empl_name} (ID: ${employee.id_employee})</li>`;
+            });
+            resultHtml += "</ul>";
+            $("#neverSoldPromotionalResult").html(resultHtml).show();
+        } else {
+            $("#neverSoldPromotionalResult").html("No employees found matching the criteria.").show();
+        }
+    }).fail(function () {
+        $("#neverSoldPromotionalResult").html("Error while fetching employees.").show();
+    });
+});
+
 function validateEmployeeForm() {
     let isValid = true;
     const errors = {};

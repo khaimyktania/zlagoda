@@ -350,6 +350,21 @@ def get_contact_by_surname_api():
     else:
         return jsonify(None)
 
+@app.route('/getEmployeesNeverSoldPromotionalToNonCardHolders', methods=['GET'])
+@require_role('manager')
+def get_employees_never_sold_promotional_to_non_card_holders():
+    connection = None
+    try:
+        connection = get_sql_connection()
+        response = employee_dao.get_employees_never_sold_promotional_to_non_card_holders(connection)
+        return jsonify(response)
+    except Exception as e:
+        print(f"Помилка в get_employees_never_sold_promotional_to_non_card_holders: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
+
 @app.route('/getAllProductsSorted', methods=['GET'])
 @require_role('cashier','manager')
 def get_all_products_sorted():

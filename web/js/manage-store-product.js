@@ -240,7 +240,19 @@ function initEventHandlers() {
             updateFilterStatus("Promotional products sorted by quantity");
         });
     });
-
+// Фільтр непромоційних продуктів, які не належать до категорії 1
+$('#filterNonPromotionalNotInCategory').on('click', function () {
+    $.get('/get_non_promotional_products_not_in_category', { category_number: 1 }, function (response) {
+        if (response && response.length > 0) {
+            renderNonPromotionalModal(response);
+            $('#nonPromotionalModal').modal('show');
+        } else {
+            alert('No products found for the specified criteria.');
+        }
+    }).fail(function (xhr) {
+        alert('Error retrieving products: ' + xhr.responseText);
+    });
+});
     // Filter promotional products by name
     $('#filterPromotionalByName').on('click', function() {
         $.get(getPromotionalProductsSortedByNameApiUrl, function(response) {
@@ -456,6 +468,8 @@ function viewProductDetails(upc) {
         }
     });
 }
+
+
 // Open the store product modal for editing
 function openEditStoreProductModal(tr) {
     // Get data from the row

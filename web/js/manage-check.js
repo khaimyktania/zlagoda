@@ -436,6 +436,7 @@ function setDefaultDates() {
     $('#start-date').val(formatDateForInput(thirtyDaysAgo));
 }
 
+
 function loadCustomerPurchases(startDate, endDate) {
     if (!startDate || !endDate) {
         alert('Please select both start and end dates');
