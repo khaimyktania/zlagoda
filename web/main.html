@@ -1,75 +1,310 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <link rel="stylesheet" href="web/main.css">
-    <title>ZLAGODA — Головна</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>ZLAGODA — Home</title>
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,300,600,700">
+
+    <!-- Bootstrap + Custom Styles -->
+    <link rel="stylesheet" href="web/static/bootstrap.min.css">
+    <link rel="stylesheet" href="web/static/style.css">
+    <link rel="stylesheet" href="web/static/sidebar-menu.css">
+    <link rel="stylesheet" href="web/static/custom.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(180deg, #1e3a8a 0%, #eff6ff 100%);
+            overflow: hidden;
+            position: relative;
+            text-align: center;
+        }
+
+        /* Animated wave background */
+        .wave-bg {
+            position: absolute;
+            bottom: 0;
+            width: 0%;
+            height: 50vh;
+            background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"%3E%3Cpath fill="rgba(0,141,235,0.3)" fill-opacity="1" d="M0,160L48,176C96,192,192,224,288,213.3C384,203,480,149,576,138.7C672,128,768,160,864,181.3C960,203,1056,213,1152,197.3C1248,181,1344,139,1392,117.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"%3E%3C/path%3E%3C/svg%3E') no-repeat bottom;
+            animation: waveFlow 20s linear infinite;
+            z-index: 0;
+        }
+
+        /* Orbs for subtle accents */
+        .orbs {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .container {
+            padding: 60px;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0, 141, 235, 0.3);
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2), inset 0 0 10px rgba(0, 141, 235, 0.2);
+            backdrop-filter: blur(12px);
+            position: relative;
+            z-index: 2;
+            animation: revealCard 1.5s ease-out forwards;
+        }
+
+        .logo {
+            max-width: 180px;
+            margin-bottom: 40px;
+            filter: drop-shadow(0 0 10px rgba(0, 141, 235, 0.5));
+            animation: fadeScale 1.2s ease-out forwards;
+        }
+
+        h1 {
+            font-size: 56px;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin-bottom: 40px;
+            text-shadow: 0 0 15px rgba(0, 141, 235, 0.3);
+            animation: fadeInText 1.5s ease-out 0.3s forwards;
+            opacity: 0;
+        }
+
+        .login-btn {
+            background: linear-gradient(90deg, #007bff, #00ddeb);
+            color: white;
+            padding: 16px 50px;
+            font-size: 22px;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0, 141, 235, 0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+            animation: pulseButton 2.5s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            animation: fadeInText 1.5s ease-out 0.6s forwards;
+        }
+
+        .login-btn i {
+            font-size: 22px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 141, 235, 0.6);
+            background: linear-gradient(90deg, #0056b3, #00b7d4);
+        }
+
+        /* Ripple effect on click */
+        .login-btn::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+            pointer-events: none;
+        }
+
+        .login-btn:active::after {
+            width: 200px;
+            height: 200px;
+            transition: width 0.5s, height 0.5s;
+        }
+
+        /* Footer */
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: #a1c4fd;
+            font-size: 14px;
+            text-shadow: 0 0 5px rgba(0, 141, 235, 0.3);
+            z-index: 1;
+            animation: fadeInText 1.5s ease-out 0.9s forwards;
+            opacity: 0;
+        }
+
+        /* Animations */
+        @keyframes waveFlow {
+            0% { background-position: 0 0; }
+            100% { background-position: -1440px 0; }
+        }
+
+        @keyframes revealCard {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+                filter: blur(5px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+                filter: blur(0);
+            }
+        }
+
+        @keyframes fadeScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes fadeInText {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulseButton {
+            0%, 100% { box-shadow: 0 5px 20px rgba(0, 141, 235, 0.4); }
+            50% { box-shadow: 0 5px 30px rgba(0, 141, 235, 0.7); }
+        }
+
+        /* Orbs */
+        .orb {
+            position: absolute;
+            background: radial-gradient(circle, rgba(0, 141, 235, 0.5), transparent);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: orbFloat 10s ease-in-out infinite;
+        }
+
+        @keyframes orbFloat {
+            0%, 100% { transform: translateY(0); opacity: 0.5; }
+            50% { transform: translateY(-50px); opacity: 0.2; }
+        }
+
+        /* Responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px;
+                max-width: 600px;
+            }
+
+            .logo {
+                max-width: 150px;
+            }
+
+            h1 {
+                font-size: 42px;
+                margin-bottom: 30px;
+            }
+
+            .login-btn {
+                padding: 14px 40px;
+                font-size: 20px;
+            }
+
+            .login-btn i {
+                font-size: 20px;
+            }
+
+            .footer {
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                padding: 30px;
+                margin: 15px;
+            }
+
+            .logo {
+                max-width: 120px;
+                margin-bottom: 30px;
+            }
+
+            h1 {
+                font-size: 32px;
+                margin-bottom: 25px;
+            }
+
+            .login-btn {
+                padding: 12px 30px;
+                font-size: 18px;
+            }
+
+            .login-btn i {
+                font-size: 18px;
+            }
+
+            .footer {
+                font-size: 10px;
+                bottom: 15px;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<header class="top-bar">
-    <div class="logo-container">
-        <img class="logo" src="web/pic/logo.png" alt="Logo">
-    </div>
-
-    <nav class="nav-center">
-        <a href="#" class="nav-item active">Головна</a>
-        <a href="/manage_product" class="nav-item">Каталог товарів</a>
-        <a href="#" class="nav-item">Акційні товари</a>
-        <a href="#" class="nav-item">Контакти</a>
-    </nav>
-
-    <div class="nav-right">
-        <button class="login-btn" onclick="window.location.href='/login.html'">Увійти</button>
-    </div>
-</header>
+    <div class="wave-bg"></div>
+    <div class="orbs" id="orbs"></div>
     <div class="container">
-    <section class="search-section">
-        <h2>Пошук товарів</h2>
-        <form>
-            <input type="text" placeholder="Назва товару або категорія">
-            <button type="submit">Пошук</button>
-        </form>
-    </section>
+        <img src="web/pic/logo.png" alt="Zlagoda Logo" class="logo">
+        <h1>Welcome to Zlagoda</h1>
+        <button class="login-btn" onclick="window.location.href='/login.html'">
+            <i class="zmdi zmdi-sign-in"></i> Sign In
+        </button>
+    </div>
+    <div class="footer">Tetiana Khaimyk, Viktoria Dovhan, Iryna Rychok</div>
 
+    <script>
+        // Create subtle orbs
+        function createOrbs() {
+            const orbsContainer = document.getElementById('orbs');
+            const orbCount = 20;
 
-    <section class="hero">
-        <h2>Ласкаво просимо до супермаркету ZLAGODA</h2>
-        <p>Ваш надійний партнер у світі покупок — швидко, зручно, вигідно!</p>
-        <button>Переглянути каталог</button>
-    </section>
+            for (let i = 0; i < orbCount; i++) {
+                const orb = document.createElement('div');
+                orb.className = 'orb';
+                const size = Math.random() * 50 + 30;
+                orb.style.width = `${size}px`;
+                orb.style.height = `${size}px`;
+                orb.style.left = `${Math.random() * 100}%`;
+                orb.style.top = `${Math.random() * 100}%`;
+                orb.style.animationDelay = `${Math.random() * 5}s`;
+                orbsContainer.appendChild(orb);
+            }
+        }
 
-    <section class="promo">
-        <h2>Акційні товари</h2>
-        <div class="product-grid">
-            <!-- Картки товарів -->
-            <div class="product-card">
-                <img src="img/milk.jpg" alt="Молоко">
-                <h3>Молоко 2.5%</h3>
-                <p class="price">₴24.00 <span class="discount">₴19.20</span></p>
-            </div>
-            <div class="product-card">
-                <img src="img/bread.jpg" alt="Хліб">
-                <h3>Хліб житній</h3>
-                <p class="price">₴16.00 <span class="discount">₴12.80</span></p>
-            </div>
-            <!-- Додаткові товари -->
-        </div>
-    </section>
-
-
-
-    <section class="info">
-        <h2>Про магазин</h2>
-        <p>Супермаркет ZLAGODA — це сучасна торгова система, що дозволяє зручно керувати товарами, клієнтами та чеками. Ми дбаємо про кожного покупця.</p>
-    </section>
-
-    <footer>
-        <p>© 2025 ZLAGODA. Всі права захищені.</p>
-        <p>Адреса: м. Львів, вул. Торгова, 5 | Телефон: +380 67 123 45 67</p>
-    </footer>
-</div>
+        // Initialize orbs
+        window.onload = createOrbs;
+    </script>
 </body>
 </html>

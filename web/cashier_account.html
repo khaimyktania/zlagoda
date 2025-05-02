@@ -69,10 +69,10 @@
 <div id="main" style="padding:20px;">
     <button id="openNav" class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()">☰</button>
 
-    <h2>Кабінет Касира</h2>
-    <p><strong>Ім’я:</strong> <span id="empl_name"></span></p>
-    <p><strong>Прізвище:</strong> <span id="empl_surname"></span></p>
-    <p><strong>Роль:</strong> <span id="empl_role"></span></p>
+    <h2>Cashier Account</h2>
+    <p><strong>Name:</strong> <span id="empl_name"></span></p>
+    <p><strong>Surname:</strong> <span id="empl_surname"></span></p>
+    <p><strong>Role:</strong> <span id="empl_role"></span></p>
 
     <!-- Додано кнопку та блок для повної інформації -->
 <button class="btn btn-info mt-3" onclick="viewFullInfo()">View Info</button>
@@ -107,15 +107,15 @@ function viewFullInfo() {
         } else {
             const fields = [
                 ['ID', data.id_employee],
-                ['Ім’я', data.empl_name],
-                ['Прізвище', data.empl_surname],
-                ['По батькові', data.empl_patronymic],
-                ['Роль', data.empl_role],
-                ['Зарплата', data.salary != null ? parseFloat(data.salary).toFixed(2) : null],
-                ['Дата народження', data.date_of_birth ? new Date(data.date_of_birth).toLocaleDateString() : null],
-                ['Дата початку роботи', data.date_of_start ? new Date(data.date_of_start).toLocaleDateString() : null],
-                ['Телефон', data.phone_number?.trim()],
-                ['Адреса', (data.city && data.street && data.zip_code) ? `${data.city}, ${data.street}, ${data.zip_code}` : null]
+                ['Name', data.empl_name],
+                ['Surname', data.empl_surname],
+                ['Patronymic', data.empl_patronymic],
+                ['Role', data.empl_role],
+                ['Salary', data.salary != null ? parseFloat(data.salary).toFixed(2) : null],
+                ['Date of Birth', data.date_of_birth ? new Date(data.date_of_birth).toLocaleDateString() : null],
+                ['Date of Start', data.date_of_start ? new Date(data.date_of_start).toLocaleDateString() : null],
+                ['Phone Number', data.phone_number?.trim()],
+                ['Address', (data.city && data.street && data.zip_code) ? `${data.city}, ${data.street}, ${data.zip_code}` : null]
             ];
 
             output = fields
