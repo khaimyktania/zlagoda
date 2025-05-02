@@ -6,15 +6,15 @@ $(function () {
 
 // Додайте цей код у ваш JavaScript-файл
 function clearPageData() {
-  // Очистити всі відображувані дані
-  document.getElementById('dataContainer').innerHTML = '';
-  // Скинути всі форми
-  document.querySelectorAll('form').forEach(form => form.reset());
+    // Очистити всі відображувані дані
+    document.getElementById('dataContainer').innerHTML = '';
+    // Скинути всі форми
+    document.querySelectorAll('form').forEach(form => form.reset());
 }
 
 // Викликайте цю функцію при переході між вкладками
 document.querySelectorAll('.tab-link').forEach(link => {
-  link.addEventListener('click', clearPageData);
+    link.addEventListener('click', clearPageData);
 });
 
 // Load customers
@@ -65,6 +65,7 @@ $('#addCustomerBtn').on('click', function() {
     $("#customerForm")[0].reset();
     // Enable card number field for new customers
     $("#card_number").prop('readonly', false);
+    $('.error-message').hide().find('.error-text').text(''); // Очищаємо повідомлення про помилки
     customerModal.modal('show');
 });
 
@@ -93,6 +94,7 @@ $(document).on('click', '.edit-customer', function() {
 
             // Update modal title and show
             customerModal.find('.modal-title').text('Edit Customer');
+            $('.error-message').hide().find('.error-text').text(''); // Очищаємо повідомлення про помилки
             customerModal.modal('show');
         }
     });
@@ -100,83 +102,79 @@ $(document).on('click', '.edit-customer', function() {
 
 // Save customer
 $("#saveCustomer").on("click", function () {
-    var data = $("#customerForm").serializeArray();
-    var requestPayload = {
-        card_number: null,
-        cust_surname: null,
-        cust_name: null,
-        cust_patronymic: null,
-        phone_number: null,
-        city: null,
-        street: null,
-        zip_code: null,
-        percent: null
-    };
+    if (validateCustomerForm()) {
+        var data = $("#customerForm").serializeArray();
+        var requestPayload = {
+            card_number: null,
+            cust_surname: null,
+            cust_name: null,
+            cust_patronymic: null,
+            phone_number: null,
+            city: null,
+            street: null,
+            zip_code: null,
+            percent: null
+        };
 
-    // Build object from form fields
-    for (var i = 0; i < data.length; ++i) {
-        var element = data[i];
-        switch(element.name) {
-            case 'card_number':
-                requestPayload.card_number = element.value;
-                break;
-            case 'cust_surname':
-                requestPayload.cust_surname = element.value;
-                break;
-            case 'cust_name':
-                requestPayload.cust_name = element.value;
-                break;
-            case 'cust_patronymic':
-                requestPayload.cust_patronymic = element.value;
-                break;
-            case 'phone_number':
-                requestPayload.phone_number = element.value;
-                break;
-            case 'city':
-                requestPayload.city = element.value;
-                break;
-            case 'street':
-                requestPayload.street = element.value;
-                break;
-            case 'zip_code':
-                requestPayload.zip_code = element.value;
-                break;
-            case 'percent':
-                requestPayload.percent = element.value;
-                break;
-        }
-    }
-
-    console.log("Sending payload:", requestPayload); // Debug logging
-
-    // Validate required fields
-    if (!requestPayload.card_number || !requestPayload.cust_surname || !requestPayload.cust_name) {
-        alert("Card number, surname and name are required fields!");
-        return;
-    }
-
-    // Send POST request
-    $.ajax({
-        type: "POST",
-        url: '/insertCustomer',
-        data: {
-            data: JSON.stringify(requestPayload)
-        },
-        success: function(response) {
-            console.log("Response:", response); // Debug logging
-            if($("#card_number").prop('readonly')) {
-                alert("Customer updated successfully!");
-            } else {
-                alert("Customer added successfully!");
+        // Build object from form fields
+        for (var i = 0; i < data.length; ++i) {
+            var element = data[i];
+            switch(element.name) {
+                case 'card_number':
+                    requestPayload.card_number = element.value;
+                    break;
+                case 'cust_surname':
+                    requestPayload.cust_surname = element.value;
+                    break;
+                case 'cust_name':
+                    requestPayload.cust_name = element.value;
+                    break;
+                case 'cust_patronymic':
+                    requestPayload.cust_patronymic = element.value;
+                    break;
+                case 'phone_number':
+                    requestPayload.phone_number = element.value;
+                    break;
+                case 'city':
+                    requestPayload.city = element.value;
+                    break;
+                case 'street':
+                    requestPayload.street = element.value;
+                    break;
+                case 'zip_code':
+                    requestPayload.zip_code = element.value;
+                    break;
+                case 'percent':
+                    requestPayload.percent = element.value;
+                    break;
             }
-            customerModal.modal('hide');
-            loadCustomers(); // refresh table
-        },
-        error: function(xhr, status, error) {
-            console.error("Error details:", xhr.responseText); // Debug logging
-            alert("Error while saving customer: " + error);
         }
-    });
+
+        console.log("Sending payload:", requestPayload); // Debug logging
+
+        // Send POST request
+        $.ajax({
+            type: "POST",
+            url: '/insertCustomer',
+            data: {
+                data: JSON.stringify(requestPayload)
+            },
+            success: function(response) {
+                console.log("Response:", response); // Debug logging
+                if($("#card_number").prop('readonly')) {
+                    alert("Customer updated successfully!");
+                } else {
+                    alert("Customer added successfully!");
+                }
+                customerModal.modal('hide');
+                loadCustomers(); // refresh table
+            },
+            error: function(xhr, status, error) {
+                console.error("Error details:", xhr.responseText); // Debug logging
+                alert("Error while saving customer: " + error);
+            }
+        });
+    }
 });
 
 // Delete customer
@@ -200,9 +198,10 @@ $(document).on("click", ".delete-customer", function () {
     }
 });
 
-// Reset form when modal is closed
+// Reset form and clear errors when modal is closed
 customerModal.on('hide.bs.modal', function(){
     $("#customerForm")[0].reset();
+    $('.error-message').hide().find('.error-text').text('');
 });
 
 // Sort/filter functionality
@@ -284,3 +283,119 @@ $("#searchBySurname").on("click", function () {
         $("#contactInfoResult").html("Error while fetching contact info.").show();
     });
 });
+
+// Function to validate customer form
+function validateCustomerForm() {
+    let isValid = true;
+    const errors = {};
+
+    // Скидання попередніх повідомлень про помилки
+    $('.error-message').hide();
+
+    // Валідація Card Number
+    const cardNumber = $('#card_number').val().trim();
+    if (!cardNumber) {
+        errors.card_number = 'Заповніть це поле. Формат: 13 цифр. Приклад: 1234567890123';
+        isValid = false;
+    } else if (!/^\d{13}$/.test(cardNumber)) {
+        errors.card_number = 'Номер картки має складатися з 13 цифр. Приклад: 1234567890123';
+        isValid = false;
+    }
+
+    // Валідація Surname
+    const surname = $('#cust_surname').val().trim();
+    if (!surname) {
+        errors.cust_surname = 'Заповніть це поле. Приклад: Smith';
+        isValid = false;
+    } else if (surname.length > 50) {
+        errors.cust_surname = 'Прізвище не може перевищувати 50 символів.';
+        isValid = false;
+    } else if (!/^[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)*(?:'[A-Za-zА-Яа-яіїєґ]*)?$/.test(surname)) {
+        errors.cust_surname = 'Прізвище має починатися з великої літери, після дефіса наступна частина також з великої (тільки літери, апострофи або дефіси). Приклад: Smith або Smith-Jones';
+        isValid = false;
+    }
+
+    // Валідація Name
+    const name = $('#cust_name').val().trim();
+    if (!name) {
+        errors.cust_name = 'Заповніть це поле. Приклад: Tom';
+        isValid = false;
+    } else if (name.length > 50) {
+        errors.cust_name = 'Ім\'я не може перевищувати 50 символів.';
+        isValid = false;
+    } else if (!/^[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)*(?:'[A-Za-zА-Яа-яіїєґ]*)?$/.test(name)) {
+        errors.cust_name = 'Ім\'я має починатися з великої літери, після дефіса наступна частина також з великої (тільки літери, апострофи або дефіси). Приклад: Tom або Mary-Jane';
+        isValid = false;
+    }
+
+    // Валідація Patronymic
+    const patronymic = $('#cust_patronymic').val().trim();
+    if (patronymic && patronymic.length > 50) {
+        errors.cust_patronymic = 'По батькові не може перевищувати 50 символів.';
+        isValid = false;
+    } else if (patronymic && !/^[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)*(?:'[A-Za-zА-Яа-яіїєґ]*)?$/.test(patronymic)) {
+        errors.cust_patronymic = 'По батькові має починатися з великої літери, після дефіса наступна частина також з великої (тільки літери, апострофи або дефіси). Приклад: Ivanovich';
+        isValid = false;
+    }
+
+    // Валідація Phone Number
+    const phone = $('#phone_number').val().trim();
+    if (!/^\+\d{12}$/.test(phone)) {
+        errors.phone_number = 'Номер телефону має бути у форматі +XXXXXXXXXXXX (12 цифр). Приклад: +380123456789';
+        isValid = false;
+    }
+
+    // Валідація Discount Percent
+    const percent = $('#percent').val().trim();
+    if (!percent) {
+        errors.percent = 'Заповніть це поле. Приклад: 10';
+        isValid = false;
+    } else {
+        const percentNum = parseFloat(percent);
+        if (isNaN(percentNum) || percentNum < 0 || percentNum > 100) {
+            errors.percent = 'Відсоток знижки має бути числом від 0 до 100. Приклад: 10';
+            isValid = false;
+        }
+    }
+
+    // Валідація City
+    const city = $('#city').val().trim();
+    if (!city) {
+        errors.city = 'Заповніть це поле. Приклад: Kyiv';
+        isValid = false;
+    } else if (city.length > 50) {
+        errors.city = 'Назва міста не може перевищувати 50 символів.';
+        isValid = false;
+    } else if (!/^[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)?$/.test(city)) {
+        errors.city = 'Місто має починатися з великої літери, після дефіса наступна частина також з великої (тільки літери, апострофи або дефіси). Приклад: Kyiv або Nova-Kahovka';
+        isValid = false;
+    }
+
+    // Валідація Street
+    const street = $('#street').val().trim();
+    if (!street) {
+        errors.street = 'Заповніть це поле. Приклад: Main-Street, 123';
+        isValid = false;
+    } else if (!/^([A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)([-\s][A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)*,\s\d{1,3}[A-ZА-ЯІЇЄҐ]?$/.test(street)) {
+        errors.street = 'Вулиця має починатися з великої літери, після дефіса або пробілу наступна частина також з великої, після коми — номер (до 3 цифр). Приклад: Main-Street, 123';
+        isValid = false;
+    }
+
+    // Валідація ZIP Code
+    const zipCode = $('#zip_code').val().trim();
+    if (!zipCode) {
+        errors.zip_code = 'Заповніть це поле. Приклад: 12345';
+        isValid = false;
+    } else if (zipCode.length !== 5 || !/^\d+$/.test(zipCode)) {
+        errors.zip_code = 'Поштовий індекс має складатися з 5 цифр. Приклад: 12345';
+        isValid = false;
+    }
+
+    // Відображення помилок
+    for (let field in errors) {
+        $(`#${field}_error`).find('.error-text').text(errors[field]);
+        $(`#${field}_error`).show();
+    }
+
+    return isValid;
+}

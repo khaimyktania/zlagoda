@@ -301,6 +301,8 @@ $(document).ready(function() {
             productModal.find('.modal-title').text('Add New Product');
             $("#productForm")[0].reset();
             $("#id_product").val('');
+            $('.error-message').hide().find('.error-text').text(''); // Очищаємо повідомлення про помилки
+            $('.is-invalid').removeClass('is-invalid'); // Очищаємо підсвічування
             loadCategories();
             productModal.modal('show');
         });
@@ -328,8 +330,6 @@ $(document).ready(function() {
             resetSearchUI();
             loadProducts();
         });
-
-
     }
 });
 
@@ -376,6 +376,8 @@ $(document).on('click', '.edit-product', function() {
 
     // Оновлення заголовка модалки та показ
     productModal.find('.modal-title').text('Edit Product');
+    $('.error-message').hide().find('.error-text').text(''); // Очищаємо повідомлення про помилки
+    $('.is-invalid').removeClass('is-invalid'); // Очищаємо підсвічування
     productModal.modal('show');
 });
 
@@ -413,85 +415,63 @@ $(window).on('hashchange', function() {
 // Функція для валідації форми продукту
 function validateProductForm() {
     let isValid = true;
+    const errors = {};
 
-    // Очищення попередніх повідомлень про помилки
-    clearFormErrors();
+    // Скидання попередніх повідомлень про помилки та підсвічування
+    $('.error-message').hide().find('.error-text').text('');
+    $('.is-invalid').removeClass('is-invalid');
 
     // Валідація product_name
     const productName = $("#product_name").val().trim();
     if (!productName) {
-        markFieldAsInvalid("product_name", "Product name is required");
+        errors.product_name = 'Заповніть це поле. Приклад: Laptop';
+        isValid = false;
+    } else if (productName.length > 100) {
+        errors.product_name = 'Назва продукту не може перевищувати 100 символів.';
+        isValid = false;
+    } else if (!/^[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ\s\-\']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ\s\-\']*)?$/.test(productName)) {
+        errors.product_name = 'Назва продукту має починатися з великої літери, після дефіса наступна частина також з великої (тільки літери, пробіли, апострофи або дефіси). Приклад: Laptop або Super-Gadget';
         isValid = false;
     }
 
     // Валідація category_number
     const categoryNumber = $("#category_number").val();
     if (!categoryNumber) {
-        markFieldAsInvalid("category_number", "Please select a category");
+        errors.category_number = 'Оберіть категорію.';
         isValid = false;
     }
 
     // Валідація characteristics
     const characteristics = $("#characteristics").val().trim();
     if (!characteristics) {
-        markFieldAsInvalid("characteristics", "Product characteristics are required");
+        errors.characteristics = 'Заповніть це поле. Приклад: 16GB RAM, 512GB SSD';
+        isValid = false;
+    } else if (characteristics.length > 255) {
+        errors.characteristics = 'Характеристики не можуть перевищувати 255 символів.';
         isValid = false;
     }
 
     // Валідація producer
     const producer = $("#producer").val().trim();
     if (!producer) {
-        markFieldAsInvalid("producer", "Producer is required");
+        errors.producer = 'Заповніть це поле. Приклад: Dell';
+        isValid = false;
+    } else if (producer.length > 50) {
+        errors.producer = 'Виробник не може перевищувати 50 символів.';
+        isValid = false;
+    } else if (!/^[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ\s\-\']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ\s\-\']*)?$/.test(producer)) {
+        errors.producer = 'Виробник має починатися з великої літери, після дефіса наступна частина також з великої (тільки літери, пробіли, апострофи або дефіси). Приклад: Dell або Super-Tech';
         isValid = false;
     }
 
-    return isValid;
-}
-
-// Функція для позначення поля як невалідного
-function markFieldAsInvalid(fieldId, errorMessage) {
-    const field = $(`#${fieldId}`);
-    const feedbackId = `${fieldId}Feedback`;
-
-    // Перевіряємо, чи існує елемент зворотного зв'язку
-    let feedbackElement = $(`#${feedbackId}`);
-
-    // Якщо елемент зворотного зв'язку не існує, створюємо його
-    if (feedbackElement.length === 0) {
-        feedbackElement = $(`<div id="${feedbackId}" class="invalid-feedback"></div>`);
-        field.after(feedbackElement);
+    // Відображення помилок і підсвічування
+    for (let field in errors) {
+        $(`#${field}_error`).find('.error-text').text(errors[field]);
+        $(`#${field}_error`).show();
+        $(`#${field}`).addClass('is-invalid');
     }
 
-    // Додаємо клас is-invalid та стилі програмно
-    field.addClass("is-invalid");
-    field.css({
-        'border': '2px solid #dc3545',
-        'background-color': 'rgba(220, 53, 69, 0.05)',
-        'box-shadow': '0 0 0 0.2rem rgba(220, 53, 69, 0.25)'
-    });
-
-    // Встановлюємо повідомлення про помилку та показуємо його
-
-    console.log(`Field ${fieldId} marked as invalid with message: ${errorMessage}`);
-}
-
-// Функція для додавання необхідних елементів форми, якщо їх немає
-function prepareFormValidation() {
-    // Перевіряємо наявність полів зворотного зв'язку для всіх полів форми
-    const formFields = ["product_name", "category_number", "characteristics", "producer"];
-
-    formFields.forEach(field => {
-        const feedbackId = `${field}Feedback`;
-        if ($(`#${feedbackId}`).length === 0) {
-            $(`#${field}`).after(`<div id="${feedbackId}" class="invalid-feedback" style="display: none;"></div>`);
-        }
-    });
-
-    // Додаємо стилі валідації
-    addValidationStyles();
-
-    // Налаштовуємо обробники подій для полів форми
-    setupFormValidation();
+    return isValid;
 }
 
 // Оновлений обробник для кнопки збереження
@@ -557,28 +537,7 @@ $(document).on("click", "#saveProduct", function(e) {
         },
         error: function(xhr, status, error) {
             console.error("Error details:", xhr.responseText);
-
-            if (xhr.status === 400) {
-                try {
-                    // Спробуємо розпарсити відповідь сервера і відобразити помилки валідації
-                    let response = JSON.parse(xhr.responseText);
-                    if (response.validation_errors) {
-                        clearFormErrors();
-
-                        // Відображаємо кожну помилку від сервера
-                        for (const field in response.validation_errors) {
-                            markFieldAsInvalid(field, response.validation_errors[field]);
-                        }
-                    } else {
-                        alert("Validation error: " + response.message || error);
-                    }
-                } catch (e) {
-                    console.error("Error parsing response:", e);
-                    alert("Error while saving product: " + error);
-                }
-            } else {
-                alert("Error while saving product: " + error);
-            }
+            alert("Error while saving product: " + error);
         }
     });
 });
@@ -587,83 +546,19 @@ $(document).on("click", "#saveProduct", function(e) {
 function initializeProductForm() {
     console.log("Initializing product form");
 
-    // Підготовка елементів форми для валідації
-    prepareFormValidation();
-
     // Обробники подій при відкритті та закритті модального вікна
     productModal.on('show.bs.modal', function() {
-        clearFormErrors();
-        console.log("Modal showing, cleared form errors");
+        $('.error-message').hide().find('.error-text').text('');
+        $('.is-invalid').removeClass('is-invalid');
+        console.log("Modal showing, cleared form errors and highlights");
     });
 
     productModal.on('hide.bs.modal', function() {
         $("#productForm")[0].reset();
         $("#id_product").val('');
         productModal.find('.modal-title').text('Add New Product');
-        clearFormErrors();
+        $('.error-message').hide().find('.error-text').text('');
+        $('.is-invalid').removeClass('is-invalid');
         console.log("Modal hiding, reset form and cleared errors");
     });
 }
-
-// Функція для динамічного додавання стилів валідації
-function addValidationStyles() {
-    // Перевіряємо, чи вже додані стилі
-    if (!$('#validation-styles').length) {
-        const styleElement = $('<style id="validation-styles">')
-            .text(`
-                input.is-invalid, select.is-invalid, textarea.is-invalid, .form-control.is-invalid {
-                    border: 2px solid #dc3545 !important;
-                    background-color: rgba(220, 53, 69, 0.05) !important;
-                    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
-                }
-                .invalid-feedback {
-                    color: #dc3545 !important;
-                    display: block !important;
-                    margin-top: 0.25rem !important;
-                    font-size: 0.875em !important;
-                }
-            `);
-        $('head').append(styleElement);
-        console.log("Validation styles added programmatically");
-    }
-}
-
-// Встановлення обробників полів форми
-function setupFormValidation() {
-    // Додаємо обробники для всіх полів форми
-    $("#productForm .form-control").on("input blur", function() {
-        validateField($(this));
-    });
-}
-
-// Функція для очищення всіх помилок форми
-function clearFormErrors() {
-    const formFields = $("#productForm .form-control");
-    formFields.removeClass("is-invalid");
-    formFields.css({
-        'border': '',
-        'background-color': '',
-        'box-shadow': ''
-    });
-    $(".invalid-feedback").hide();
-    console.log("All form errors cleared");
-}
-
-// Функція для валідації окремого поля
-function validateField(field) {
-    const fieldId = field.attr('id');
-    const feedbackElement = $(`#${fieldId}Feedback`);
-
-    // Прибираємо помилку, якщо поле має значення
-    if (field.val().trim()) {
-        field.removeClass("is-invalid");
-        field.css({
-            'border': '',
-            'background-color': '',
-            'box-shadow': ''
-        });
-        feedbackElement.hide();
-        console.log(`Field ${fieldId} validated successfully`);
-    }
-}
-

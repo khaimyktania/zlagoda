@@ -18,10 +18,10 @@
 
     <style>
         .logout-btn-fixed {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    }
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
         /* Always visible sidebar on desktop */
         @media (min-width: 992px) {
             #mySidebar {
@@ -44,6 +44,61 @@
             #main {
                 margin-left: 0;
             }
+        }
+
+        /* Стилі для повідомлень про помилки */
+        .error-container {
+            position: relative;
+            min-height: 20px;
+        }
+
+        .error-message {
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            align-items: flex-start;
+            z-index: 1000;
+            max-width: 100%;
+        }
+
+        .error-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-color: #ff8c00;
+            color: white;
+            text-align: center;
+            line-height: 16px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-right: 5px;
+            flex-shrink: 0;
+        }
+
+        .error-text {
+            display: inline-block;
+            background-color: white;
+            color: #333;
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            font-size: 12px;
+            white-space: normal;
+            word-wrap: break-word;
+            max-width: calc(100% - 25px);
+        }
+
+        .form-group .error-message {
+            max-width: 100%;
+        }
+
+        /* Стилі для підсвічування червоним */
+        .is-invalid {
+            border: 2px solid #dc3545 !important;
+            background-color: rgba(220, 53, 69, 0.05) !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
         }
     </style>
 </head>
@@ -212,20 +267,44 @@
                         <div class="form-group">
                             <label>Product Name</label>
                             <input class="form-control" name="product_name" id="product_name" type="text" placeholder="Product Name">
+                            <div class="error-container">
+                                <div id="product_name_error" class="error-message" style="display: none;">
+                                    <span class="error-icon">⚠️</span>
+                                    <span class="error-text"></span>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>Category Number</label>
                             <select class="form-control" name="category_number" id="category_number">
                                 <option value="">Select category</option>
                             </select>
+                            <div class="error-container">
+                                <div id="category_number_error" class="error-message" style="display: none;">
+                                    <span class="error-icon">⚠️</span>
+                                    <span class="error-text"></span>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>Characteristics</label>
                             <input class="form-control" name="characteristics" id="characteristics" type="text" placeholder="Characteristics">
+                            <div class="error-container">
+                                <div id="characteristics_error" class="error-message" style="display: none;">
+                                    <span class="error-icon">⚠️</span>
+                                    <span class="error-text"></span>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>Producer</label>
                             <input class="form-control" name="producer" id="producer" type="text" placeholder="Producer">
+                            <div class="error-container">
+                                <div id="producer_error" class="error-message" style="display: none;">
+                                    <span class="error-icon">⚠️</span>
+                                    <span class="error-text"></span>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -291,5 +370,5 @@
         // Add this event listener to ensure openNav works on mobile
         document.getElementById('openNav').addEventListener('click', w3_open);
     </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'939706304fc7afc6',t:'MTc0NjE4MzcyMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
