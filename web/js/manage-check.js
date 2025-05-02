@@ -28,6 +28,12 @@ const API_ENDPOINTS = {
     GET_CUSTOMER_PURCHASES: "/getCustomerPurchasesByDateRange"
 };
 
+// Function to show error in modal
+function showErrorModal(message) {
+    $('#error-message').text(message || 'An error occurred. Please try again.');
+    $('#errorModal').modal('show');
+}
+
 // Додайте цей код у ваш JavaScript-файл
 function clearPageData() {
   // Очистити всі відображувані дані
@@ -96,7 +102,7 @@ $('#search-check').on('click', function() {
     const checkNumber = $('#check-number-search').val().trim();
 
     if (!checkNumber) {
-        alert('Please enter a check number');
+        showErrorModal('Please enter a check number');
         return;
     }
 if (currentUserRole.toLowerCase() === 'manager') {
@@ -140,7 +146,7 @@ if (currentUserRole.toLowerCase() === 'manager') {
         },
         error: function(xhr) {
             $('#loading-indicator').hide();
-            console.error('Error searching for check:', xhr.responseText);
+            showErrorModal('Error searching for check:', xhr.responseText);
             $('#checks-list').html('<div class="alert alert-danger">Error searching for check</div>');
         }
     });
@@ -168,7 +174,7 @@ if (currentUserRole.toLowerCase() === 'manager') {
     // Функція для завантаження даних про покупки
     function loadCustomerPurchases(startDate, endDate) {
         if (!startDate || !endDate) {
-            alert('Please select both start and end dates');
+            showErrorModal('Please select both start and end dates');
             return;
         }
 
@@ -1046,36 +1052,22 @@ function validateCheckNumberLength(inputField) {
     // Regular expression to match our check number format (CH followed by 3+ digits)
     const checkNumberPattern = /^CH\d{3,}$/;
 
-    if (inputField.value && !checkNumberPattern.test(inputField.value)) {
-        alert('Check number must be in format CH followed by at least 3 digits (e.g., CH001)');
+    if (!checkNumberPattern.test(inputField.value)) {
+        showErrorModal('Check number must be in format CH followed by at least 3 digits (e.g., CH001)');
         // Reset to empty or previous valid value
         inputField.value = '';
     }
 }
-
-// Add a validation function for check number input - updated for new format
-// Add a validation function for check number input - updated for new format
-function validateCheckNumberLength(inputField) {
-    // Regular expression to match our check number format (CH followed by 3+ digits)
-    const checkNumberPattern = /^CH\d{3,}$/;
-
-    if (inputField.value && !checkNumberPattern.test(inputField.value)) {
-        alert('Check number must be in format CH followed by at least 3 digits (e.g., CH001)');
-        // Reset to empty or previous valid value
-        inputField.value = '';
-    }
-}
-
 
 // This function should be called in document.ready
 function addCheckNumberValidation() {
     // Add validation for check number input in create form
-    $('#check-number').on('input', function() {
+    $('#check-number').on('blur', function() {
         validateCheckNumberLength(this);
     });
 
     // Add validation for check number search field
-    $('#check-number-search').on('input', function() {
+    $('#check-number-search').on('blur', function() {
         validateCheckNumberLength(this);
     });
 }
@@ -1107,13 +1099,13 @@ function addProductToCheck() {
     const selectedUPC = $('#product-select').val();
 
     if (!selectedUPC) {
-        alert('Please select a product');
+        showErrorModal('Please select a product');
         return;
     }
 
     const quantity = parseInt($('#product-quantity').val());
     if (!quantity || quantity <= 0) {
-        alert('Please enter a valid quantity');
+        showErrorModal('Please enter a valid quantity');
         return;
     }
 
@@ -1214,7 +1206,7 @@ function updateCheckTotals() {
 // Save check to database - остаточно виправлена функція
 function saveCheck() {
     if (currentCheckItems.length === 0) {
-        alert('Please add at least one product to the check');
+        showErrorModal('Please add at least one product to the check');
         return;
     }
 
@@ -1475,7 +1467,7 @@ function applyFilters() {
     let cashierId = $('#cashier-select').val();
 
     if (!startDate || !endDate) {
-        alert('Будь ласка, виберіть початкову та кінцеву дати');
+        showErrorModal('Будь ласка, виберіть початкову та кінцеву дати');
         return;
     }
 
@@ -1556,7 +1548,7 @@ function searchCheckByNumber() {
     const checkNumber = $('#check-number-search').val().trim();
 
     if (!checkNumber) {
-        alert('Please enter a check number');
+        showErrorModal('Please enter a check number');
         return;
     }
 
@@ -1591,7 +1583,7 @@ function viewCheckDetails(checkNumber) {
                     if (currentUserRole.toLowerCase() === 'cashier' && checkEmployeeId !== userId) {
                         console.warn("Access denied: Cashier attempting to view another cashier's check");
                         $('#checkDetailsModal').modal('hide');
-                        alert('You do not have permission to view this check.');
+                        showErrorModal('You do not have permission to view this check.');
                         return;
                     }
 
@@ -1612,13 +1604,13 @@ function viewCheckDetails(checkNumber) {
                 } else {
                     console.warn("Check not found or invalid data:", checkData);
                     $('#checkDetailsModal').modal('hide');
-                    alert('Check not found');
+                    showErrorModal('Check not found');
                 }
             },
             error: function(xhr, status, error) {
                 console.error('Error getting check details:', xhr.responseText, status, error);
                 $('#checkDetailsModal').modal('hide');
-                alert('Error loading check details: ' + error);
+                showErrorModal('Error loading check details: ' + error);
             }
         });
     }
