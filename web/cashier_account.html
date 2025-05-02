@@ -118,6 +118,7 @@ function viewFullInfo() {
                 ['Address', (data.city && data.street && data.zip_code) ? `${data.city}, ${data.street}, ${data.zip_code}` : null]
             ];
 
+
             output = fields
                 .filter(([_, value]) => value && value !== '')
                 .map(([label, value]) => `<p><strong>${label}:</strong> ${value}</p>`)
