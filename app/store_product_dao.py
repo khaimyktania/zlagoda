@@ -317,3 +317,49 @@ def get_all_store_products_sorted(connection):
         except Exception as e:
             print(f"Помилка в get_all_store_products_sorted: {e}")
             raise
+def generate_upc(connection):
+    """
+    Generate a new UPC by finding the maximum existing UPC and incrementing by 1
+    """
+    query = "SELECT MAX(CAST(UPC AS UNSIGNED)) FROM store_products"
+    try:
+        cursor = connection.cursor()
+        cursor.execute(query)
+        result = cursor.fetchone()
+        max_upc = result[0] if result[0] else 0
+        new_upc = str(int(max_upc) + 1).zfill(12)  # Форматуємо до 12 цифр
+        return new_upc
+    except Exception as e:
+        print(f"Error generating UPC: {e}")
+        raise
+
+def reprice_store_product(connection, upc, new_price, additional_quantity=0):
+    """
+    Reprice all units of a product to a new price and optionally add new quantity
+    """
+    try:
+        product = get_store_product_by_upc(connection, upc)
+        if not product:
+            return {"success": False, "message": "Product not found"}
+
+        # Оновлюємо ціну та кількість
+        new_quantity = product['products_number'] + additional_quantity
+        update_data = {
+            "UPC": upc,
+            "UPC_prom": product['UPC_prom'],
+            "id_product": product['id_product'],
+            "selling_price": new_price,
+            "products_number": new_quantity,
+            "promotional_product": product['promotional_product']
+        }
+
+        update_store_product(connection, update_data)
+        return {
+            "success": True,
+            "message": "Product repriced and quantity updated successfully",
+            "new_price": new_price,
+            "new_quantity": new_quantity
+        }
+    except Exception as e:
+        print(f"Error repricing product: {e}")
+        return {"success": False, "message": str(e)}

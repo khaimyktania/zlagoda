@@ -583,6 +583,33 @@ def get_store_product_by_upc():
     finally:
         connection.close()
 
+@app.route('/generateUPC', methods=['GET'])
+@require_role('manager')
+def generate_upc():
+    connection = get_sql_connection()
+    try:
+        new_upc = store_product_dao.generate_upc(connection)
+        return jsonify({"success": True, "upc": new_upc})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+    finally:
+        connection.close()
+
+@app.route('/repriceStoreProduct', methods=['POST'])
+@require_role('manager')
+def reprice_store_product():
+    connection = get_sql_connection()
+    try:
+        upc = request.form['upc']
+        new_price = float(request.form['new_price'])
+        additional_quantity = int(request.form.get('additional_quantity', 0))
+        result = store_product_dao.reprice_store_product(connection, upc, new_price, additional_quantity)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+    finally:
+        connection.close()
+
 @app.route('/insertStoreProduct', methods=['POST'])
 @require_role('manager')
 def insert_store_product():

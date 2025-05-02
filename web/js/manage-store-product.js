@@ -17,6 +17,8 @@ const getPromotionalProductsSortedByNameApiUrl = "/getPromotionalProductsSortedB
 const getNonPromotionalProductsSortedByQuantityApiUrl = "/getNonPromotionalProductsSortedByQuantity";
 const getNonPromotionalProductsSortedByNameApiUrl = "/getNonPromotionalProductsSortedByName";
 const getAllProductsSortedByQuantityApiUrl = "/getAllProductsSortedByQuantity";
+const generateUPCApiUrl = "/generateUPC";
+const repriceStoreProductApiUrl = "/repriceStoreProduct";
 
 let currentRole = null;
 fetch('/api/employee_info', {
@@ -102,16 +104,10 @@ function renderProductsTable(products) {
     if (products) {
         let table = '';
         $.each(products, function (index, product) {
-            // Determine if this is a promotional product for row styling
             const promotionalClass = product.promotional_product == 1 ? 'promotional-product' : '';
-
-            // Format price with VAT
             const priceWithVAT = parseFloat(product.selling_price).toFixed(2);
-
-            // UPC_prom might be null for non-promotional products
             const promotionalUPC = product.UPC_prom || '-';
 
-            // Create table row
             table += '<tr class="' + promotionalClass + '" data-upc="' + product.UPC +
                 '" data-product-id="' + product.id_product +
                 '" data-product-name="' + product.product_name +
@@ -129,13 +125,14 @@ function renderProductsTable(products) {
                 '<td>' +
                     '<div class="btn-group">';
 
-            // Додаємо кнопку "Details" для всіх ролей
+            // Кнопка "Details" для всіх
             table += '<button class="btn btn-xs btn-info view-product-details">Details</button> ';
 
-            // Додаємо інші кнопки лише для ролі manager
+            // Кнопки для менеджера
             if (currentRole === 'manager') {
                 table += '<button class="btn btn-xs btn-primary edit-store-product">Edit</button> ' +
                          '<button class="btn btn-xs btn-danger delete-store-product">Delete</button> ' +
+                         '<button class="btn btn-xs btn-warning reprice-store-product">Reprice</button> ' +
                          (product.promotional_product == 1 ?
                             '<button class="btn btn-xs btn-warning make-non-promotional">Make Non-Promotional</button>' :
                             '<button class="btn btn-xs btn-success make-promotional">Make Promotional</button>'
@@ -173,7 +170,22 @@ function loadProductDropdown() {
         }
     });
 }
-
+$('#storeProductModal').on('show.bs.modal', function(e) {
+    var modalTitle = $(this).find('.modal-title').text();
+    if (modalTitle === 'Add New Store Product') {
+        // Очищаємо поле UPC
+        $('#UPC').val('');
+        // Запитуємо новий UPC
+        $.get(generateUPCApiUrl, function(response) {
+            if (response.success) {
+                $('#UPC').val(response.upc);
+                $('#UPC').prop('readonly', true); // Робимо поле тільки для читання
+            } else {
+                alert('Error generating UPC: ' + response.error);
+            }
+        });
+    }
+});
 // Initialize all event handlers
 function initEventHandlers() {
     // Add new store product button
@@ -200,7 +212,10 @@ function initEventHandlers() {
         var tr = $(this).closest('tr');
         deleteStoreProduct(tr);
     });
-
+$(document).on('click', '.reprice-store-product', function() {
+        var tr = $(this).closest('tr');
+        openRepriceModal(tr);
+    });
     // Make product promotional
     $(document).on('click', '.make-promotional', function() {
         var tr = $(this).closest('tr');
@@ -307,6 +322,93 @@ function initEventHandlers() {
 // Update filter status text
 function updateFilterStatus(statusText) {
     $('#filterStatus').text(statusText);
+}
+
+function openRepriceModal(tr) {
+    var upc = tr.data('upc');
+    var productName = tr.data('product-name');
+    var currentPrice = tr.data('selling-price');
+
+    // Створюємо модальне вікно для переоцінки
+    var modalHtml = `
+        <div class="modal fade" id="repriceModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Reprice Product: ${productName}</h5>
+                    </div>
+                    <div class="modal-body">
+                        <form id="repriceForm">
+                            <div class="form-group">
+                                <label>UPC</label>
+                                <input class="form-control" id="repriceUPC" value="${upc}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Current Price</label>
+                                <input class="form-control" value="${currentPrice}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>New Price</label>
+                                <input class="form-control" id="newPrice" type="number" step="0.0001" required>
+                                <small class="text-muted">Price includes 20% VAT</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Additional Quantity (optional)</label>
+                                <input class="form-control" id="additionalQuantity" type="number" value="0">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="saveReprice">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Додаємо модальне вікно до DOM
+    $('body').append(modalHtml);
+    var repriceModal = $('#repriceModal');
+    repriceModal.modal('show');
+
+    // Обробник збереження переоцінки
+    $('#saveReprice').on('click', function() {
+        var newPrice = $('#newPrice').val();
+        var additionalQuantity = $('#additionalQuantity').val();
+
+        if (!newPrice) {
+            alert('New price is required');
+            return;
+        }
+
+        $.ajax({
+            url: repriceStoreProductApiUrl,
+            type: 'POST',
+            data: {
+                upc: upc,
+                new_price: newPrice,
+                additional_quantity: additionalQuantity
+            },
+            success: function(response) {
+                if (response.success) {
+                    alert('Product repriced successfully');
+                    repriceModal.modal('hide');
+                    loadStoreProducts();
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function(xhr) {
+                alert('Error repricing product: ' + xhr.responseText);
+            }
+        });
+    });
+
+    // Видаляємо модальне вікно після закриття
+    repriceModal.on('hidden.bs.modal', function() {
+        repriceModal.remove();
+    });
 }
 
 // View product details by UPC
