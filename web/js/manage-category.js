@@ -22,6 +22,12 @@ document.querySelectorAll('.tab-link').forEach(link => {
 });
 
 $(document).ready(function() {
+    // Прибирати помилки при введенні в поля
+    $('#category_name').on('input change', function() {
+        const field = $(this).attr('id');
+        $(`#${field}`).removeClass('is-invalid');
+        $(`#${field}_error`).hide();
+    });
     // Load categories when page loads
     loadCategories();
 

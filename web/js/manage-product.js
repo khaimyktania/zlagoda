@@ -286,7 +286,14 @@ function initSearchForm() {
 
 // Оновлена document.ready функція
 $(document).ready(function() {
+    //прибирає помилку і підсвічування коли щось вводиш а не після натиску на кнопку save
     console.log("Document ready, checking if product page:", isProductPage());
+    $('#product_name, #category_number, #characteristics, #producer').on('input change', function () {
+        const field = $(this).attr('id');
+        $(`#${field}`).removeClass('is-invalid');
+        $(`#${field}_error`).hide();
+    });
+
     // Load products and filters when page loads
     if (isProductPage()) {
         console.log("This is a product page, loading products and filters");
@@ -429,9 +436,6 @@ function validateProductForm() {
     } else if (productName.length > 100) {
         errors.product_name = 'Назва продукту не може перевищувати 100 символів.';
         isValid = false;
-    } else if (!/^[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ\s\-\']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ\s\-\']*)?$/.test(productName)) {
-        errors.product_name = 'Назва продукту має починатися з великої літери, після дефіса наступна частина також з великої (тільки літери, пробіли, апострофи або дефіси). Приклад: Laptop або Super-Gadget';
-        isValid = false;
     }
 
     // Валідація category_number
@@ -458,9 +462,6 @@ function validateProductForm() {
         isValid = false;
     } else if (producer.length > 50) {
         errors.producer = 'Виробник не може перевищувати 50 символів.';
-        isValid = false;
-    } else if (!/^[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ\s\-\']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ\s\-\']*)?$/.test(producer)) {
-        errors.producer = 'Виробник має починатися з великої літери, після дефіса наступна частина також з великої (тільки літери, пробіли, апострофи або дефіси). Приклад: Dell або Super-Tech';
         isValid = false;
     }
 

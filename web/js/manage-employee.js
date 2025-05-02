@@ -168,6 +168,13 @@ $("#saveEmployee").on("click", function () {
 employeeModal.on('hide.bs.modal', function(){
     $("#employeeForm")[0].reset();
     $('.error-message').hide().find('.error-text').text('');
+    $('.form-control').removeClass('is-invalid');
+});
+
+$("#empl_surname, #empl_name, #empl_patronymic, #empl_role, #salary, #date_of_birth, #date_of_start, #phone_number, #city, #street, #zip_code").on('input change', function() {
+    const field = $(this).attr('id');
+    $(`#${field}`).removeClass('is-invalid');
+    $(`#${field}_error`).hide();
 });
 
 // Delete employee
@@ -250,7 +257,8 @@ function validateEmployeeForm() {
     const errors = {};
 
     // Скидання попередніх повідомлень про помилки
-    $('.error-message').hide();
+    $('.error-message').hide().find('.error-text').text('');
+    $('.is-invalid').removeClass('is-invalid'); // Видаляємо клас is-invalid з усіх полів вводу
 
     // Валідація Surname
     const surname = $('#empl_surname').val().trim();
@@ -380,6 +388,7 @@ function validateEmployeeForm() {
     for (let field in errors) {
         $(`#${field}_error`).find('.error-text').text(errors[field]);
         $(`#${field}_error`).show();
+        $(`#${field}`).addClass('is-invalid');
     }
 
     return isValid;

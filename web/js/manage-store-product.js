@@ -315,6 +315,12 @@ function initEventHandlers() {
             }
         }
     });
+    // Прибирати помилки при введенні в поля
+    $('#UPC, #UPC_prom, #id_product, #selling_price, #products_number').on('input change', function() {
+        const field = $(this).attr('id');
+        $(`#${field}`).removeClass('is-invalid');
+        $(`#${field}_error`).hide();
+    });
 }
 
 // Update filter status text
