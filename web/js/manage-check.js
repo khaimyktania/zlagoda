@@ -22,7 +22,8 @@ const API_ENDPOINTS = {
     INSERT_CHECK: "/insertCheck",
     DELETE_CHECK: "/deleteCheck",
     GET_CHECKS_BY_DATE_RANGE: "/getChecksByDateRange",
-    GET_CASHIER_TOTAL_SALES: "/getCashierTotalSales"
+    GET_CASHIER_TOTAL_SALES: "/getCashierTotalSales",
+    GET_PRODUCT_SALES_BY_NAME: "/api/product_sales_by_name"
 };
 
 // Додайте цей код у ваш JavaScript-файл
@@ -45,7 +46,7 @@ $(document).ready(function() {
     loadCheckStatistics('all');
     loadRecentChecks();
         loadCashierFilter();
-
+loadStoreProductsForSales();
     // Initialize event handlers
     initEventHandlers();
 
@@ -56,6 +57,12 @@ $(document).ready(function() {
     addCheckNumberValidation();
 
     // Додайте цей код до функції $(document).ready() або до ініціалізації сторінки
+
+$('#calculate-sales-by-name').on('click', function() {
+        calculateProductSalesByName();
+    });
+
+    setDefaultDatesForSales();
 
 // Обробник для кнопки "Apply Filters"
 $('#apply-cashier-filter').on('click', function() {
@@ -266,6 +273,52 @@ $('#cashier-select').on('change', function() {
         }
     });
 
+    // Пошук кількості проданих одиниць
+    $('#search-product-units').on('click', function() {
+        const upc = $('#product-search').val();
+        const startDate = $('#start-date').val();
+        const endDate = $('#end-date').val();
+
+        if (!upc) {
+            alert('Будь ласка, виберіть товар');
+            return;
+        }
+        if (!startDate || !endDate) {
+            alert('Будь ласка, виберіть діапазон дат');
+            return;
+        }
+
+        loadProductUnitsSold(upc, startDate, endDate);
+    });
+ $('#product-search').on('change', function() {
+        updateProductPriceFromSelection();
+    });
+    // Автоматичне оновлення при зміні товару
+    $('#product-search').on('change', function() {
+        if (currentUserRole.toLowerCase() === 'manager') {
+            const upc = $(this).val();
+            const startDate = $('#start-date').val();
+            const endDate = $('#end-date').val();
+            if (upc && startDate && endDate) {
+                loadProductUnitsSold(upc, startDate, endDate);
+            } else {
+                $('#product-units-result').val('0');
+            }
+        }
+    });
+
+    // Автоматичне оновлення при зміні дат
+    $('#start-date, #end-date').on('change', function() {
+        if (currentUserRole.toLowerCase() === 'manager') {
+            const upc = $('#product-search').val();
+            const startDate = $('#start-date').val();
+            const endDate = $('#end-date').val();
+            if (upc && startDate && endDate) {
+                loadProductUnitsSold(upc, startDate, endDate);
+            }
+        }
+    });
+
 // Set default dates for the filter
 function setDefaultDates() {
     const today = new Date();
@@ -307,6 +360,85 @@ function checkCurrentUserRole() {
             loadRecentChecks();
         }
     });
+}
+
+function loadStoreProductsForSales() {
+    console.log("Loading store products for sales filter...");
+    return $.ajax({
+        url: API_ENDPOINTS.GET_STORE_PRODUCTS,
+        type: 'GET',
+        success: function(response) {
+            console.log("Store products for sales filter loaded successfully:", response);
+            storeProducts = response;
+
+            // Заповнюємо розкривний список продуктів
+            let options = '<option value="">Select product</option>';
+            storeProducts.forEach(function(product) {
+                // Показуємо лише продукти в наявності
+                if (product.products_number > 0) {
+                    options += `<option value="${product.product_name}">
+                                ${product.product_name} - $${parseFloat(product.selling_price).toFixed(2)}
+                                </option>`;
+                }
+            });
+            $('#product-sales-select').html(options);
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading store products for sales:', xhr.responseText, status, error);
+            $('#product-sales-select').html('<option value="">Error loading products</option>');
+        }
+    });
+}
+
+// Функція для обчислення продажів за назвою товару
+function calculateProductSalesByName() {
+    const productName = $('#product-sales-select').val();
+    const startDate = $('#sales-start-date').val();
+    const endDate = $('#sales-end-date').val();
+
+    if (!productName) {
+        alert('Please select a product');
+        return;
+    }
+
+    if (!startDate || !endDate) {
+        alert('Please select both start and end dates');
+        return;
+    }
+
+    $.ajax({
+        url: API_ENDPOINTS.GET_PRODUCT_SALES_BY_NAME,
+        type: 'GET',
+        data: {
+            product_name: productName,
+            start_date: startDate + ' 00:00:00',
+            end_date: endDate + ' 23:59:59'
+        },
+        success: function(response) {
+            if (response.success) {
+                $('#sales-result').text(
+                    `Total units sold for "${productName}": ${response.total_quantity}`
+                ).show();
+            } else {
+                $('#sales-result').text(
+                    `Error: ${response.message || 'Unable to calculate sales'}`
+                ).show();
+            }
+        },
+        error: function(xhr) {
+            console.error('Error calculating product sales:', xhr.responseText);
+            $('#sales-result').text('Error calculating product sales').show();
+        }
+    });
+}
+
+function setDefaultDatesForSales() {
+    const today = new Date();
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(today.getDate() - 30);
+
+    $('#sales-end-date').val(formatDateForInput(today));
+    $('#sales-start-date').val(formatDateForInput(thirtyDaysAgo));
 }
 //function loadTotalSalesByCashier(startDate, endDate, cashierId) {
 //    console.log("loadTotalSalesByCashier called with:", { startDate, endDate, cashierId });
@@ -428,28 +560,22 @@ function applyFilters() {
     });
 }
 
-// 3. Створення нової функції для налаштування інтерфейсу залежно від ролі
 function adjustUIBasedOnRole() {
     if (currentUserRole.toLowerCase() === 'cashier') {
-        // Приховуємо фільтр вибору касира
         $('.cashier-filter').hide();
-        // Приховуємо елементи, доступні тільки менеджерам
         $('.admin-only').hide();
-        // Встановлюємо заголовок для касирів
+        $('.product-sales-filter').hide(); // Приховуємо секцію продажів для касирів
         $('#checks-heading').text('My Checks');
+        $('button[data-target="#createCheckModal"]').show(); // Показуємо кнопку для касирів
     } else {
-        // Показуємо фільтр вибору касира
         $('.cashier-filter').show();
-        // Показуємо елементи для менеджерів
         $('.admin-only').show();
-        // Встановлюємо заголовок для менеджерів
+        $('.product-sales-filter').show(); // Показуємо секцію продажів для менеджерів
         $('#checks-heading').text('All Checks');
-        // Дозволяємо вибір будь-якого касира
         $('#cashier-select').prop('disabled', false);
+        $('button[data-target="#createCheckModal"]').hide(); // Приховуємо кнопку для менеджерів
     }
 }
-
-
 // Add this function to adjust UI for cashier role
 // Add this function to adjust UI for cashier role
 function adjustUIForCashierRole() {
@@ -525,27 +651,75 @@ function loadStoreProducts() {
         url: API_ENDPOINTS.GET_STORE_PRODUCTS,
         type: 'GET',
         success: function(response) {
-            console.log("Store products data loaded successfully:", response);
-            storeProducts = response;
+            console.log("Store products data received:", response);
+            if (!Array.isArray(response)) {
+                console.error("Response is not an array:", response);
+                $('#product-search').html('<option value="">Invalid data format</option>');
+                return;
+            }
 
-            // Populate product dropdown
+            storeProducts = response;
             let options = '<option value="">Select product</option>';
-            storeProducts.forEach(function(product) {
-                // Only show products that are in stock
-                if (product.products_number > 0) {
+            let availableProducts = 0;
+
+            storeProducts.forEach(function(product, index) {
+                console.log(`Processing product ${index + 1}:`, product);
+                if (product.products_number > 0 && product.UPC && product.product_name && product.selling_price) {
                     options += `<option value="${product.UPC}"
                                 data-price="${product.selling_price}"
                                 data-name="${product.product_name}"
                                 data-stock="${product.products_number}">
                                 ${product.product_name} - $${parseFloat(product.selling_price).toFixed(2)}
                                 </option>`;
+                    availableProducts++;
+                } else {
+                    console.warn(`Skipping product due to missing data or zero stock:`, product);
                 }
             });
-            $('#product-select').html(options);
+
+            console.log(`Found ${availableProducts} available products`);
+            $('#product-search').html(options);
+
+            if (availableProducts === 0) {
+                $('#product-search').html('<option value="">No products available</option>');
+            }
         },
         error: function(xhr, status, error) {
             console.error('Error loading store products:', xhr.responseText, status, error);
-            $('#product-select').html('<option value="">Error loading products</option>');
+            $('#product-search').html('<option value="">Error loading products</option>');
+        }
+    });
+}
+
+function loadProductUnitsSold(upc, startDate, endDate) {
+    if (currentUserRole.toLowerCase() !== 'manager') {
+        $('#product-units-result').val('N/A');
+        return;
+    }
+
+    if (!upc || !startDate || !endDate) {
+        $('#product-units-result').val('0');
+        return;
+    }
+
+    $.ajax({
+        url: API_ENDPOINTS.GET_PRODUCT_UNITS_SOLD,
+        type: 'GET',
+        data: {
+            upc: upc,
+            start_date: startDate + ' 00:00:00',
+            end_date: endDate + ' 23:59:59'
+        },
+        success: function(response) {
+            if (response.success) {
+                $('#product-units-result').val(response.total_units_sold);
+            } else {
+                $('#product-units-result').val('0');
+            }
+        },
+        error: function(xhr) {
+            console.error('Помилка завантаження кількості проданих одиниць:', xhr.responseText);
+            $('#product-units-result').val('Помилка');
         }
     });
 }

@@ -1147,6 +1147,36 @@ def get_cashiers_api():
     finally:
         if connection:
             connection.close()
+@app.route('/api/product_sales_by_name', methods=['GET'])
+@require_role('manager')
+def get_product_sales_by_name():
+    connection = None
+    try:
+        product_name = request.args.get('product_name')
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+
+        if not product_name or not start_date or not end_date:
+            return jsonify({
+                'success': False,
+                'message': 'Product name, start date, and end date are required'
+            }), 400
+
+        connection = get_sql_connection()
+        response = check_dao.get_product_sales_by_name_and_period(
+            connection, product_name, start_date, end_date
+        )
+
+        return jsonify({
+            'success': True,
+            'total_quantity': float(response['total_quantity']) if response['total_quantity'] else 0.0
+        })
+    except Exception as e:
+        print(f"Error in get_product_sales_by_name: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
 
 if __name__ == "__main__":
     print("Starting Python Flask Server For Grocery Store Management System")

@@ -22,6 +22,8 @@
             bottom: 0;
             width: 100%;
         }
+
+
         /* Always visible sidebar on desktop */
         @media (min-width: 992px) {
             #mySidebar {
@@ -113,6 +115,12 @@
             gap: 10px;
             align-items: center;
         }
+        .manager-only {
+    display: none;
+}
+.manager-only.active {
+    display: block;
+}
 
         .statistics-section {
             background-color: #e9ecef;
@@ -279,8 +287,35 @@
                                         </div>
                                     </div>
                                 </div>
+                                <!-- Product Sales by Name Filter Section -->
+<!-- Product Sales by Name Filter Section -->
+<div class="filter-section product-sales-filter">
+    <h4>Product Sales by Period</h4>
+    <div class="form-row align-items-end">
+        <div class="col-md-5">
+            <label for="product-sales-select">Product</label>
+            <select class="form-control" id="product-sales-select">
+                <option value="">Select product</option>
+                <!-- Products will be populated dynamically -->
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="sales-start-date">From</label>
+            <input type="date" class="form-control" id="sales-start-date">
+        </div>
+        <div class="col-md-3">
+            <label for="sales-end-date">To</label>
+            <input type="date" class="form-control" id="sales-end-date">
+        </div>
+        <div class="col-md-1">
+            <button class="btn btn-primary" id="calculate-sales-by-name">Calculate</button>
+        </div>
+    </div>
+    <div class="alert alert-info mt-3" id="sales-result" style="display: none;"></div>
+</div>
                             </div>
                         </div>
+
                     </div>
 
                     <!-- Action Buttons -->
