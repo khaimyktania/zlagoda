@@ -23,7 +23,8 @@ const API_ENDPOINTS = {
     DELETE_CHECK: "/deleteCheck",
     GET_CHECKS_BY_DATE_RANGE: "/getChecksByDateRange",
     GET_CASHIER_TOTAL_SALES: "/getCashierTotalSales",
-    GET_PRODUCT_SALES_BY_NAME: "/api/product_sales_by_name"
+    GET_PRODUCT_SALES_BY_NAME: "/api/product_sales_by_name",
+    GET_CUSTOMER_PURCHASES: "/getCustomerPurchasesByDateRange"
 };
 
 // Додайте цей код у ваш JavaScript-файл
@@ -57,6 +58,8 @@ loadStoreProductsForSales();
     addCheckNumberValidation();
 
     // Додайте цей код до функції $(document).ready() або до ініціалізації сторінки
+
+
 
 $('#calculate-sales-by-name').on('click', function() {
         calculateProductSalesByName();
@@ -141,7 +144,111 @@ if (currentUserRole.toLowerCase() === 'manager') {
         }
     });
 });
+
+    // Обробник події для кнопки "Load Purchases"
+    $('#load-customer-purchases').on('click', function() {
+        const startDate = $('#purchases-start-date').val();
+        const endDate = $('#purchases-end-date').val();
+        loadCustomerPurchases(startDate, endDate);
+    });
+
+    // Встановлення дат за замовчуванням
+    const today = new Date();
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(today.getDate() - 30);
+    $('#purchases-end-date').val(formatDateForInput(today));
+    $('#purchases-start-date').val(formatDateForInput(thirtyDaysAgo));
+
+    // Функція для форматування дати у формат YYYY-MM-DD
+    function formatDateForInput(date) {
+        return date.toISOString().split('T')[0];
+    }
+
+    // Функція для завантаження даних про покупки
+    function loadCustomerPurchases(startDate, endDate) {
+        if (!startDate || !endDate) {
+            alert('Please select both start and end dates');
+            return;
+        }
+
+        const startDateFormatted = startDate + ' 00:00:00';
+        const endDateFormatted = endDate + ' 23:59:59';
+
+        console.log('Sending AJAX request to:', API_ENDPOINTS.GET_CUSTOMER_PURCHASES);
+        console.log('Parameters:', { start_date: startDateFormatted, end_date: endDateFormatted });
+
+        $('#loading-indicator').show();
+        $('#customer-purchases-list2').empty();
+
+        $.ajax({
+            url: API_ENDPOINTS.GET_CUSTOMER_PURCHASES,
+            type: 'GET',
+            data: {
+                start_date: startDateFormatted,
+                end_date: endDateFormatted
+            },
+            success: function(response) {
+                $('#loading-indicator').hide();
+                console.log('Received response:', response);
+
+                if (response && Array.isArray(response)) {
+                    if (response.length === 0) {
+                        console.log('No purchases found');
+                        $('#customer-purchases-list2').html('<div class="alert alert-info">No customer purchases found for the selected period.</div>');
+                    } else {
+                        console.log('Rendering purchases:', response);
+                        renderCustomerPurchases(response);
+                    }
+                    $('#customerPurchasesModal').modal('show');
+                } else {
+                    console.error('Invalid response format:', response);
+                    $('#customer-purchases-list2').html('<div class="alert alert-warning">Invalid response format. Please try again.</div>');
+                    $('#customerPurchasesModal').modal('show');
+                }
+            },
+            error: function(xhr, status, error) {
+                $('#loading-indicator').hide();
+                console.error('AJAX error:', status, error);
+                console.error('Response text:', xhr.responseText);
+                $('#customer-purchases-list2').html('<div class="alert alert-danger">Error loading customer purchases: ' + xhr.responseText + '</div>');
+                $('#customerPurchasesModal').modal('show');
+            }
+        });
+    }
+
+    // Функція для відображення даних у таблиці
+    function renderCustomerPurchases(purchases) {
+        console.log('Rendering table with data:', purchases);
+        let html = `
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Card Number</th>
+                        <th>Surname</th>
+                        <th>Total Checks</th>
+                        <th>Total Purchases ($)</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        purchases.forEach(purchase => {
+            console.log('Processing purchase:', purchase);
+            html += `
+                <tr>
+                    <td>${purchase.card_number || 'N/A'}</td>
+                    <td>${purchase.cust_surname || 'N/A'}</td>
+                    <td>${purchase.total_checks || 0}</td>
+                    <td>$${parseFloat(purchase.total_purchases || 0).toFixed(2)}</td>
+                </tr>
+            `;
+        });
+
+        html += '</tbody></table>';
+        $('#customer-purchases-list2').html(html);
+    }
 });
+
 
 // Initialize all event handlers
 function initEventHandlers() {
@@ -329,6 +436,73 @@ function setDefaultDates() {
     $('#start-date').val(formatDateForInput(thirtyDaysAgo));
 }
 
+function loadCustomerPurchases(startDate, endDate) {
+    if (!startDate || !endDate) {
+        alert('Please select both start and end dates');
+        return;
+    }
+
+    const startDateFormatted = startDate + ' 00:00:00';
+    const endDateFormatted = endDate + ' 23:59:59';
+
+    $('#loading-indicator').show();
+    $('#customer-purchases-list').empty();
+
+    $.ajax({
+        url: API_ENDPOINTS.GET_CUSTOMER_PURCHASES,
+        type: 'GET',
+        data: {
+            start_date: startDateFormatted,
+            end_date: endDateFormatted
+        },
+        success: function(response) {
+            $('#loading-indicator').hide();
+            if (response && Array.isArray(response)) {
+                if (response.length === 0) {
+                    $('#customer-purchases-list').html('<div class="alert alert-info">No customer purchases found for the selected period.</div>');
+                } else {
+                    renderCustomerPurchases(response);
+                }
+            } else {
+                $('#customer-purchases-list').html('<div class="alert alert-warning">Invalid response format. Please try again.</div>');
+            }
+        },
+        error: function(xhr) {
+            $('#loading-indicator').hide();
+            console.error('Error loading customer purchases:', xhr.responseText);
+            $('#customer-purchases-list').html('<div class="alert alert-danger">Error loading customer purchases.</div>');
+        }
+    });
+}
+
+function renderCustomerPurchases(purchases) {
+    let html = `
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Card Number</th>
+                    <th>Surname</th>
+                    <th>Total Checks</th>
+                    <th>Total Purchases ($)</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    purchases.forEach(purchase => {
+        html += `
+            <tr>
+                <td>${purchase.card_number}</td>
+                <td>${purchase.cust_surname}</td>
+                <td>${purchase.total_checks}</td>
+                <td>$${parseFloat(purchase.total_purchases).toFixed(2)}</td>
+            </tr>
+        `;
+    });
+
+    html += '</tbody></table>';
+    $('#customer-purchases-list').html(html);
+}
 
 function checkCurrentUserRole() {
         console.log("Checking current user role and ID...");

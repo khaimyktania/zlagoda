@@ -287,6 +287,19 @@
                                         </div>
                                     </div>
                                 </div>
+                                   <div class="col-md-4">
+        <label for="purchases-start-date">Start Date</label>
+        <input type="date" id="purchases-start-date" class="form-control">
+    </div>
+    <div class="col-md-4">
+        <label for="purchases-end-date">End Date</label>
+        <input type="date" id="purchases-end-date" class="form-control">
+    </div>
+    <div class="col-md-4 align-self-end">
+        <button id="load-customer-purchases" class="btn btn-primary">Load Purchases</button>
+    </div>
+<div id="customer-purchases-list"></div>
+
                                 <!-- Product Sales by Name Filter Section -->
 <!-- Product Sales by Name Filter Section -->
 <div class="filter-section product-sales-filter">
@@ -407,6 +420,7 @@
                             </div>
                         </div>
 
+
                         <!-- Products List -->
                         <div class="row mt-3">
                             <div class="col-md-12">
@@ -445,6 +459,23 @@
             </div>
         </div>
     </div>
+
+<div class="modal fade" id="customerPurchasesModal" tabindex="-1" aria-labelledby="customerPurchasesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="customerPurchasesModalLabel">Customer Purchases</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="customer-purchases-list2"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
     <!-- Check Details Modal -->
     <div class="modal fade" id="checkDetailsModal" tabindex="-1" role="dialog">

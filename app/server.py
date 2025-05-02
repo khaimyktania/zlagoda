@@ -89,7 +89,30 @@ def login():
         print(f"[LOGIN ERROR]: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@app.route('/getCustomerPurchasesByDateRange', methods=['GET'])
+@require_role('manager')
+def get_customer_purchases_by_date_range():
+    connection = None
+    try:
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
 
+        if not start_date or not end_date:
+            return jsonify({
+                'success': False,
+                'message': 'Start and end dates are required'
+            }), 400
+
+        connection = get_sql_connection()
+        response = check_dao.get_customer_purchases_by_date_range(connection, start_date, end_date)
+
+        return jsonify(response)
+    except Exception as e:
+        print(f"Error in get_customer_purchases_by_date_range: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
 @app.route('/api/employee_info', methods=['GET'])
 def get_employee_info():
     try:

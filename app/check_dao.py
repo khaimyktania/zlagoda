@@ -384,3 +384,28 @@ def get_product_sales_by_name_and_period(connection, product_name, start_date, e
     except Exception as e:
         print(f"Error in get_product_sales_by_name_and_period: {e}")
         raise
+
+def get_customer_purchases_by_date_range(connection, start_date, end_date):
+    query = """
+        SELECT 
+            cu.card_number,
+            cu.cust_surname,
+            COUNT(c.check_number) AS total_checks,
+            SUM(c.sum_total) AS total_purchases
+        FROM 
+            `check` c
+            INNER JOIN customer_card cu ON c.card_number = cu.card_number
+            LEFT JOIN employee e ON c.id_employee = e.id_employee
+        WHERE 
+            c.print_date BETWEEN %s AND %s
+        GROUP BY 
+            cu.card_number, cu.cust_surname
+        ORDER BY 
+            total_purchases DESC;
+    """
+    try:
+        result = execute_query(connection, query, (start_date, end_date))
+        return result
+    except Exception as e:
+        print(f"Error in get_customer_purchases_by_date_range: {e}")
+        raise
