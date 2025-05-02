@@ -76,22 +76,22 @@ $(document).on('click', '.edit-employee', function() {
 
 // Save employee
 $("#saveEmployee").on("click", function () {
-    var data = $("#employeeForm").serializeArray();
-    var requestPayload = {
-        id_employee: null,
-        empl_surname: null,
-        empl_name: null,
-        empl_patronymic: null,
-        empl_role: null,
-        salary: null,
-        date_of_birth: null,
-        date_of_start: null,
-        phone_number: null,
-        city: null,
-        street: null,
-        zip_code: null
-    };
-
+    if (validateEmployeeForm()) {
+        var data = $("#employeeForm").serializeArray();
+        var requestPayload = {
+            id_employee: null,
+            empl_surname: null,
+            empl_name: null,
+            empl_patronymic: null,
+            empl_role: null,
+            salary: null,
+            date_of_birth: null,
+            date_of_start: null,
+            phone_number: null,
+            city: null,
+            street: null,
+            zip_code: null
+        };
     // Build object from form fields
     for (var i = 0; i < data.length; ++i) {
         var element = data[i];
@@ -159,6 +159,13 @@ $("#saveEmployee").on("click", function () {
             alert("Error while saving employee: " + error);
         }
     });
+}
+});
+
+// Очистка повідомлень про помилки при закритті модального вікна
+employeeModal.on('hide.bs.modal', function(){
+    $("#employeeForm")[0].reset();
+    $('.error-message').hide().text('');
 });
 // Delete employee
 $(document).on("click", ".delete-employee", function () {
@@ -239,3 +246,142 @@ $("#searchBySurname").on("click", function () {
         $("#contactInfoResult").html("Error while fetching contact info.").show();
     });
 });
+function validateEmployeeForm() {
+    let isValid = true;
+    const errors = {};
+
+    // Скидання попередніх повідомлень про помилки
+    $('.error-message').hide();
+
+    // Валідація Surname
+    const surname = $('#empl_surname').val().trim();
+    if (!surname) {
+        errors.empl_surname = 'Заповніть це поле. Приклад: Smith';
+        isValid = false;
+    } else if (surname.length > 50) {
+        errors.empl_surname = 'Прізвище не може перевищувати 50 символів.';
+        isValid = false;
+    } else if (!/^[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)*(?:'[A-Za-zА-Яа-яіїєґ]*)?$/.test(surname)) {
+        errors.empl_surname = 'Прізвище має починатися з великої літери, після дефіса наступна частина також з великої (тільки літери, апострофи або дефіси). Приклад: Smith або Smith-Jones';
+        isValid = false;
+    }
+
+    // Валідація Name
+    const name = $('#empl_name').val().trim();
+    if (!name) {
+        errors.empl_name = 'Заповніть це поле. Приклад: Tom';
+        isValid = false;
+    } else if (name.length > 50) {
+        errors.empl_name = 'Ім\'я не може перевищувати 50 символів.';
+        isValid = false;
+    } else if (!/^[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)*(?:'[A-Za-zА-Яа-яіїєґ]*)?$/.test(name)) {
+        errors.empl_name = 'Ім\'я має починатися з великої літери, після дефіса наступна частина також з великої (тільки літери, апострофи або дефіси). Приклад: Tom або Mary-Jane';
+        isValid = false;
+    }
+
+    // Валідація Patronymic
+    const patronymic = $('#empl_patronymic').val().trim();
+    if (patronymic && patronymic.length > 50) {
+        errors.empl_patronymic = 'По батькові не може перевищувати 50 символів.';
+        isValid = false;
+    } else if (patronymic && !/^[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)*(?:'[A-Za-zА-Яа-яіїєґ]*)?$/.test(patronymic)) {
+        errors.empl_patronymic = 'По батькові має починатися з великої літери, після дефіса наступна частина також з великої (тільки літери, апострофи або дефіси). Приклад: Ivanovich';
+        isValid = false;
+    }
+
+    // Валідація Role
+    const role = $('#empl_role').val();
+    if (!role) {
+        errors.empl_role = 'Оберіть роль (Cashier або Manager).';
+        isValid = false;
+    }
+
+    // Валідація Salary
+    const salary = $('#salary').val().trim();
+    if (!salary) {
+        errors.salary = 'Заповніть це поле. Приклад: 500.00';
+        isValid = false;
+    } else {
+        const salaryNum = parseFloat(salary);
+        if (isNaN(salaryNum) || salaryNum < 0) {
+            errors.salary = 'Зарплата має бути невід\'ємним числом. Приклад: 500.00';
+            isValid = false;
+        }
+    }
+
+    // Валідація Date of Birth
+    const birthDate = $('#date_of_birth').val();
+    if (!birthDate) {
+        errors.date_of_birth = 'Заповніть це поле. Формат: РРРР-ММ-ДД';
+        isValid = false;
+    } else {
+        const birth = new Date(birthDate);
+        const today = new Date();
+        const age = (today - birth) / (1000 * 60 * 60 * 24 * 365);
+        if (birth > today) {
+            errors.date_of_birth = 'Дата народження не може бути в майбутньому.';
+            isValid = false;
+        } else if (age < 18 || age > 135) {
+            errors.date_of_birth = 'Працівник має бути віком від 18 до 135 років.';
+            isValid = false;
+        }
+    }
+
+    // Валідація Date of Start
+    const startDate = $('#date_of_start').val();
+    if (!startDate) {
+        errors.date_of_start = 'Заповніть це поле. Формат: РРРР-ММ-ДД';
+        isValid = false;
+    } else if (new Date(startDate) > new Date()) {
+        errors.date_of_start = 'Дата початку роботи не може бути в майбутньому.';
+        isValid = false;
+    }
+
+    // Валідація Phone Number
+    const phone = $('#phone_number').val().trim();
+    if (!/^\+\d{12}$/.test(phone)) {
+        errors.phone_number = 'Номер телефону має бути у форматі +XXXXXXXXXXXX (12 цифр). Приклад: +380123456789';
+        isValid = false;
+    }
+
+    // Валідація City
+    const city = $('#city').val().trim();
+    if (!city) {
+        errors.city = 'Заповніть це поле. Приклад: Kyiv';
+        isValid = false;
+    } else if (city.length > 50) {
+        errors.city = 'Назва міста не може перевищувати 50 символів.';
+        isValid = false;
+    } else if (!/^[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)?$/.test(city)) {
+        errors.city = 'Місто має починатися з великої літери, після дефіса наступна частина також з великої (тільки літери, апострофи або дефіси). Приклад: Kyiv або Nova-Kahovka';
+        isValid = false;
+    }
+
+    // Валідація Street
+    const street = $('#street').val().trim();
+    if (!street) {
+        errors.street = 'Заповніть це поле. Приклад: Main-Street, 123';
+        isValid = false;
+    } else if (!/^([A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)([-\s][A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)*,\s\d{1,3}[A-ZА-ЯІЇЄҐ]?$/.test(street)) {
+        errors.street = 'Вулиця має починатися з великої літери, після дефіса або пробілу наступна частина також з великої, після коми — номер (до 3 цифр). Приклад: Main-Street, 123';
+        isValid = false;
+    }
+
+    // Валідація ZIP Code
+    const zipCode = $('#zip_code').val().trim();
+    if (!zipCode) {
+        errors.zip_code = 'Заповніть це поле. Приклад: 12345';
+        isValid = false;
+    } else if (zipCode.length !== 5 || !/^\d+$/.test(zipCode)) {
+        errors.zip_code = 'Поштовий індекс має складатися з 5 цифр. Приклад: 12345';
+        isValid = false;
+    }
+
+    // Відображення помилок
+    for (let field in errors) {
+        $(`#${field}_error`).find('.error-text').text(errors[field]);
+        $(`#${field}_error`).show();
+    }
+
+    return isValid;
+}

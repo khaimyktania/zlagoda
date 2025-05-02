@@ -47,4 +47,3 @@ def delete_credentials(user_id):
         print(f"Credentials for user {user_id} deleted.")
     else:
         print(f"No credentials found for user {user_id}.")
-

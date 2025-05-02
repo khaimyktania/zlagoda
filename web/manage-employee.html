@@ -17,6 +17,62 @@
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
 
     <style>
+        .error-container {
+    position: relative;
+    min-height: 20px;
+}
+
+.error-message {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: flex-start; /* Змінено з center на flex-start, щоб текст вирівнювався зверху */
+    z-index: 1000;
+    max-width: 100%; /* Обмежуємо ширину контейнера помилки шириною поля */
+}
+
+.error-icon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-color: #ff8c00;
+    color: white;
+    text-align: center;
+    line-height: 16px;
+    border-radius: 3px;
+    font-size: 12px;
+    margin-right: 5px;
+    flex-shrink: 0; /* Іконка не стискається */
+}
+
+.error-text {
+    display: inline-block;
+    background-color: white;
+    color: #333;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    font-size: 12px;
+    white-space: normal; /* Дозволяємо перенос тексту */
+    word-wrap: break-word; /* Переносимо слова на новий рядок */
+    max-width: calc(100% - 25px); /* Обмежуємо ширину тексту, враховуючи ширину іконки та відступ */
+}
+
+/* Динамічне прив'язування до ширини поля вводу */
+.form-group .error-message {
+    max-width: 100%; /* Забезпечуємо, щоб контейнер помилки не виходив за межі поля */
+}
+
+@media (min-width: 768px) {
+    .col-md-4 .error-message {
+        max-width: 100%; /* Для колонок шириною 4 */
+    }
+    .col-md-6 .error-message {
+        max-width: 100%; /* Для колонок шириною 6 */
+    }
+}
         .logout-btn-fixed {
     position: absolute;
     bottom: 0;
@@ -178,105 +234,169 @@
     </div>
 
     <!-- Modal -->
-    <div class="modal fade-scale" id="employeeModal" role="dialog" data-backdrop="static">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Add New Employee</h4>
-                </div>
-                <div class="modal-body">
-                    <form id="employeeForm">
-                        <input type="hidden" name="id_employee" id="id_employee">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Surname</label>
-                                    <input class="form-control" name="empl_surname" id="empl_surname" type="text" placeholder="Surname">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Name</label>
-                                    <input class="form-control" name="empl_name" id="empl_name" type="text" placeholder="Name">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Patronymic</label>
-                                    <input class="form-control" name="empl_patronymic" id="empl_patronymic" type="text" placeholder="Patronymic">
+<div class="modal fade-scale" id="employeeModal" role="dialog" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add New Employee</h4>
+            </div>
+            <div class="modal-body">
+                <form id="employeeForm">
+                    <input type="hidden" name="id_employee" id="id_employee">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Surname</label>
+                                <input class="form-control" name="empl_surname" id="empl_surname" type="text" placeholder="Surname">
+                                <div class="error-container" style="position: relative; min-height: 20px;">
+                                    <div id="empl_surname_error" class="error-message" style="display: none;">
+                                        <span class="error-icon">⚠️</span>
+                                        <span class="error-text"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Name</label>
+                                <input class="form-control" name="empl_name" id="empl_name" type="text" placeholder="Name">
+                                <div class="error-container" style="position: relative; min-height: 20px;">
+                                    <div id="empl_name_error" class="error-message" style="display: none;">
+                                        <span class="error-icon">⚠️</span>
+                                        <span class="error-text"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Patronymic</label>
+                                <input class="form-control" name="empl_patronymic" id="empl_patronymic" type="text" placeholder="Patronymic">
+                                <div class="error-container" style="position: relative; min-height: 20px;">
+                                    <div id="empl_patronymic_error" class="error-message" style="display: none;">
+                                        <span class="error-icon">⚠️</span>
+                                        <span class="error-text"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Role</label>
-                                    <select class="form-control" name="empl_role" id="empl_role">
-                                        <option value="Cashier">Cashier</option>
-                                        <option value="Manager">Manager</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Salary</label>
-                                    <input class="form-control" name="salary" id="salary" type="number" step="0.01" placeholder="0.00">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Role</label>
+                                <select class="form-control" name="empl_role" id="empl_role">
+                                    <option value="Cashier">Cashier</option>
+                                    <option value="Manager">Manager</option>
+                                </select>
+                                <div class="error-container" style="position: relative; min-height: 20px;">
+                                    <div id="empl_role_error" class="error-message" style="display: none;">
+                                        <span class="error-icon">⚠️</span>
+                                        <span class="error-text"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Salary</label>
+                                <input class="form-control" name="salary" id="salary" type="number" step="0.01" placeholder="0.00">
+                                <div class="error-container" style="position: relative; min-height: 20px;">
+                                    <div id="salary_error" class="error-message" style="display: none;">
+                                        <span class="error-icon">⚠️</span>
+                                        <span class="error-text"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Date of Birth</label>
-                                    <input class="form-control" name="date_of_birth" id="date_of_birth" type="date">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Date of Start</label>
-                                    <input class="form-control" name="date_of_start" id="date_of_start" type="date">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Date of Birth</label>
+                                <input class="form-control" name="date_of_birth" id="date_of_birth" type="date">
+                                <div class="error-container" style="position: relative; min-height: 20px;">
+                                    <div id="date_of_birth_error" class="error-message" style="display: none;">
+                                        <span class="error-icon">⚠️</span>
+                                        <span class="error-text"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Date of Start</label>
+                                <input class="form-control" name="date_of_start" id="date_of_start" type="date">
+                                <div class="error-container" style="position: relative; min-height: 20px;">
+                                    <div id="date_of_start_error" class="error-message" style="display: none;">
+                                        <span class="error-icon">⚠️</span>
+                                        <span class="error-text"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                        <div class="form-group">
-                            <label>Phone Number</label>
-                            <input class="form-control" name="phone_number" id="phone_number" type="text" placeholder="Phone Number">
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input class="form-control" name="phone_number" id="phone_number" type="text" placeholder="Phone Number">
+                        <div class="error-container" style="position: relative; min-height: 20px;">
+                            <div id="phone_number_error" class="error-message" style="display: none;">
+                                <span class="error-icon">⚠️</span>
+                                <span class="error-text"></span>
+                            </div>
                         </div>
+                    </div>
 
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>City</label>
-                                    <input class="form-control" name="city" id="city" type="text" placeholder="City">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Street</label>
-                                    <input class="form-control" name="street" id="street" type="text" placeholder="Street">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>ZIP Code</label>
-                                    <input class="form-control" name="zip_code" id="zip_code" type="text" placeholder="ZIP Code">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>City</label>
+                                <input class="form-control" name="city" id="city" type="text" placeholder="City">
+                                <div class="error-container" style="position: relative; min-height: 20px;">
+                                    <div id="city_error" class="error-message" style="display: none;">
+                                        <span class="error-icon">⚠️</span>
+                                        <span class="error-text"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="saveEmployee">Save</button>
-                </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Street</label>
+                                <input class="form-control" name="street" id="street" type="text" placeholder="Street">
+                                <div class="error-container" style="position: relative; min-height: 20px;">
+                                    <div id="street_error" class="error-message" style="display: none;">
+                                        <span class="error-icon">⚠️</span>
+                                        <span class="error-text"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>ZIP Code</label>
+                                <input class="form-control" name="zip_code" id="zip_code" type="text" placeholder="ZIP Code">
+                                <div class="error-container" style="position: relative; min-height: 20px;">
+                                    <div id="zip_code_error" class="error-message" style="display: none;">
+                                        <span class="error-icon">⚠️</span>
+                                        <span class="error-text"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveEmployee">Save</button>
             </div>
         </div>
     </div>
-
-</div> <!-- #main -->
+</div>
 
 <!-- Scripts -->
 <script src="/web/js/package/jquery.min.js"></script>
