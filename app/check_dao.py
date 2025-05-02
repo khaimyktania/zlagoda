@@ -364,3 +364,23 @@ def get_cashier_total_sales(connection, id_employee, start_date, end_date):
     except Exception as e:
         print(f"Помилка в get_cashier_total_sales: {e}")
         raise
+
+def get_product_sales_by_name_and_period(connection, product_name, start_date, end_date):
+    """
+    Calculate total quantity of a specific product sold within a date range by product name
+    """
+    query = """
+    SELECT SUM(s.product_number) as total_quantity
+    FROM sale s
+    JOIN `check` c ON s.check_number = c.check_number
+    JOIN store_products sp ON s.UPC = sp.UPC
+    JOIN products p ON sp.id_product = p.id_product
+    WHERE p.product_name = %s
+    AND c.print_date BETWEEN %s AND %s;
+    """
+    try:
+        result = execute_query(connection, query, (product_name, start_date, end_date))
+        return result[0] if result else {'total_quantity': 0}
+    except Exception as e:
+        print(f"Error in get_product_sales_by_name_and_period: {e}")
+        raise
