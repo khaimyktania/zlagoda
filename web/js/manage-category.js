@@ -61,15 +61,17 @@ function loadCategories() {
 }
 
 // Display categories in the table
-function displayCategories(categories) {
+function displayCategories(categories, salesMap = {}) {
     var tbody = $("#categoryTableBody");
     tbody.empty();
 
     categories.forEach(function(category) {
+        const totalSales = salesMap[category.category_number] || 0;
         var row = `
             <tr data-number="${category.category_number}" data-name="${category.name}">
                 <td>${category.category_number}</td>
                 <td>${category.name}</td>
+                <td>${totalSales}</td>
                 <td>
                     <span class="btn btn-xs btn-primary edit-category">Edit</span>
                     <span class="btn btn-xs btn-danger delete-category">Delete</span>
@@ -78,7 +80,14 @@ function displayCategories(categories) {
         `;
         tbody.append(row);
     });
+
+    // Update the table header if not already added
+    const thead = $("#categoryTableBody").closest("table").find("thead tr");
+    if (thead.find("th").length === 3) {
+        thead.find("th:last").before('<th>Sales Count</th>');
+    }
 }
+
 
 // Sort categories by name
 function sortCategories() {
@@ -219,6 +228,35 @@ function deleteCategory() {
         }
     });
 }
+$("#sortBySalesBtn").click(function () {
+    $.get("/api/category_sales_count", function (salesData) {
+        if (!Array.isArray(salesData)) {
+            alert("Error loading sales data.");
+            return;
+        }
+
+        // Map sales: category_number -> count
+        const salesMap = {};
+        salesData.forEach(row => {
+            salesMap[row.category_number] = row.total_sales;
+        });
+
+        // Fetch category list again and sort based on sales count
+        $.get(categoryListApiUrl, function (categories) {
+            categories.sort(function (a, b) {
+                const salesA = salesMap[a.category_number] || 0;
+                const salesB = salesMap[b.category_number] || 0;
+                return salesB - salesA;
+            });
+
+            displayCategories(categories, salesMap);
+        });
+    }).fail(function (err) {
+        console.error("Failed to load category sales count", err.responseText);
+        alert("Failed to load sales data");
+    });
+});
+
 
 // Reset category form and clear errors
 function resetCategoryForm() {

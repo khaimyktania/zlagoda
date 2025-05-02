@@ -1294,6 +1294,27 @@ def get_product_sales_by_name():
             connection.close()
 
 
+@app.route('/api/category_sales_count', methods=['GET'])
+def category_sales_count():
+    connection = get_sql_connection()
+    try:
+        query = """
+            SELECT 
+                c.category_number,
+                COUNT(s.check_number) AS total_sales
+            FROM category c
+            LEFT JOIN products p ON c.category_number = p.category_number
+            LEFT JOIN store_products sp ON p.id_product = sp.id_product
+            LEFT JOIN sale s ON sp.UPC = s.UPC
+            GROUP BY c.category_number
+        """
+        result = execute_query(connection, query)
+        return jsonify(result)
+    except Exception as e:
+        print("category_sales_count error:", e)
+        return jsonify({"error": "Server error"}), 500
+
+
 
 if __name__ == "__main__":
     print("Starting Python Flask Server For Grocery Store Management System")

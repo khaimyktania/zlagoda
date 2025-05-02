@@ -412,3 +412,20 @@ def get_customer_purchases_by_date_range(connection, start_date, end_date):
     except Exception as e:
         print(f"Error in get_customer_purchases_by_date_range: {e}")
         raise
+
+def get_customers_not_buying_category_from_cashier(connection, id_employee, category_number):
+    query = """
+        SELECT cc.card_number, cc.cust_surname, cc.cust_name
+        FROM customer_card cc
+        WHERE NOT EXISTS (
+            SELECT *
+            FROM `check` ch
+            JOIN sale s ON ch.check_number = s.check_number
+            JOIN store_product sp ON s.UPC = sp.UPC
+            JOIN product p ON sp.id_product = p.id_product
+            WHERE ch.card_number = cc.card_number
+              AND ch.id_employee = %s
+              AND p.category_number = %s
+        )
+    """
+    return execute_query(connection, query, (id_employee, category_number))
