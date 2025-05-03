@@ -252,7 +252,7 @@ function validateCategoryForm() {
     } else if (categoryName.length < 3) {
         errors.category_name = 'Назва категорії має містити щонайменше 3 символи.';
         isValid = false;
-    } else if (!/^[a-zA-Z0-9\s]+$/.test(categoryName)) {
+    } else if (!/^[a-zA-Zа-яА-ЯіІїЇєЄґҐ0-9\s]+$/.test(categoryName)) {
         errors.category_name = 'Назва категорії може містити лише літери, цифри та пробіли.';
         isValid = false;
     }

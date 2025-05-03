@@ -66,6 +66,7 @@ $('#addCustomerBtn').on('click', function() {
     // Enable card number field for new customers
     $("#card_number").prop('readonly', false);
     $('.error-message').hide().find('.error-text').text(''); // Очищаємо повідомлення про помилки
+    $('.form-control').removeClass('is-invalid');
     customerModal.modal('show');
 });
 
@@ -95,6 +96,7 @@ $(document).on('click', '.edit-customer', function() {
             // Update modal title and show
             customerModal.find('.modal-title').text('Edit Customer');
             $('.error-message').hide().find('.error-text').text(''); // Очищаємо повідомлення про помилки
+            $('.form-control').removeClass('is-invalid');
             customerModal.modal('show');
         }
     });
@@ -168,6 +170,9 @@ $("#saveCustomer").on("click", function () {
                 }
                 customerModal.modal('hide');
                 loadCustomers(); // refresh table
+                $('.error-message').hide().find('.error-text').text('');
+                $('.form-control').removeClass('is-invalid');
+
             },
             error: function(xhr, status, error) {
                 console.error("Error details:", xhr.responseText); // Debug logging
@@ -202,6 +207,14 @@ $(document).on("click", ".delete-customer", function () {
 customerModal.on('hide.bs.modal', function(){
     $("#customerForm")[0].reset();
     $('.error-message').hide().find('.error-text').text('');
+    $('.form-control').removeClass('is-invalid');
+});
+
+// Clear error on input change
+$("#card_number, #cust_surname, #cust_name, #cust_patronymic, #phone_number, #city, #street, #zip_code, #percent").on('input change', function() {
+    const field = $(this).attr('id');
+    $(`#${field}`).removeClass('is-invalid');
+    $(`#${field}_error`).hide();
 });
 
 // Sort/filter functionality
@@ -395,6 +408,7 @@ function validateCustomerForm() {
     for (let field in errors) {
         $(`#${field}_error`).find('.error-text').text(errors[field]);
         $(`#${field}_error`).show();
+        $(`#${field}`).addClass('is-invalid');
     }
 
     return isValid;
