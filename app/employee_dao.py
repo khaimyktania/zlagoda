@@ -376,3 +376,39 @@ def get_employee_info_by_id(connection, id_employee):
         'street': row[10],
         'zip_code': row[11]
     }
+def get_employees_never_sold_promotional_to_non_premium(connection):
+    query = """
+        SELECT 
+            e.id_employee,
+            e.empl_surname,
+            e.empl_name
+        FROM 
+            employee e
+        WHERE 
+            NOT EXISTS (
+                SELECT 1
+                FROM `check` ch
+                JOIN store_products sp ON sp.UPC IN (
+                    SELECT UPC 
+                    FROM store_products 
+                    WHERE promotional_product = 1
+                )
+                JOIN customer_card cc ON ch.card_number = cc.card_number
+                WHERE 
+                    ch.id_employee = e.id_employee
+                    AND cc.percent <= 20
+            )
+            AND EXISTS (
+                SELECT 1
+                FROM `check` ch
+                WHERE ch.id_employee = e.id_employee
+            )
+        ORDER BY 
+            e.empl_surname, e.empl_name;
+    """
+    try:
+        result = execute_query(connection, query)
+        return result
+    except Exception as e:
+        print(f"Помилка отримання працівників, які не продавали акційні товари непреміум-клієнтам: {e}")
+        raise

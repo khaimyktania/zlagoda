@@ -1,7 +1,6 @@
 from sql_connection import execute_query, get_sql_connection
 import re
 
-
 def validate_customer(customer):
     errors = []
 
@@ -10,7 +9,8 @@ def validate_customer(customer):
     for field in required_fields:
         if not customer.get(field):
             errors.append(f"Field '{field}' is required.")
-    # Перевірка імені — перша літера велика, інші малі, тільки літери
+
+    # Перевірка імені
     try:
         name = customer['cust_name']
         if not name:
@@ -21,12 +21,11 @@ def validate_customer(customer):
             errors.append("Name must contain only letters, apostrophes, or hyphens.")
         else:
             if not re.fullmatch(r"[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)*(?:'[A-Za-zА-Яа-яіїєґ]*)?", name):
-                errors.append(
-                    "Name must start with a capital letter, and after any hyphen, the next part must start with a capital letter.")
+                errors.append("Name must start with a capital letter, and after any hyphen, the next part must start with a capital letter.")
     except Exception:
         errors.append("Invalid cust_name format.")
 
-    # Перевірка прізвища — перша літера велика, інші малі, тільки літери
+    # Перевірка прізвища
     try:
         surname = customer['cust_surname']
         if not surname:
@@ -36,29 +35,26 @@ def validate_customer(customer):
         elif not all(char.isalpha() or char in "'-" for char in surname):
             errors.append("Surname must contain only letters, apostrophes, or hyphens.")
         else:
-            # Перевірка: перша літера велика, решта малі, після дефіса перша велика
             if not re.fullmatch(r"[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)*(?:'[A-Za-zА-Яа-яіїєґ]*)?", surname):
                 errors.append("Surname must start with a capital letter, and after any hyphen, the next part must start with a capital letter.")
     except Exception:
         errors.append("Invalid cust_surname format.")
 
-    # Перевірка по-батькові — перша літера велика, інші малі, тільки літери
+    # Перевірка по-батькові
     try:
         patronymic = customer.get('cust_patronymic', '')
-        if patronymic:  # Перевірка, чи не порожнє поле
+        if patronymic:
             if len(patronymic) > 50:
                 errors.append("Patronymic must not exceed 50 characters.")
             elif not all(char.isalpha() or char in "'-" for char in patronymic):
                 errors.append("Patronymic must contain only letters, apostrophes, or hyphens.")
             else:
-                # Перевірка: перша літера велика, решта малі, після дефіса перша велика
                 if not re.fullmatch(r"[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)*(?:'[A-Za-zА-Яа-яіїєґ]*)?", patronymic):
-                    errors.append(
-                        "Patronymic must start with a capital letter, and after any hyphen, the next part must start with a capital letter.")
+                    errors.append("Patronymic must start with a capital letter, and after any hyphen, the next part must start with a capital letter.")
     except Exception:
         errors.append("Invalid cust_patronymic format.")
 
-    # Отримуємо значення з customer
+    # Перевірка адреси
     city = customer.get('city', '').strip()
     zipcode = customer.get('zip_code', '').strip()
     street = customer.get('street', '').strip()
@@ -73,8 +69,7 @@ def validate_customer(customer):
                 errors.append("City must contain only letters, apostrophes, or hyphens.")
             else:
                 if not re.fullmatch(r"[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)?", city):
-                    errors.append(
-                        "City must start with a capital letter, and after any hyphen, the next part must start with a capital letter.")
+                    errors.append("City must start with a capital letter, and after any hyphen, the next part must start with a capital letter.")
         except Exception:
             errors.append("Invalid city format.")
 
@@ -98,22 +93,20 @@ def validate_customer(customer):
         except Exception:
             errors.append("Invalid street format.")
 
-    # Відсоток має бути в межах 0–100
+    # Відсоток від -1 до 100
     try:
         percent = float(customer['percent'])
-        if percent < 0 or percent > 100:
-            errors.append("Percent must be between 0 and 100.")
+        if percent < -1 or percent > 100:
+            errors.append("Percent must be between -1 and 100.")
     except Exception:
         errors.append("Invalid format for percent.")
 
-
-
-    # Телефон — строго 13 символів: + і 12 цифр
+    # Телефон
     phone = customer.get('phone_number', '')
     if not re.fullmatch(r'\+\d{12}', phone):
         errors.append("Phone number must be in format +XXXXXXXXXXXX (12 digits).")
 
-    # Якщо хоч одне поле адреси вказане — усі мають бути
+    # Перевірка адреси
     has_any_address_field = any(customer.get(field) for field in ['city', 'street', 'zip_code'])
     if has_any_address_field:
         for field in ['city', 'street', 'zip_code']:
@@ -142,7 +135,6 @@ def insert_new_customer(connection, customer):
         customer['zip_code'],
         customer['percent']
     )
-
     try:
         result = execute_query(connection, query, data)
         return result
@@ -150,12 +142,10 @@ def insert_new_customer(connection, customer):
         print(f"Error adding customer: {e}")
         raise
 
-
 def update_customer(connection, customer):
     validate_customer(customer)
     if not customer['card_number']:
         raise ValueError("card_number is required for update")
-
     query = """
         UPDATE customer_card SET
             cust_surname = %s,
@@ -179,7 +169,6 @@ def update_customer(connection, customer):
         customer['percent'],
         customer['card_number']
     )
-
     try:
         result = execute_query(connection, query, data)
         return result
@@ -187,24 +176,40 @@ def update_customer(connection, customer):
         print(f"Error updating customer: {e}")
         raise
 
-
 def delete_customer(connection, card_number):
-    query = "DELETE FROM customer_card WHERE card_number = %s;"
+    """
+    Soft delete a customer by setting their percent to -1, preserving their data for checks.
+    """
     try:
-        result = execute_query(connection, query, (card_number,))
-        return result
-    except Exception as e:
-        print(f"Error deleting customer: {e}")
-        raise
+        cursor = connection.cursor()
+        query = "SELECT card_number FROM customer_card WHERE card_number = %s"
+        cursor.execute(query, (card_number,))
+        customer = cursor.fetchone()
+        if not customer:
+            return {"success": False, "message": "Customer not found"}
 
+        soft_delete_query = """
+        UPDATE customer_card 
+        SET percent = -1 
+        WHERE card_number = %s
+        """
+        cursor.execute(soft_delete_query, (card_number,))
+        rows_updated = cursor.rowcount
+        connection.commit()
+        return {"success": True, "rows_updated": rows_updated}
+    except Exception as e:
+        connection.rollback()
+        print(f"Error soft deleting customer: {str(e)}")
+        return {"success": False, "message": f"Error soft deleting customer: {str(e)}"}
+    finally:
+        cursor.close()
 
 def get_contact_by_surname(connection, surname):
     query = """
         SELECT phone_number, city, street, zip_code
         FROM customer_card
-        WHERE cust_surname = %s;
+        WHERE cust_surname = %s AND percent >= 0;
     """
-
     try:
         result = execute_query(connection, query, (surname,))
         if result and len(result) > 0:
@@ -215,15 +220,14 @@ def get_contact_by_surname(connection, surname):
         print(f"Error getting contact by surname: {e}")
         raise
 
-
 def get_all_customers_ordered_by_surname(connection):
     query = """
         SELECT card_number, cust_surname, cust_name, cust_patronymic,
                phone_number, city, street, zip_code, percent
         FROM customer_card
+        WHERE percent >= 0
         ORDER BY cust_surname;
     """
-
     try:
         result = execute_query(connection, query)
         return result
@@ -231,16 +235,14 @@ def get_all_customers_ordered_by_surname(connection):
         print(f"Error getting customer list: {e}")
         raise
 
-
 def get_premium_customers(connection):
     query = """
         SELECT card_number, cust_surname, cust_name, cust_patronymic,
                phone_number, city, street, zip_code, percent
         FROM customer_card
-        WHERE percent >= 10
+        WHERE percent >= 10 AND percent <= 100
         ORDER BY cust_surname;
     """
-
     try:
         result = execute_query(connection, query)
         return result
@@ -248,10 +250,11 @@ def get_premium_customers(connection):
         print(f"Error getting premium customers: {e}")
         raise
 
-
 def get_all_customers(connection):
-    query = "SELECT * FROM customer_card;"
-
+    query = """
+        SELECT * FROM customer_card
+        WHERE percent >= 0;
+    """
     try:
         result = execute_query(connection, query)
         return result

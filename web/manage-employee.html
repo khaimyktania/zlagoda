@@ -165,11 +165,12 @@
 
                         <!-- Блок для виводу результату -->
                         <div id="contactInfoResult" class="alert alert-secondary" style="display: none;"></div>
-                        <div class="row mt-3 mb-3">
-                            <div class="col-md-12">
-                                <button class="btn btn-sm btn-warning" id="findEmployeesNeverSoldPromotional" data-toggle="modal" data-target="#neverSoldPromotionalModal">Find Employees (Never Sold Promotional to Non-Card Holders)</button>
-                            </div>
-                        </div>
+                   <div class="row mt-3 mb-3">
+    <div class="col-md-12">
+        <button class="btn btn-sm btn-warning" id="findEmployeesNeverSoldPromotionalToNonPremium">Find Employees (Never Sold Promotional to Non-Premium)</button>
+    </div>
+</div>
+<div id="neverSoldPromotionalToNonPremiumResult" class="alert alert-secondary" style="display: none;"></div>
                         <div class="row mb-4">
                             <div class="col-sm-12">
                                 <select id="sortSelect" class="form-control" style="width: auto; display: inline-block;">
@@ -367,38 +368,24 @@
         </div>
     </div>
 
-    <!-- Modal for Never Sold Promotional Employees -->
-    <div class="modal fade-scale" id="neverSoldPromotionalModal" role="dialog" data-backdrop="static">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Employees Who Never Sold Promotional to Non-Card Holders</h4>
+ <!-- Нове модальне вікно для результатів у вигляді таблиці -->
+<div class="modal fade-scale" id="neverSoldPromotionalModal" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-lg"> <!-- modal-lg для ширшої таблиці -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Employees Never Sold Promotional to Non-Premium</h4>
+            </div>
+            <div class="modal-body">
+                <div id="neverSoldPromotionalResult">
+                    <!-- Таблиця результатів буде тут -->
                 </div>
-                <div class="modal-body">
-                    <table class="table table-bordered" id="neverSoldPromotionalTable">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Surname</th>
-                                <th>Name</th>
-                                <th>Role</th>
-                                <th>Phone</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Employee rows will be populated dynamically -->
-                        </tbody>
-                    </table>
-                    <div id="noResultsMessage" style="display: none;" class="alert alert-secondary">
-                        No employees found matching the criteria.
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
+</div>
 
     <!-- Scripts -->
     <script src="/web/js/package/jquery.min.js"></script>

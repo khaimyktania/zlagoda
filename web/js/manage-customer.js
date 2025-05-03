@@ -192,10 +192,10 @@ $(document).on("click", ".delete-customer", function () {
     if (isDelete) {
         $.post('/deleteCustomer', data, function(response){
             if(response.success) {
-                alert("Customer deleted successfully.");
-                loadCustomers(); // refresh table
+                alert(`Customer deleted successfully. Rows updated: ${response.rows_updated}`);
+                loadCustomers();
             } else {
-                alert("Error: Could not delete customer.");
+                alert("Error: Could not delete customer. " + response.message);
             }
         }).fail(function(xhr){
             alert("Error: " + (xhr.responseJSON ? xhr.responseJSON.message : "Error while deleting customer"));

@@ -251,7 +251,47 @@ $("#searchBySurname").on("click", function () {
         $("#contactInfoResult").html("Error while fetching contact info.").show();
     });
 });
+// Обробник для кнопки пошуку працівників
+// Обробник для кнопки пошуку працівників
+$("#findEmployeesNeverSoldPromotionalToNonPremium").on("click", function () {
+    $.get('/getEmployeesNeverSoldPromotionalToNonPremium', function (response) {
+        let resultHtml = '';
+        if (response && response.length > 0) {
+            resultHtml = `
+                <h5>Employees who never sold promotional products to non-premium customers (discount ≤ 20%):</h5>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
 
+                            <th>Surname</th>
+                            <th>Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            $.each(response, function(index, employee) {
+                resultHtml += `
+                    <tr>
+
+                        <td>${employee.empl_surname}</td>
+                        <td>${employee.empl_name}</td>
+                    </tr>
+                `;
+            });
+            resultHtml += `
+                    </tbody>
+                </table>
+            `;
+        } else {
+            resultHtml = "<p>No employees found matching the criteria.</p>";
+        }
+        $("#neverSoldPromotionalResult").html(resultHtml);
+        $("#neverSoldPromotionalModal").modal('show');
+    }).fail(function () {
+        $("#neverSoldPromotionalResult").html("<p>Error while fetching employees.</p>");
+        $("#neverSoldPromotionalModal").modal('show');
+    });
+});
 // Find employees who never sold promotional products to non-card holders
 $("#findEmployeesNeverSoldPromotional").on("click", function () {
     $.get('/getEmployeesNeverSoldPromotionalToNonCardHolders', function (response) {

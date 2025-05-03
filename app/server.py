@@ -113,6 +113,8 @@ def get_customer_purchases_by_date_range():
     finally:
         if connection:
             connection.close()
+
+
 @app.route('/api/employee_info', methods=['GET'])
 def get_employee_info():
     try:
@@ -364,7 +366,20 @@ def get_contact_by_surname_api():
         return jsonify(result)
     else:
         return jsonify(None)
-
+@app.route('/getEmployeesNeverSoldPromotionalToNonPremium', methods=['GET'])
+@require_role('manager')
+def get_employees_never_sold_promotional_to_non_premium():
+    connection = None
+    try:
+        connection = get_sql_connection()
+        response = employee_dao.get_employees_never_sold_promotional_to_non_premium(connection)
+        return jsonify(response)
+    except Exception as e:
+        print(f"Помилка в get_employees_never_sold_promotional_to_non_premium: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
 @app.route('/getEmployeesNeverSoldPromotionalToNonCardHolders', methods=['GET'])
 @require_role('manager')
 def get_employees_never_sold_promotional_to_non_card_holders():
@@ -641,15 +656,22 @@ def insert_customer():
 @app.route('/deleteCustomer', methods=['POST'])
 @require_role('manager')
 def delete_customer():
+    connection = None
     try:
         card_number = request.form['card_number']
-        rows_deleted = customer_dao.delete_customer(connection, card_number)
-
-        response = jsonify({
-            'success': True,
-            'message': 'Customer deleted successfully',
-            'rows_deleted': rows_deleted
-        })
+        connection = get_sql_connection()
+        result = customer_dao.delete_customer(connection, card_number)
+        if result['success']:
+            response = jsonify({
+                'success': True,
+                'message': 'Customer deleted successfully',
+                'rows_updated': result['rows_updated']
+            })
+        else:
+            response = jsonify({
+                'success': False,
+                'message': result['message']
+            })
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
     except Exception as e:
@@ -658,6 +680,9 @@ def delete_customer():
             'success': False,
             'error': str(e)
         }), 500
+    finally:
+        if connection:
+            connection.close()
 
     # Add these routes to your server.py file
 

@@ -152,7 +152,6 @@ if (currentUserRole.toLowerCase() === 'manager') {
     });
 });
 
-    // Обробник події для кнопки "Load Purchases"
     $('#load-customer-purchases').on('click', function() {
         const startDate = $('#purchases-start-date').val();
         const endDate = $('#purchases-end-date').val();
@@ -195,7 +194,6 @@ function deleteStoreProduct(upc) {
     });
 }
 
-    // Функція для завантаження даних про покупки
     function loadCustomerPurchases(startDate, endDate) {
         if (!startDate || !endDate) {
             showErrorModal('Please select both start and end dates');
@@ -274,7 +272,7 @@ function loadStoreProductsForSales() {
         }
     });
 }
-    // Функція для відображення даних у таблиці
+
     function renderCustomerPurchases(purchases) {
         console.log('Rendering table with data:', purchases);
         let html = `
@@ -289,7 +287,6 @@ function loadStoreProductsForSales() {
                 </thead>
                 <tbody>
         `;
-
         purchases.forEach(purchase => {
             console.log('Processing purchase:', purchase);
             html += `
@@ -301,7 +298,6 @@ function loadStoreProductsForSales() {
                 </tr>
             `;
         });
-
         html += '</tbody></table>';
         $('#customer-purchases-list2').html(html);
     }
