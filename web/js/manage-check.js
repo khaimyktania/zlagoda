@@ -25,7 +25,8 @@ const API_ENDPOINTS = {
     GET_CHECKS_BY_DATE_RANGE: "/getChecksByDateRange",
     GET_CASHIER_TOTAL_SALES: "/getCashierTotalSales",
     GET_PRODUCT_SALES_BY_NAME: "/api/product_sales_by_name",
-    GET_CUSTOMER_PURCHASES: "/getCustomerPurchasesByDateRange"
+    GET_CUSTOMER_PURCHASES: "/getCustomerPurchasesByDateRange",
+
 };
 
 // Function to show error in modal
@@ -246,33 +247,30 @@ function deleteStoreProduct(upc) {
     }
 
 function loadStoreProductsForSales() {
-    console.log("Loading store products for sales filter...");
+    console.log("Loading all products for sales filter...");
     return $.ajax({
-        url: API_ENDPOINTS.GET_STORE_PRODUCTS,
+        url: '/getProducts', // Змінено з GET_STORE_PRODUCTS на GET_PRODUCTS
         type: 'GET',
         success: function(response) {
-            console.log("Store products for sales filter loaded successfully:", response);
+            console.log("Products for sales filter loaded successfully:", response);
             storeProducts = response;
 
             // Заповнюємо розкривний список продуктів
             let options = '<option value="">Select product</option>';
             storeProducts.forEach(function(product) {
-                // Показуємо лише продукти в наявності
-                if (product.products_number > 0) {
-                    options += `<option value="${product.product_name}">
-                                ${product.product_name} - $${parseFloat(product.selling_price).toFixed(2)}
-                                </option>`;
-                }
+                // Включаємо всі продукти, незалежно від наявності в магазині
+                options += `<option value="${product.product_name}">
+                            ${product.product_name}
+                            </option>`;
             });
             $('#product-sales-select').html(options);
         },
         error: function(xhr, status, error) {
-            console.error('Error loading store products for sales:', xhr.responseText, status, error);
+            console.error('Error loading products for sales:', xhr.responseText, status, error);
             $('#product-sales-select').html('<option value="">Error loading products</option>');
         }
     });
 }
-
     function renderCustomerPurchases(purchases) {
         console.log('Rendering table with data:', purchases);
         let html = `

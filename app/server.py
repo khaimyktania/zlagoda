@@ -896,6 +896,7 @@ def get_all_products_sorted_by_quantity():
         connection.close()
 
 
+
 @app.route('/manage_check')
 @require_role('cashier', 'manager')
 def manage_check():

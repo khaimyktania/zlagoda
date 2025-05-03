@@ -115,7 +115,6 @@ function renderProductsTable(products) {
                 '" data-promotional="' + product.promotional_product +
                 '" data-upc-prom="' + (product.UPC_prom || '') + '">' +
                 '<td>' + product.UPC + '</td>' +
-                '<td>' + promotionalUPC + '</td>' +
                 '<td>' + product.product_name + '</td>' +
                 '<td><span class="price-with-vat">' + priceWithVAT + '</span> <br>' +
                 '<a href="#" class="show-vat-info" data-upc="' + product.UPC + '">VAT info</a></td>' +
@@ -210,11 +209,11 @@ $('#storeProductModal').on('show.bs.modal', function(e) {
                 alert('Error generating UPC: ' + response.error);
             }
         });
+        $('#id_product').closest('.form-group').show(); // Show dropdown for adding new product
     }
     $('.error-message').hide().find('.error-text').text(''); // Очищаємо повідомлення про помилки
     $('.is-invalid').removeClass('is-invalid'); // Очищаємо підсвічування
 });
-
 // Initialize all event handlers
 function initEventHandlers() {
     // Add new store product button
@@ -513,7 +512,7 @@ function openEditStoreProductModal(tr) {
     $('#UPC').val(upc);
     $('#UPC').prop('readonly', true); // UPC can't be changed when editing
     $('#UPC_prom').val(upcProm);
-    $('#id_product').val(productId);
+    $('#id_product').val(productId).closest('.form-group').hide(); // Hide dropdown and its label
     $('#selling_price').val(sellingPrice);
     $('#products_number').val(quantity);
     $('#promotional_product').prop('checked', isPromotional);
@@ -525,7 +524,6 @@ function openEditStoreProductModal(tr) {
     $('.error-message').hide().find('.error-text').text(''); // Очищаємо повідомлення про помилки
     $('.is-invalid').removeClass('is-invalid'); // Очищаємо підсвічування
 }
-
 // Save or update store product
 function saveStoreProduct() {
     if (!validateStoreProductForm()) {
@@ -665,11 +663,11 @@ function showVatInfo(upc) {
 storeProductModal.on('hidden.bs.modal', function() {
     $('#storeProductForm')[0].reset();
     $('#UPC').prop('readonly', false);
+    $('#id_product').closest('.form-group').show(); // Show dropdown
     storeProductModal.find('.modal-title').text('Add New Store Product');
     $('.error-message').hide().find('.error-text').text(''); // Очищаємо повідомлення про помилки
     $('.is-invalid').removeClass('is-invalid'); // Очищаємо підсвічування
 });
-
 // Функція для валідації форми
 function validateStoreProductForm() {
     let isValid = true;

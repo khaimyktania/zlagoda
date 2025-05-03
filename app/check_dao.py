@@ -429,3 +429,19 @@ def get_customers_not_buying_category_from_cashier(connection, id_employee, cate
         )
     """
     return execute_query(connection, query, (id_employee, category_number))
+
+def get_all_products(connection):
+    """
+    Get all products from the products table
+    """
+    query = """
+    SELECT id_product, product_name, selling_price
+    FROM products
+    ORDER BY product_name;
+    """
+    try:
+        result = execute_query(connection, query)
+        return result
+    except Exception as e:
+        print(f"Error in get_all_products: {e}")
+        raise
