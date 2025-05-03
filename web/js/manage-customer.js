@@ -1,4 +1,5 @@
 var customerModal = $("#customerModal");
+var customerDetailsModal = $("#customerDetailsModal");
 
 $(function () {
     loadCustomers();
@@ -6,10 +7,11 @@ $(function () {
 
 // Додайте цей код у ваш JavaScript-файл
 function clearPageData() {
-    // Очистити всі відображувані дані
-    document.getElementById('dataContainer').innerHTML = '';
-    // Скинути всі форми
+    document.querySelector('table tbody').innerHTML = '';
     document.querySelectorAll('form').forEach(form => form.reset());
+    $('#contactInfoResult').hide().empty();
+    $('#sortSelect').val('default');
+    loadCustomers();
 }
 
 // Викликайте цю функцію при переході між вкладками
@@ -28,7 +30,11 @@ function loadCustomers() {
                     '<td>'+ customer.cust_surname + ' ' + customer.cust_name + ' ' + customer.cust_patronymic +'</td>'+
                     '<td>'+ customer.phone_number +'</td>'+
                     '<td>'+ customer.percent +'</td>'+
-                    '<td><span class="btn btn-xs btn-primary edit-customer">Edit</span> <span class="btn btn-xs btn-danger delete-customer role-manager">Delete</span></td></tr>';
+                    '<td>' +
+                        '<span class="btn btn-xs btn-primary edit-customer">Edit</span> ' +
+                        '<span class="btn btn-xs btn-danger delete-customer role-manager">Delete</span> ' +
+                        '<span class="btn btn-xs btn-info details-customer">Details</span>' +
+                    '</td></tr>';
             });
             $("table").find('tbody').empty().html(table);
 
@@ -98,6 +104,36 @@ $(document).on('click', '.edit-customer', function() {
             $('.error-message').hide().find('.error-text').text(''); // Очищаємо повідомлення про помилки
             $('.form-control').removeClass('is-invalid');
             customerModal.modal('show');
+        }
+    });
+});
+
+// Show customer details
+$(document).on('click', '.details-customer', function() {
+    var row = $(this).closest('tr');
+    var cardNumber = row.data('id');
+
+    $.get('/getCustomers', function(customers) {
+        var customer = customers.find(c => c.card_number == cardNumber);
+
+        if(customer) {
+            var leftColumn = `
+                <p><strong>Card Number:</strong> ${customer.card_number}</p>
+                <p><strong>Surname:</strong> ${customer.cust_surname}</p>
+                <p><strong>Name:</strong> ${customer.cust_name}</p>
+                <p><strong>Patronymic:</strong> ${customer.cust_patronymic || 'N/A'}</p>
+                <p><strong>Phone Number:</strong> ${customer.phone_number}</p>
+            `;
+            var rightColumn = `
+                <p><strong>City:</strong> ${customer.city}</p>
+                <p><strong>Street:</strong> ${customer.street}</p>
+                <p><strong>ZIP Code:</strong> ${customer.zip_code}</p>
+                <p><strong>Discount Percent:</strong> ${customer.percent}%</p>
+            `;
+            $('#customerDetailsLeft').html(leftColumn);
+            $('#customerDetailsRight').html(rightColumn);
+            customerDetailsModal.find('.modal-title').text('Customer Details: ' + customer.cust_surname + ' ' + customer.cust_name);
+            customerDetailsModal.modal('show');
         }
     });
 });
@@ -210,6 +246,12 @@ customerModal.on('hide.bs.modal', function(){
     $('.form-control').removeClass('is-invalid');
 });
 
+// Clear details modal when closed
+customerDetailsModal.on('hide.bs.modal', function(){
+    $('#customerDetailsLeft').empty();
+    $('#customerDetailsRight').empty();
+});
+
 // Clear error on input change
 $("#card_number, #cust_surname, #cust_name, #cust_patronymic, #phone_number, #city, #street, #zip_code, #percent").on('input change', function() {
     const field = $(this).attr('id');
@@ -243,8 +285,11 @@ $("#sortSelect").on("change", function () {
                     '<td>'+ customer.cust_surname + ' ' + customer.cust_name + ' ' + customer.cust_patronymic +'</td>'+
                     '<td>'+ customer.phone_number +'</td>'+
                     '<td>'+ customer.percent +'</td>'+
-                    '<td><span class="btn btn-xs btn-primary edit-customer">Edit</span> <span class="btn btn-xs btn-danger delete-customer role-manager">Delete</span></td></tr>';
-            });
+                    '<td>' +
+                        '<span class="btn btn-xs btn-primary edit-customer">Edit</span> ' +
+                        '<span class="btn btn-xs btn-danger delete-customer role-manager">Delete</span> ' +
+                        '<span class="btn btn-xs btn-info details-customer">Details</span>' +
+                    '</td></tr>';            });
             $("table").find('tbody').empty().html(table);
 
             // Повторно застосовуємо стилі лише для role-manager у таблиці
