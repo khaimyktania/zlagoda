@@ -896,12 +896,37 @@ def get_all_products_sorted_by_quantity():
         connection.close()
 
 
-
 @app.route('/manage_check')
 @require_role('cashier', 'manager')
 def manage_check():
     return app.send_static_file('manage_check.html')
+@app.route('/checkCardNumber', methods=['GET'])
+@require_role('manager', 'cashier')
+def check_card_number():
+    connection = None
+    try:
+        card_number = request.args.get('card_number')
+        if not card_number:
+            return jsonify({'success': False, 'message': 'Card number is required'}), 400
 
+        connection = get_sql_connection()
+        cursor = connection.cursor()
+        query = "SELECT card_number FROM customer_card WHERE card_number = %s"
+        cursor.execute(query, (card_number,))
+        result = cursor.fetchone()
+        cursor.close()
+
+        return jsonify({
+            'success': True,
+            'exists': bool(result),
+            'card_number': card_number if result else None
+        })
+    except Exception as e:
+        print(f"Error in check_card_number: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
 
 @app.route('/getRecentChecks', methods=['GET'])
 @require_role('cashier', 'manager')

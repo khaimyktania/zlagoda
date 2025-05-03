@@ -377,6 +377,29 @@ function validateCustomerForm() {
     } else if (!/^\d{13}$/.test(cardNumber)) {
         errors.card_number = 'Номер картки має складатися з 13 цифр. Приклад: 1234567890123';
         isValid = false;
+    }else {
+       // Перевірка унікальності номера картки
+        const isEditing = $("#card_number").prop('readonly');
+        let uniqueCheck = true;
+        $.ajax({
+            type: "GET",
+            url: '/checkCardNumber',
+            data: { card_number: cardNumber },
+            async: false, // Синхронний запит для валідації
+            success: function(response) {
+                if (response.exists && !isEditing) {
+                    errors.card_number = 'Цей номер картки вже використовується.';
+                    uniqueCheck = false;
+                }
+            },
+            error: function() {
+                errors.card_number = 'Помилка перевірки номера картки.';
+                uniqueCheck = false;
+            }
+        });
+        if (!uniqueCheck) {
+            isValid = false;
+        }
     }
 
     // Валідація Surname
@@ -472,7 +495,7 @@ function validateCustomerForm() {
     }
 
     // Відображення помилок
-    for (let field in errors) {
+     for (let field in errors) {
         $(`#${field}_error`).find('.error-text').text(errors[field]);
         $(`#${field}_error`).show();
         $(`#${field}`).addClass('is-invalid');

@@ -10,6 +10,15 @@ def validate_customer(customer):
         if not customer.get(field):
             errors.append(f"Field '{field}' is required.")
 
+    try:
+        card_number = customer['card_number']
+        if not card_number:
+            errors.append("Card number is required.")
+        elif not re.fullmatch(r"\d{13}", card_number):
+            errors.append("Card number must be exactly 13 digits.")
+    except Exception:
+        errors.append("Invalid card_number format.")
+
     # Перевірка імені
     try:
         name = customer['cust_name']
@@ -117,6 +126,18 @@ def validate_customer(customer):
         raise ValueError("Validation error(s): " + "; ".join(errors))
 
 def insert_new_customer(connection, customer):
+    # Перевірка унікальності номера картки
+    try:
+        card_number = customer['card_number']
+        cursor = connection.cursor()
+        query = "SELECT card_number FROM customer_card WHERE card_number = %s"
+        cursor.execute(query, (card_number,))
+        if cursor.fetchone():
+            raise ValueError("Card number must be unique. This card number already exists.")
+        cursor.close()
+    except Exception as e:
+        raise ValueError(f"Error checking card number uniqueness: {str(e)}")
+
     validate_customer(customer)
     query = """
         INSERT INTO customer_card (
@@ -143,9 +164,23 @@ def insert_new_customer(connection, customer):
         raise
 
 def update_customer(connection, customer):
+    # Перевірка унікальності номера картки
+    try:
+        card_number = customer['card_number']
+        if not card_number:
+            raise ValueError("card_number is required for update")
+        cursor = connection.cursor()
+        # Перевіряємо, чи існує інший клієнт з таким же номером картки
+        query = "SELECT card_number FROM customer_card WHERE card_number = %s"
+        cursor.execute(query, (card_number,))
+        existing = cursor.fetchone()
+        if existing and existing[0] != card_number:
+            raise ValueError("Card number must be unique. This card number already exists.")
+        cursor.close()
+    except Exception as e:
+        raise ValueError(f"Error checking card number uniqueness: {str(e)}")
+
     validate_customer(customer)
-    if not customer['card_number']:
-        raise ValueError("card_number is required for update")
     query = """
         UPDATE customer_card SET
             cust_surname = %s,
