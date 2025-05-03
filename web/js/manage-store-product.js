@@ -156,17 +156,26 @@ $('#getAllStoreProductsSorted').on('click', function () {
 
 // Load products dropdown for store product form (only products not in store)
 function loadProductDropdown() {
+    console.log('loadProductDropdown called');
     $.get("/getProductsNotInStore", function (response) {
+        console.log('Response from /getProductsNotInStore:', response);
         if (response) {
-            productSelect.empty(); // Очищаємо dropdown перед додаванням нових опцій
+            productSelect.empty();
             productSelect.append('<option value="">Select product</option>');
 
+            const existingIds = new Set();
             $.each(response, function (index, product) {
-                productSelect.append(
-                    $('<option></option>')
-                        .attr('value', product.id_product)
-                        .text(product.product_name)
-                );
+                if (!existingIds.has(product.id_product)) {
+                    console.log('Adding product to dropdown:', product);
+                    productSelect.append(
+                        $('<option></option>')
+                            .attr('value', product.id_product)
+                            .text(product.product_name)
+                    );
+                    existingIds.add(product.id_product);
+                } else {
+                    console.warn('Duplicate product skipped:', product);
+                }
             });
             console.log('Dropdown updated with products:', response);
         } else {
@@ -574,8 +583,9 @@ function deleteStoreProduct(tr) {
             success: function(response) {
                 if (response.success) {
                     alert('Store product deleted successfully');
-                    loadStoreProducts(); // Оновлюємо таблицю
-                    loadProductDropdown(); // Оновлюємо dropdown після видалення
+                    loadStoreProducts();
+                    // Викликаємо подію лише один раз
+                    $(document).trigger('productDeleted');
                 } else {
                     alert('Error: ' + response.message);
                 }
