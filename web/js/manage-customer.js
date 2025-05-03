@@ -117,21 +117,40 @@ $(document).on('click', '.details-customer', function() {
         var customer = customers.find(c => c.card_number == cardNumber);
 
         if(customer) {
-            var leftColumn = `
-                <p><strong>Card Number:</strong> ${customer.card_number}</p>
-                <p><strong>Surname:</strong> ${customer.cust_surname}</p>
-                <p><strong>Name:</strong> ${customer.cust_name}</p>
-                <p><strong>Patronymic:</strong> ${customer.cust_patronymic || 'N/A'}</p>
-                <p><strong>Phone Number:</strong> ${customer.phone_number}</p>
-            `;
-            var rightColumn = `
-                <p><strong>City:</strong> ${customer.city}</p>
-                <p><strong>Street:</strong> ${customer.street}</p>
-                <p><strong>ZIP Code:</strong> ${customer.zip_code}</p>
-                <p><strong>Discount Percent:</strong> ${customer.percent}%</p>
-            `;
+            // Define all fields with labels and values
+            const fields = [
+                ['Card Number', customer.card_number],
+                ['Surname', customer.cust_surname],
+                ['Name', customer.cust_name],
+                ['Patronymic', customer.cust_patronymic],
+                ['Phone Number', customer.phone_number],
+                ['City', customer.city],
+                ['Street', customer.street],
+                ['ZIP Code', customer.zip_code],
+                ['Discount Percent', customer.percent + '%']
+            ];
+
+            // Filter fields with valid values (exclude null, undefined, or empty strings)
+            const validFields = fields.filter(([_, value]) => value && value !== '');
+
+            // Split fields into two columns for balanced distribution
+            const splitIndex = Math.ceil(validFields.length / 2);
+            const leftFields = validFields.slice(0, splitIndex);
+            const rightFields = validFields.slice(splitIndex);
+
+            // Generate HTML for each column
+            const leftColumn = leftFields
+                .map(([label, value]) => `<p><strong>${label}:</strong> ${value}</p>`)
+                .join('');
+            const rightColumn = rightFields
+                .map(([label, value]) => `<p><strong>${label}:</strong> ${value}</p>`)
+                .join('');
+
+            // Populate the columns
             $('#customerDetailsLeft').html(leftColumn);
             $('#customerDetailsRight').html(rightColumn);
+
+            // Set modal title
             customerDetailsModal.find('.modal-title').text('Customer Details: ' + customer.cust_surname + ' ' + customer.cust_name);
             customerDetailsModal.modal('show');
         }
