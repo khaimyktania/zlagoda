@@ -153,10 +153,12 @@ $('#getAllStoreProductsSorted').on('click', function () {
 
 // Load products dropdown for store product form
 // Load products dropdown for store product form (only products not in store)
+
+// Load products dropdown for store product form (only products not in store)
 function loadProductDropdown() {
     $.get("/getProductsNotInStore", function (response) {
         if (response) {
-            productSelect.empty();
+            productSelect.empty(); // Очищаємо dropdown перед додаванням нових опцій
             productSelect.append('<option value="">Select product</option>');
 
             $.each(response, function (index, product) {
@@ -166,12 +168,24 @@ function loadProductDropdown() {
                         .text(product.product_name)
                 );
             });
+            console.log('Dropdown updated with products:', response);
+        } else {
+            productSelect.empty();
+            productSelect.append('<option value="">No products available</option>');
+            console.log('No products available for dropdown');
         }
     }).fail(function (xhr) {
         console.error('Error loading products dropdown:', xhr.responseText);
         alert('Error loading products dropdown: ' + xhr.responseText);
     });
 }
+
+// Додаємо обробник події для оновлення dropdown після видалення продукту
+$(document).on('productDeleted', function() {
+    if (window.location.pathname === '/manage_store_product' && typeof loadProductDropdown === 'function') {
+        loadProductDropdown();
+    }
+});
 
 $('#storeProductModal').on('show.bs.modal', function(e) {
     var modalTitle = $(this).find('.modal-title').text();
@@ -505,12 +519,10 @@ function openEditStoreProductModal(tr) {
 
 // Save or update store product
 function saveStoreProduct() {
-    // Перевіряємо валідацію перед збереженням
     if (!validateStoreProductForm()) {
         return;
     }
 
-    // Collect form data
     var formData = {
         UPC: $('#UPC').val(),
         UPC_prom: $('#UPC_prom').val() || null,
@@ -520,13 +532,10 @@ function saveStoreProduct() {
         promotional_product: $('#promotional_product').is(':checked') ? 1 : 0
     };
 
-    // Validation (basic check already done in validateStoreProductForm)
     if (formData.promotional_product === 1 && !formData.UPC_prom) {
-        // Generate promotional UPC if not provided
         formData.UPC_prom = 'P' + formData.UPC;
     }
 
-    // Send data to server
     $.ajax({
         url: storeProductSaveApiUrl,
         type: 'POST',
@@ -537,8 +546,6 @@ function saveStoreProduct() {
                 storeProductModal.modal('hide');
                 loadStoreProducts();
                 loadProductDropdown(); // Оновлюємо dropdown після додавання продукту
-
-                // Reset form
                 $('#storeProductForm')[0].reset();
                 $('#UPC').prop('readonly', false);
                 $('.error-message').hide().find('.error-text').text('');
@@ -552,7 +559,7 @@ function saveStoreProduct() {
         }
     });
 }
-// Delete store product
+
 // Delete store product
 // Delete store product
 function deleteStoreProduct(tr) {
@@ -567,8 +574,8 @@ function deleteStoreProduct(tr) {
             success: function(response) {
                 if (response.success) {
                     alert('Store product deleted successfully');
-                    loadStoreProducts(); // Update table
-                    loadProductDropdown(); // Update dropdown
+                    loadStoreProducts(); // Оновлюємо таблицю
+                    loadProductDropdown(); // Оновлюємо dropdown після видалення
                 } else {
                     alert('Error: ' + response.message);
                 }
@@ -579,7 +586,7 @@ function deleteStoreProduct(tr) {
         });
     }
 }
-// Make product promotional or non-promotional
+  //Make product promotional or non-promotional
 function makeProductPromotional(tr, makePromotional) {
     var upc = tr.data('upc');
     var productName = tr.data('product-name');

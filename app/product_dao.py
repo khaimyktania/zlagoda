@@ -71,14 +71,32 @@ def update_product(connection, product):
 
 
 def delete_products(connection, id_product):
-    query = "DELETE FROM products WHERE id_product = %s"
     try:
-        result = execute_query(connection, query, (id_product,))
+        # Спочатку видаляємо всі записи з store_products, пов’язані з id_product
+        delete_store_products_query = """
+        DELETE FROM store_products 
+        WHERE id_product = %s
+        """
+        cursor = connection.cursor()
+        cursor.execute(delete_store_products_query, (id_product,))
+        store_products_deleted = cursor.rowcount
+        print(f"Deleted {store_products_deleted} store_products for product ID {id_product}")
+
+        # Тепер видаляємо продукт із таблиці products
+        delete_query = "DELETE FROM products WHERE id_product = %s"
+        result = execute_query(connection, delete_query, (id_product,))
+        print(f"Deleted product with ID {id_product}")
+
+        connection.commit()
         return result
+
     except Exception as e:
+        connection.rollback()
         print(f"Помилка видалення продукту: {e}")
         raise
-
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
 
 def get_all_products_sorted(connection):
     query = "SELECT * FROM products ORDER BY product_name ASC;"

@@ -402,31 +402,52 @@ $(document).on("click", ".delete-product", function () {
     var productId = tr.data('id');
     var productName = tr.data('name');
 
-    // Check if the product is in store products by querying /getStoreProducts
+    // Перевірка, чи продукт є в store_products
     $.ajax({
         url: '/getStoreProducts',
         type: 'GET',
         success: function(response) {
-            // Filter store products to find those with matching id_product
+            // Фільтруємо store_products, щоб знайти продукти з відповідним id_product
             var storeProducts = response.filter(function(product) {
                 return product.id_product == productId;
             });
 
             if (storeProducts.length > 0) {
-                // Product is in store products, show modal
+                // Продукт є в store_products, показуємо модальне вікно
                 $('#deleteProductName').text(productName);
                 $('#deleteProductStoreCount').text(storeProducts.length);
+                // Оновлюємо повідомлення в модальному вікні
+                $('#deleteProductModal .modal-body').html(
+                    `Product "${productName}" is present in ${storeProducts.length} store(s). ` +
+                    `Deleting this product will also remove it from all stores. Are you sure you want to proceed?`
+                );
                 $('#deleteProductModal').modal('show');
+
+                // Обробник підтвердження видалення в модальному вікні
+                $('#confirmDeleteProduct').off('click').on('click', function() {
+                    $.post(productDeleteApiUrl, { product_id: productId }, function(response) {
+                        alert("Product deleted.");
+                        $('#deleteProductModal').modal('hide');
+                        loadProducts(null, false);
+                        // Викликаємо подію для оновлення dropdown
+                        $(document).trigger('productDeleted');
+                    }).fail(function(xhr) {
+                        console.error("Error details:", xhr.responseText);
+                        alert("Error while deleting product: " + xhr.responseText);
+                    });
+                });
             } else {
-                // Product is not in store products, use simple confirmation
+                // Продукт не є в store_products, використовуємо просте підтвердження
                 var isDelete = confirm("Are you sure to delete " + productName + "?");
                 if (isDelete) {
                     $.post(productDeleteApiUrl, { product_id: productId }, function(response) {
                         alert("Product deleted.");
                         loadProducts(null, false);
+                        // Викликаємо подію для оновлення dropdown
+                        $(document).trigger('productDeleted');
                     }).fail(function(xhr) {
                         console.error("Error details:", xhr.responseText);
-                        alert("Error while deleting product.");
+                        alert("Error while deleting product: " + xhr.responseText);
                     });
                 }
             }

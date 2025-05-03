@@ -115,23 +115,52 @@ def update_employee(connection, employee):
 
 
 def delete_employee(connection, employee_id):
-    query = "DELETE FROM employee WHERE id_employee = %s;"
+    """
+    Soft delete an employee by setting their salary to 0, preserving their data for checks.
+    """
+    print(f"Attempting to soft delete employee with id_employee: {employee_id}")
     try:
-        result = execute_query(connection, query, (employee_id,))
-        delete_credentials(employee_id)
-        return result
-    except Exception as e:
-        print(f"Помилка видалення працівника: {e}")
-        raise
+        # Перевіряємо, чи існує працівник
+        print("Calling get_employee_by_id")
+        employee = get_employee_by_id(connection, employee_id)
+        if not employee:
+            print(f"Employee with id_employee {employee_id} not found")
+            return {"success": False, "message": "Employee not found"}
 
+        # Встановлюємо salary = 0 для позначення "видаленого" працівника
+        soft_delete_query = """
+        UPDATE employee 
+        SET salary = 0 
+        WHERE id_employee = %s
+        """
+        print(f"Executing query: {soft_delete_query} with id_employee: {employee_id}")
+        cursor = connection.cursor()
+        cursor.execute(soft_delete_query, (employee_id,))
+        rows_updated = cursor.rowcount
+        print(f"Rows updated: {rows_updated}")
+        connection.commit()
+
+        # Видаляємо облікові дані
+        print("Deleting credentials")
+        delete_credentials(employee_id)
+
+        return {"success": True, "rows_updated": rows_updated}
+
+    except Exception as e:
+        connection.rollback()
+        print(f"Error soft deleting employee: {str(e)}")
+        return {"success": False, "message": f"Error soft deleting employee: {str(e)}"}
+    finally:
+        if 'cursor' in locals():
+            print("Closing cursor")
+            cursor.close()
 
 def get_contact_by_surname(connection, surname):
     query = """
-        SELECT phone_number, city, street, zip_code
-        FROM employee
-        WHERE empl_surname = %s;
+    SELECT phone_number, city, street, zip_code
+    FROM employee
+    WHERE empl_surname = %s AND salary > 0;
     """
-
     try:
         result = execute_query(connection, query, (surname,))
         if result and len(result) > 0:
@@ -142,34 +171,30 @@ def get_contact_by_surname(connection, surname):
         print(f"Помилка отримання контакту за прізвищем: {e}")
         raise
 
-
 def get_all_employees_ordered_by_surname(connection):
     query = """
-        SELECT id_employee, empl_surname, empl_name, empl_patronymic,
-               empl_role, salary, date_of_birth, date_of_start,
-               phone_number, city, street, zip_code
-        FROM employee
-        ORDER BY empl_surname;
+    SELECT id_employee, empl_surname, empl_name, empl_patronymic,
+           empl_role, salary, date_of_birth, date_of_start,
+           phone_number, city, street, zip_code
+    FROM employee
+    WHERE salary > 0
+    ORDER BY empl_surname;
     """
-
     try:
         result = execute_query(connection, query)
         return result
     except Exception as e:
         print(f"Помилка отримання списку працівників: {e}")
         raise
-
-
 def get_cashiers_ordered_by_surname(connection):
     query = """
-        SELECT id_employee, empl_surname, empl_name, empl_patronymic,
-               empl_role, salary, date_of_birth, date_of_start,
-               phone_number, city, street, zip_code
-        FROM employee
-        WHERE empl_role = 'Cashier'
-        ORDER BY empl_surname;
+    SELECT id_employee, empl_surname, empl_name, empl_patronymic,
+           empl_role, salary, date_of_birth, date_of_start,
+           phone_number, city, street, zip_code
+    FROM employee
+    WHERE empl_role = 'Cashier' AND salary > 0
+    ORDER BY empl_surname;
     """
-
     try:
         result = execute_query(connection, query)
         return result
@@ -177,10 +202,11 @@ def get_cashiers_ordered_by_surname(connection):
         print(f"Помилка отримання списку касирів: {e}")
         raise
 
-
 def get_all_employees(connection):
-    query = "SELECT * FROM employee;"
-
+    query = """
+    SELECT * FROM employee 
+    WHERE salary > 0;
+    """
     try:
         result = execute_query(connection, query)
         return result

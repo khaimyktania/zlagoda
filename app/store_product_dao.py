@@ -206,19 +206,13 @@ def update_store_product(connection, store_product):
 
 
 def delete_store_product(connection, upc):
-    """
-    Soft delete a store product by setting its quantity to 0, preserving its data for checks.
-    """
     print(f"Attempting to soft delete product with UPC: {upc}")
     try:
-        # Перевіряємо, чи існує продукт
-        print("Calling get_store_product_by_upc")
         product = get_store_product_by_upc(connection, upc)
         if not product:
             print(f"Product with UPC {upc} not found")
             return {"success": False, "message": "Product not found"}
 
-        # Встановлюємо products_number = 0
         soft_delete_query = """
         UPDATE store_products 
         SET products_number = 0 
@@ -231,7 +225,6 @@ def delete_store_product(connection, upc):
         print(f"Rows updated: {rows_updated}")
         connection.commit()
         return {"success": True, "rows_updated": rows_updated}
-
     except Exception as e:
         connection.rollback()
         print(f"Error soft deleting store product: {str(e)}")
@@ -240,6 +233,7 @@ def delete_store_product(connection, upc):
         if 'cursor' in locals():
             print("Closing cursor")
             cursor.close()
+
 
 def make_product_promotional(connection, upc, promotional=True):
     """
