@@ -4,6 +4,8 @@ from credentials_utils import auto_generate_credentials, load_credentials, save_
 import secrets
 import re
 
+
+
 def insert_new_employee(connection, employee):
     validate_employee(employee)
 
@@ -50,6 +52,7 @@ def insert_new_employee(connection, employee):
     except Exception as e:
         print(f"Помилка додавання працівника: {e}")
         raise
+
 
 def update_employee(connection, employee):
     # Перевірка наявності id_employee
@@ -110,6 +113,7 @@ def update_employee(connection, employee):
         print(f"Помилка оновлення працівника: {e}")
         raise
 
+
 def delete_employee(connection, employee_id):
     query = "DELETE FROM employee WHERE id_employee = %s;"
     try:
@@ -119,6 +123,7 @@ def delete_employee(connection, employee_id):
     except Exception as e:
         print(f"Помилка видалення працівника: {e}")
         raise
+
 
 def get_contact_by_surname(connection, surname):
     query = """
@@ -137,6 +142,7 @@ def get_contact_by_surname(connection, surname):
         print(f"Помилка отримання контакту за прізвищем: {e}")
         raise
 
+
 def get_all_employees_ordered_by_surname(connection):
     query = """
         SELECT id_employee, empl_surname, empl_name, empl_patronymic,
@@ -152,6 +158,7 @@ def get_all_employees_ordered_by_surname(connection):
     except Exception as e:
         print(f"Помилка отримання списку працівників: {e}")
         raise
+
 
 def get_cashiers_ordered_by_surname(connection):
     query = """
@@ -170,6 +177,7 @@ def get_cashiers_ordered_by_surname(connection):
         print(f"Помилка отримання списку касирів: {e}")
         raise
 
+
 def get_all_employees(connection):
     query = "SELECT * FROM employee;"
 
@@ -179,6 +187,7 @@ def get_all_employees(connection):
     except Exception as e:
         print(f"Помилка отримання всіх працівників: {e}")
         raise
+
 
 def validate_employee(employee):
     errors = []
@@ -302,7 +311,7 @@ def validate_employee(employee):
     except Exception:
         errors.append("Invalid date_of_birth format (expected YYYY-MM-DD).")
 
-    # Перевірка зарплати — обов’язково вказана, числова і не від’ємна
+    # Перевірка зарплати — обов'язково вказана, числова і не від’ємна
     try:
         salary_raw = employee['salary']
         if salary_raw is None or salary_raw == '':
@@ -321,6 +330,7 @@ def validate_employee(employee):
 
     if errors:
         raise ValueError("Validation errors: " + "; ".join(errors))
+
 
 def get_employee_by_id(connection, id_employee):
     cursor = connection.cursor()
@@ -366,41 +376,3 @@ def get_employee_info_by_id(connection, id_employee):
         'street': row[10],
         'zip_code': row[11]
     }
-
-def get_employees_never_sold_promotional_to_non_card_holders(connection):
-    query = """
-        SELECT 
-            e.id_employee,
-            e.empl_surname,
-            e.empl_name,
-            e.empl_role,
-            e.phone_number
-        FROM 
-            employee e
-        WHERE 
-            NOT EXISTS (
-                SELECT 1
-                FROM `check` ch
-                JOIN store_products sp ON sp.UPC IN (
-                    SELECT UPC 
-                    FROM store_products 
-                    WHERE promotional_product = 1
-                )
-                WHERE 
-                    ch.id_employee = e.id_employee
-                    AND ch.card_number IS NULL
-            )
-            AND EXISTS (
-                SELECT 1
-                FROM `check` ch
-                WHERE ch.id_employee = e.id_employee
-            )
-        ORDER BY 
-            e.empl_surname, e.empl_name;
-    """
-    try:
-        result = execute_query(connection, query)
-        return result
-    except Exception as e:
-        print(f"Помилка отримання працівників, які не продавали акційні товари без картки: {e}")
-        raise

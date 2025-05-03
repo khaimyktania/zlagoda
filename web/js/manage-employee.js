@@ -185,10 +185,10 @@ $(document).on("click", ".delete-employee", function () {
     if (isDelete) {
         $.post('/deleteEmployee', data, function(response){
             if(response.success) {
-                alert("Employee deleted successfully.");
+                alert(`Employee deleted successfully. Rows updated: ${response.rows_updated}`);
                 loadEmployees();
             } else {
-                alert("Error: Could not delete employee.");
+                alert("Error: Could not delete employee. " + response.message);
             }
         }).fail(function(xhr){
             alert("Error: " + (xhr.responseJSON ? xhr.responseJSON.message : "Error while deleting employee"));

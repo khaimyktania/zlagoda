@@ -309,13 +309,28 @@ def update_employee():
 @app.route('/deleteEmployee', methods=['POST'])
 @require_role('manager')
 def delete_employee():
-    employee_id = request.form['id_employee']
-    rows_deleted = employee_dao.delete_employee(connection, employee_id)
-    return jsonify({
-        'success': True,
-        'deleted_id': employee_id,
-        'rows_deleted': rows_deleted
-    })
+    connection = None
+    try:
+        employee_id = request.form['id_employee']
+        connection = get_sql_connection()
+        result = employee_dao.delete_employee(connection, employee_id)
+        if result['success']:
+            return jsonify({
+                'success': True,
+                'message': 'Employee deleted successfully',
+                'rows_updated': result['rows_updated']
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': result['message']
+            }), 500
+    except Exception as e:
+        print(f"Error in delete_employee: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
 
 
 @app.route('/getCashiers', methods=['GET'])
@@ -369,6 +384,28 @@ def get_employees_never_sold_promotional_to_non_card_holders():
 @require_role('cashier','manager')
 def get_all_products_sorted():
     return jsonify(product_dao.get_all_products_sorted(connection))
+
+@app.route('/getProductsNotInStore', methods=['GET'])
+@require_role('cashier', 'manager')
+def get_products_not_in_store():
+    connection = None
+    try:
+        connection = get_sql_connection()
+        query = """
+        SELECT p.id_product, p.product_name
+        FROM products p
+        LEFT JOIN store_products sp ON p.id_product = sp.id_product
+        WHERE sp.id_product IS NULL OR sp.products_number = 0
+        ORDER BY p.product_name ASC
+        """
+        products = execute_query(connection, query)
+        return jsonify(products)
+    except Exception as e:
+        print(f"Error in get_products_not_in_store: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
 
 @app.route('/getAvailableProducts', methods=['GET'])
 @require_role('cashier', 'manager')

@@ -152,9 +152,9 @@ $('#getAllStoreProductsSorted').on('click', function () {
 });
 
 // Load products dropdown for store product form
-// Load products dropdown for store product form
+// Load products dropdown for store product form (only products not in store)
 function loadProductDropdown() {
-    $.get("/getAvailableProducts", function (response) {
+    $.get("/getProductsNotInStore", function (response) {
         if (response) {
             productSelect.empty();
             productSelect.append('<option value="">Select product</option>');
@@ -167,6 +167,9 @@ function loadProductDropdown() {
                 );
             });
         }
+    }).fail(function (xhr) {
+        console.error('Error loading products dropdown:', xhr.responseText);
+        alert('Error loading products dropdown: ' + xhr.responseText);
     });
 }
 
@@ -550,6 +553,7 @@ function saveStoreProduct() {
 }
 
 // Delete store product
+// Delete store product
 function deleteStoreProduct(tr) {
     var upc = tr.data('upc');
     var productName = tr.data('product-name');
@@ -562,7 +566,8 @@ function deleteStoreProduct(tr) {
             success: function(response) {
                 if (response.success) {
                     alert('Store product deleted successfully');
-                    loadStoreProducts();
+                    loadStoreProducts(); // Оновлюємо таблицю
+                    loadProductDropdown(); // Оновлюємо дропдаун
                 } else {
                     alert('Error: ' + response.message);
                 }
@@ -573,7 +578,6 @@ function deleteStoreProduct(tr) {
         });
     }
 }
-
 // Make product promotional or non-promotional
 function makeProductPromotional(tr, makePromotional) {
     var upc = tr.data('upc');

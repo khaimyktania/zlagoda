@@ -143,11 +143,8 @@ def get_store_product_by_upc(connection, upc):
     WHERE sp.UPC = %s
     """
     try:
-        cursor = connection.cursor()
-        cursor.execute(query, (upc,))
-        result = cursor.fetchone()
-        cursor.close()
-        return result
+        result = execute_query(connection, query, (upc,))
+        return result[0] if result else None
     except Exception as e:
         print(f"Error in get_store_product_by_upc: {e}")
         return None
