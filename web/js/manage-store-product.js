@@ -536,12 +536,13 @@ function saveStoreProduct() {
                 alert('Store product saved successfully');
                 storeProductModal.modal('hide');
                 loadStoreProducts();
+                loadProductDropdown(); // Оновлюємо dropdown після додавання продукту
 
                 // Reset form
                 $('#storeProductForm')[0].reset();
                 $('#UPC').prop('readonly', false);
-                $('.error-message').hide().find('.error-text').text(''); // Очищаємо повідомлення після успіху
-                $('.is-invalid').removeClass('is-invalid'); // Очищаємо підсвічування
+                $('.error-message').hide().find('.error-text').text('');
+                $('.is-invalid').removeClass('is-invalid');
             } else {
                 alert('Error: ' + response.error);
             }
@@ -551,7 +552,7 @@ function saveStoreProduct() {
         }
     });
 }
-
+// Delete store product
 // Delete store product
 // Delete store product
 function deleteStoreProduct(tr) {
@@ -566,8 +567,8 @@ function deleteStoreProduct(tr) {
             success: function(response) {
                 if (response.success) {
                     alert('Store product deleted successfully');
-                    loadStoreProducts(); // Оновлюємо таблицю
-                    loadProductDropdown(); // Оновлюємо дропдаун
+                    loadStoreProducts(); // Update table
+                    loadProductDropdown(); // Update dropdown
                 } else {
                     alert('Error: ' + response.message);
                 }
