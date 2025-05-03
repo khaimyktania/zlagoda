@@ -435,37 +435,40 @@ function validateCustomerForm() {
         }
     }
 
-    // Валідація City
+    // Валідація Address (City, Street, ZIP Code)
     const city = $('#city').val().trim();
-    if (!city) {
-        errors.city = 'Заповніть це поле. Приклад: Kyiv';
-        isValid = false;
-    } else if (city.length > 50) {
-        errors.city = 'Назва міста не може перевищувати 50 символів.';
-        isValid = false;
-    } else if (!/^[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)?$/.test(city)) {
-        errors.city = 'Місто має починатися з великої літери, після дефіса наступна частина також з великої (тільки літери, апострофи або дефіси). Приклад: Kyiv або Nova-Kahovka';
-        isValid = false;
-    }
-
-    // Валідація Street
     const street = $('#street').val().trim();
-    if (!street) {
-        errors.street = 'Заповніть це поле. Приклад: Main-Street, 123';
-        isValid = false;
-    } else if (!/^([A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)([-\s][A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)*,\s\d{1,3}[A-ZА-ЯІЇЄҐ]?$/.test(street)) {
-        errors.street = 'Вулиця має починатися з великої літери, після дефіса або пробілу наступна частина також з великої, після коми — номер (до 3 цифр). Приклад: Main-Street, 123';
-        isValid = false;
-    }
-
-    // Валідація ZIP Code
     const zipCode = $('#zip_code').val().trim();
-    if (!zipCode) {
-        errors.zip_code = 'Заповніть це поле. Приклад: 12345';
-        isValid = false;
-    } else if (zipCode.length !== 5 || !/^\d+$/.test(zipCode)) {
-        errors.zip_code = 'Поштовий індекс має складатися з 5 цифр. Приклад: 12345';
-        isValid = false;
+
+    // Перевірка, чи заповнене хоча б одне поле адреси
+    if (city || street || zipCode) {
+        // Якщо хоча б одне поле заповнене, усі поля адреси мають бути заповнені та валідними
+        if (!city) {
+            errors.city = 'Заповніть це поле. Приклад: Kyiv';
+            isValid = false;
+        } else if (city.length > 50) {
+            errors.city = 'Назва міста не може перевищувати 50 символів.';
+            isValid = false;
+        } else if (!/^[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*(?:-[A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)?$/.test(city)) {
+            errors.city = 'Місто має починатися з великої літери, після дефіса наступна частина також з великої (тільки літери, апострофи або дефіси). Приклад: Kyiv або Nova-Kahovka';
+            isValid = false;
+        }
+
+        if (!street) {
+            errors.street = 'Заповніть це поле. Приклад: Main-Street, 123';
+            isValid = false;
+        } else if (!/^([A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)([-\s][A-ZА-ЯІЇЄҐ][a-zа-яіїєґ']*)*,\s\d{1,3}[A-ZА-ЯІЇЄҐ]?$/.test(street)) {
+            errors.street = 'Вулиця має починатися з великої літери, після дефіса або пробілу наступна частина також з великої, після коми — номер (до 3 цифр). Приклад: Main-Street, 123';
+            isValid = false;
+        }
+
+        if (!zipCode) {
+            errors.zip_code = 'Заповніть це поле. Приклад: 12345';
+            isValid = false;
+        } else if (zipCode.length !== 5 || !/^\d+$/.test(zipCode)) {
+            errors.zip_code = 'Поштовий індекс має складатися з 5 цифр. Приклад: 12345';
+            isValid = false;
+        }
     }
 
     // Відображення помилок
