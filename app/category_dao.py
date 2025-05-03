@@ -172,22 +172,55 @@ def get_dead_categories(connection):
     except Exception as e:
         print(f"Помилка в get_dead_categories: {e}")
         raise
-
-def get_category_sales(connection):
-    query = """
-        SELECT 
-            c.category_name,
-            COUNT(s.sale_number) AS total_sales
-        FROM sale s
-        JOIN store_product sp ON s.UPC = sp.UPC
-        JOIN product p ON sp.id_product = p.id_product
-        JOIN category c ON p.category_number = c.category_number
-        GROUP BY c.category_name
-        ORDER BY total_sales DESC;
-    """
+def get_categories_without_low_price_and_stock(min_price):
+    connection = get_sql_connection()
     try:
-        result = execute_query(connection, query)
-        return result
-    except Exception as e:
-        print(f"Error in get_category_sales: {e}")
-        raise
+        with connection.cursor() as cursor:
+            query = """
+                SELECT c.category_number, c.category_name
+                FROM category c
+                WHERE NOT EXISTS (
+                    SELECT p.id_product
+                    FROM products p
+                    JOIN store_products sp ON sp.id_product = p.id_product
+                    JOIN sale s ON s.UPC = sp.UPC
+                    WHERE p.category_number = c.category_number
+                      AND s.selling_price < %s
+                )
+                AND NOT EXISTS (
+                    SELECT p.id_product
+                    FROM products p
+                    JOIN store_products sp ON sp.id_product = p.id_product
+                    WHERE p.category_number = c.category_number
+                      AND sp.products_number > 0
+                );
+            """
+            cursor.execute(query, (min_price,))
+            rows = cursor.fetchall()
+            columns = ['category_number', 'category_name']
+            return [dict(zip(columns, row)) for row in rows]
+    finally:
+        connection.close()
+
+
+def get_category_sales_count():
+    connection = get_sql_connection()
+    try:
+        with connection.cursor() as cursor:
+            query = """
+                SELECT 
+                c.category_number,
+                COUNT(s.check_number) AS total_sales
+            FROM category c
+            LEFT JOIN products p ON c.category_number = p.category_number
+            LEFT JOIN store_products sp ON p.id_product = sp.id_product
+            LEFT JOIN sale s ON sp.UPC = s.UPC
+            GROUP BY c.category_number
+            """
+            cursor.execute(query)
+            rows = cursor.fetchall()
+            columns = ['category_number', 'total_sales']
+            return [dict(zip(columns, row)) for row in rows]
+    finally:
+        connection.close()
+

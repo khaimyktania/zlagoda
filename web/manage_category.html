@@ -17,6 +17,58 @@
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
 
     <style>
+        /* Стилі для таблиці результатів у модальному вікні */
+#noLowPriceNoStockResult table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+#noLowPriceNoStockResult th,
+#noLowPriceNoStockResult td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+#noLowPriceNoStockResult th {
+    background: var(--primary-blue);
+    color: white;
+    font-weight: 500;
+}
+
+#noLowPriceNoStockResult td {
+    color: var(--text-color);
+}
+
+#noLowPriceNoStockResult tr:last-child td {
+    border-bottom: none;
+}
+
+#noLowPriceNoStockResult tr:nth-child(even) {
+    background: var(--light-blue);
+}
+
+/* Стилі для повідомлення про відсутність результатів */
+#noLowPriceNoStockResult .no-results {
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Адаптивність для маленьких екранів */
+@media (max-width: 576px) {
+    #noLowPriceNoStockResult th,
+    #noLowPriceNoStockResult td {
+        padding: 8px 10px;
+        font-size: 14px;
+    }
+}
         /* Minimalistic Blue Theme */
          :root {
              --primary-blue: #4A90E2;
@@ -266,13 +318,13 @@
                     <div class="panel-body pt-0">
                         <div class="row mb-4">
                             <div class="col-sm-12">
-                                <button type="button" class="btn btn-sm btn-primary pull-right" id="addCategoryBtn">
-                                    Add New Category
-                                </button>
+                                <button type="button" class="btn btn-sm btn-primary pull-right" id="addCategoryBtn">Add New Category</button>
                                 <button id="sortCategoriesBtn" class="btn btn-secondary ml-2">Sort by Name ▼</button>
                                 <button id="sortBySalesBtn" class="btn btn-secondary ml-2">Sort by Sales ▼</button>
                                 <button id="clearFiltersBtn" class="btn btn-secondary ml-2">Clear Filters</button>
                                 <button id="deadCategoriesBtn" class="btn btn-sm btn-warning">Dead Categories</button>
+                                <button type="button" class="btn btn-sm btn-info" id="findCategoriesNoLowPriceNoStock">Categories with No Low Price & No Stock</button>
+
                             </div>
                         </div>
                         <table class="table table-bordered">
@@ -324,16 +376,14 @@
         </div>
     </div>
 
-</div> <!-- #main -->
-
-<!-- Modal for category summary -->
+    <!-- Modal for category summary -->
     <div class="modal fade" id="summaryModal" tabindex="-1" aria-labelledby="summaryModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="summaryModalLabel">Зведення для категорії</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true">×</span>
                     </button>
                 </div>
                 <div class="modal-body">
@@ -346,7 +396,7 @@
         </div>
     </div>
 
-<!-- Modal for dead categories -->
+    <!-- Modal for dead categories -->
     <div class="modal fade" id="deadCategoriesModal" tabindex="-1" aria-labelledby="deadCategoriesModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -361,6 +411,31 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрити</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Categories with No Low Price and No Stock -->
+    <div class="modal fade" id="noLowPriceNoStockModal" tabindex="-1" aria-labelledby="noLowPriceNoStockModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="noLowPriceNoStockModalLabel">Categories with No Low Price Products & No Stock</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="minPriceInput">Minimum Price (UAH):</label>
+                        <input type="number" step="0.01" class="form-control" id="minPriceInput" placeholder="Enter minimum price (e.g., 10)">
+                    </div>
+                    <button type="button" class="btn btn-primary" id="fetchNoLowPriceNoStock">Fetch Results</button>
+                    <div id="noLowPriceNoStockResult" class="mt-3"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -425,13 +500,93 @@ var deadCategoriesModal = $("#deadCategoriesModal");
      $("#sortBySalesBtn").click(sortBySales);
      $("#clearFiltersBtn").click(clearPageData);
      $("#deadCategoriesBtn").click(showDeadCategories);
+     $("#findCategoriesWithAllSold").on("click", function() {
+         const startDate = prompt("Enter start date (YYYY-MM-DD):");
+         if (!startDate) {
+             alert("Start date is required.");
+             return;
+         }
 
+         $.get('/api/categories_with_all_products_sold', { start_date: startDate }, function(response) {
+             if (response && response.length > 0) {
+                 let html = "<h4>Categories with all products sold since " + startDate + ":</h4><ul>";
+                 response.forEach(category => {
+                     html += `<li>${category.category_name} (ID: ${category.category_number})</li>`;
+                 });
+                 html += "</ul>";
+                 $("#categoriesWithAllSoldResult").html(html).show();
+             } else {
+                 $("#categoriesWithAllSoldResult").html("No categories match the criteria.").show();
+             }
+         }).fail(() => {
+             $("#categoriesWithAllSoldResult").html("Server error occurred.").show();
+         });
+     });
+
+     // Open modal for Categories with No Low Price and No Stock
+     $("#findCategoriesNoLowPriceNoStock").click(function() {
+         $("#noLowPriceNoStockModal").modal('show');
+     });
+
+     // Fetch results for Categories with No Low Price and No Stock
+     $("#fetchNoLowPriceNoStock").click(function() {
+    const minPrice = $("#minPriceInput").val();
+    if (!minPrice || minPrice <= 0) {
+        alert("Please enter a valid minimum price greater than 0.");
+        return;
+    }
+
+    $.get('http://127.0.0.1:5000/api/categories_without_low_price_and_stock', { min_price: minPrice }, function(response) {
+        const resultDiv = $("#noLowPriceNoStockResult");
+        resultDiv.empty(); // Очищаємо попередні результати
+
+        if (response && response.length > 0) {
+            // Формуємо таблицю з результатами
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Category Number</th>
+                            <th>Category Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            response.forEach(category => {
+                html += `
+                    <tr>
+                        <td>${category.category_number}</td>
+                        <td>${category.category_name}</td>
+                    </tr>
+                `;
+            });
+            html += `
+                    </tbody>
+                </table>
+            `;
+            resultDiv.html(html);
+        } else {
+            // Якщо результатів немає, показуємо повідомлення
+            resultDiv.html('<div class="no-results">No categories match the criteria.</div>');
+        }
+    }).fail((xhr) => {
+        console.error("Error fetching categories:", xhr.responseText);
+        $("#noLowPriceNoStockResult").html(
+            `<div class="no-results text-danger">Server error occurred: ${xhr.responseText}</div>`
+        );
+    });
+});
+
+     // Clear modal content when closed
+     $("#noLowPriceNoStockModal").on('hide.bs.modal', function() {
+         $("#minPriceInput").val('');
+         $("#noLowPriceNoStockResult").empty();
+     });
 
      // Event delegation for dynamic buttons
      $(document).on('click', '.edit-category', editCategory);
      $(document).on('click', '.delete-category', deleteCategory);
      $(document).on('click', '.summary-category', showCategorySummary);
-
 
      // Reset form and clear errors when modal is closed
      categoryModal.on('hide.bs.modal', resetCategoryForm);
@@ -442,14 +597,13 @@ var deadCategoriesModal = $("#deadCategoriesModal");
          $('.is-invalid').removeClass('is-invalid');
      });
 
-     //для запиту
-    // Clear summary modal when closed
-    summaryModal.on('hide.bs.modal', function() {
-        $('#summaryContent').empty();
-    });
-    deadCategoriesModal.on('hide.bs.modal', function() {
-        $('#deadCategoriesContent').empty();
-    });
+     // Clear summary modal when closed
+     summaryModal.on('hide.bs.modal', function() {
+         $('#summaryContent').empty();
+     });
+     deadCategoriesModal.on('hide.bs.modal', function() {
+         $('#deadCategoriesContent').empty();
+     });
  });
 
  // Load all categories into the table with sales data
@@ -584,84 +738,82 @@ var deadCategoriesModal = $("#deadCategoriesModal");
      categoryModal.modal('show');
  }
 
+ // Show category summary in modal
+ function showCategorySummary() {
+     var tr = $(this).closest('tr');
+     var categoryNumber = tr.data('number');
+     var categoryName = tr.data('name');
 
-//для запиту
-// Show category summary in modal
-function showCategorySummary() {
-    var tr = $(this).closest('tr');
-    var categoryNumber = tr.data('number');
-    var categoryName = tr.data('name');
+     $.ajax({
+         url: storeProductsSummaryApiUrl,
+         type: 'GET',
+         data: { category_number: categoryNumber },
+         success: function(response) {
+             var content = '<div class="table-responsive"><table class="table table-bordered"><thead><tr>' +
+                 '<th>Номер категорії</th>' +
+                 '<th>Назва категорії</th>' +
+                 '<th>Кількість продуктів у магазині</th>' +
+                 '<th>Загальна кількість</th>' +
+                 '</tr></thead><tbody>';
 
-    $.ajax({
-        url: storeProductsSummaryApiUrl,
-        type: 'GET',
-        data: { category_number: categoryNumber },
-        success: function(response) {
-            var content = '<div class="table-responsive"><table class="table table-bordered"><thead><tr>' +
-                '<th>Номер категорії</th>' +
-                '<th>Назва категорії</th>' +
-                '<th>Кількість продуктів у магазині</th>' +
-                '<th>Загальна кількість</th>' +
-                '</tr></thead><tbody>';
+             if (response.length === 0) {
+                 content += '<tr><td colspan="4">Продуктів у магазині для цієї категорії не знайдено.</td></tr>';
+             } else {
+                 response.forEach(function(row) {
+                     content += '<tr>' +
+                         '<td>' + row.category_number + '</td>' +
+                         '<td>' + row.category_name + '</td>' +
+                         '<td>' + row.store_product_count + '</td>' +
+                         '<td>' + row.total_quantity + '</td>' +
+                         '</tr>';
+                 });
+             }
 
-            if (response.length === 0) {
-                content += '<tr><td colspan="4">Продуктів у магазині для цієї категорії не знайдено.</td></tr>';
-            } else {
-                response.forEach(function(row) {
-                    content += '<tr>' +
-                        '<td>' + row.category_number + '</td>' +
-                        '<td>' + row.category_name + '</td>' +
-                        '<td>' + row.store_product_count + '</td>' +
-                        '<td>' + row.total_quantity + '</td>' +
-                        '</tr>';
-                });
-            }
+             content += '</tbody></table></div>';
+             $('#summaryContent').html(content);
+             summaryModal.find('.modal-title').text('Зведення для категорії: ' + categoryName);
+             summaryModal.modal('show');
+         },
+         error: function(xhr) {
+             console.error('Помилка отримання зведення:', xhr.responseText);
+             alert('Помилка отримання зведення: ' + xhr.responseText);
+         }
+     });
+ }
 
-            content += '</tbody></table></div>';
-            $('#summaryContent').html(content);
-            summaryModal.find('.modal-title').text('Зведення для категорії: ' + categoryName);
-            summaryModal.modal('show');
-        },
-        error: function(xhr) {
-            console.error('Помилка отримання зведення:', xhr.responseText);
-            alert('Помилка отримання зведення: ' + xhr.responseText);
-        }
-    });
-}
+ // Show dead categories in modal
+ function showDeadCategories() {
+     $.ajax({
+         url: deadCategoriesApiUrl,
+         type: 'GET',
+         success: function(response) {
+             var content = '<div class="table-responsive"><table class="table table-bordered"><thead><tr>' +
+                 '<th>Номер категорії</th>' +
+                 '<th>Назва категорії</th>' +
+                 '</tr></thead><tbody>';
 
-//для запиту
-function showDeadCategories() {
-    $.ajax({
-        url: deadCategoriesApiUrl,
-        type: 'GET',
-        success: function(response) {
-            var content = '<div class="table-responsive"><table class="table table-bordered"><thead><tr>' +
-                '<th>Номер категорії</th>' +
-                '<th>Назва категорії</th>' +
-                '</tr></thead><tbody>';
+             if (response.length === 0) {
+                 content += '<tr><td colspan="2">Категорій без неактивних продуктів не знайдено.</td></tr>';
+             } else {
+                 response.forEach(function(row) {
+                     content += '<tr>' +
+                         '<td>' + row.category_number + '</td>' +
+                         '<td>' + row.category_name + '</td>' +
+                         '</tr>';
+                 });
+             }
 
-            if (response.length === 0) {
-                content += '<tr><td colspan="2">Категорій без неактивних продуктів не знайдено.</td></tr>';
-            } else {
-                response.forEach(function(row) {
-                    content += '<tr>' +
-                        '<td>' + row.category_number + '</td>' +
-                        '<td>' + row.category_name + '</td>' +
-                        '</tr>';
-                });
-            }
-
-            content += '</tbody></table></div>';
-            $('#deadCategoriesContent').html(content);
-            deadCategoriesModal.find('.modal-title').text('Категорії без неактивних продуктів');
-            deadCategoriesModal.modal('show');
-        },
-        error: function(xhr) {
-            console.error('Помилка отримання даних про категорії:', xhr.responseText);
-            alert('Помилка отримання даних про категорії: ' + xhr.responseText);
-        }
-    });
-}
+             content += '</tbody></table></div>';
+             $('#deadCategoriesContent').html(content);
+             deadCategoriesModal.find('.modal-title').text('Категорії без неактивних продуктів');
+             deadCategoriesModal.modal('show');
+         },
+         error: function(xhr) {
+             console.error('Помилка отримання даних про категорії:', xhr.responseText);
+             alert('Помилка отримання даних про категорії: ' + xhr.responseText);
+         }
+     });
+ }
 
  // Validate category form
  function validateCategoryForm() {
